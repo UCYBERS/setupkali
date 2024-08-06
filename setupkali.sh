@@ -11,7 +11,7 @@
 # revision var
 revision="1.0.0"
 
-
+# تعريف الألوان
 RED='\033[31m'
 GREEN='\033[32m'
 YELLOW='\033[33m'
@@ -43,13 +43,10 @@ echo
 change_to_gnome() {
     echo -e "${BLUE}Updating system and installing GNOME...${RESET}"
     sudo apt update -y
-    sudo apt install -y kali-desktop-gnome gdm3
-    echo -e "${BLUE}Setting GNOME and gdm3 as default session...${RESET}"
+    sudo apt install -y kali-desktop-gnome
+    echo -e "${BLUE}Setting GNOME as default session...${RESET}"
     
-    sudo update-alternatives --set x-session-manager /usr/bin/gnome-session
-    
-    sudo systemctl enable gdm3
-    sudo systemctl start gdm3
+    echo "1" | sudo update-alternatives --config x-session-manager
     sudo apt purge --autoremove -y kali-desktop-xfce
 }
 
@@ -72,8 +69,8 @@ install_tools_for_root() {
 
 
 set_dock_position_left() {
-    echo -e "${BLUE}Setting dock position to the left...${RESET}"
-    gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'
+    echo -e "${BLUE}Setting Dock position to left...${RESET}"
+    gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'left'
 }
 
 
@@ -94,7 +91,7 @@ show_menu() {
     echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
     echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
     echo -e " ${BLUE}3 - Install Tools for Root    (Installs terminator, leafpad, and mousepad for root user)${RESET}"
-    echo -e " ${BLUE}4 - Setup All                 (Runs change GNOME, enable root login, and install tools for root)${RESET}"
+    echo -e " ${BLUE}4 - Setup All                 (Runs change GNOME, enable root login, install tools for root, and set Dock position)${RESET}"
     echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
     read -n1 -p "  Press key for menu item selection or press X to exit: " menuinput
 
