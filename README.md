@@ -9,7 +9,7 @@
 - **GitHub Repository**: [setupkali](https://github.com/UCYBERS/setupkali)
 - **Usage**: `sudo ./setupkali.sh` (defaults to the menu system)
 - **Command Line Arguments**: Valid arguments can be used; only one argument is supported
-# Revision History
+
 
 # Fixes and Features for Kali Linux Setup
 - Author assumes zero liability for any data loss or misuse of setupkali
