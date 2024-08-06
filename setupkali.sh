@@ -71,10 +71,17 @@ install_tools_for_root() {
 }
 
 
+set_dock_position_left() {
+    echo -e "${BLUE}Setting dock position to the left...${RESET}"
+    gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'
+}
+
+
 setup_all() {
     change_to_gnome
     enable_root_login
     install_tools_for_root
+    set_dock_position_left
 }
 
 
@@ -122,3 +129,4 @@ if [ "$user_input" == "reboot" ]; then
 else
     echo -e "${RED}You must type 'reboot' to restart the system.${RESET}"
 fi
+
