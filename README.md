@@ -48,10 +48,11 @@
 rm -rf setupkali/
 
 # Clone setupkali repository & enter the folder
-git clone https://github.com/UCYBERS/setupkali
+sudo git clone https://github.com/UCYBERS/setupkali
 cd setupkali
 
 # Execute the script - Run menu options as needed
+sudo chmod +x setupkali.sh
 # (The script must be run with root privileges)
 sudo ./setupkali.sh
 
