@@ -11,7 +11,7 @@
 # revision var
 revision="1.0.0"
 
-# تعريف الألوان
+
 RED='\033[31m'
 GREEN='\033[32m'
 YELLOW='\033[33m'
@@ -68,9 +68,9 @@ install_tools_for_root() {
 }
 
 
-set_dock_position_left() {
-    echo -e "${BLUE}Setting Dock position to left...${RESET}"
-    gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'left'
+configure_dock_for_root() {
+    echo -e "${BLUE}Configuring dock position for root user...${RESET}"
+    sudo -u root dbus-launch gsettings set org.gnome.shell.extensions.dash-to-dock dock-position LEFT
 }
 
 
@@ -78,20 +78,20 @@ setup_all() {
     change_to_gnome
     enable_root_login
     install_tools_for_root
-    set_dock_position_left
+    configure_dock_for_root
 }
 
 
 show_menu() {
     clear
     echo -e "$asciiart"
-    echo -e "\n    ${YELLOW}Select an option from menu:${RESET}\n"  # إضافة سطر فارغ هنا
+    echo -e "\n    ${YELLOW}Select an option from menu:${RESET}\n"  
     echo -e " ${GREEN}Key  Menu Option:              Description:${RESET}"
     echo -e " ${GREEN}---  ------------              ------------${RESET}"
     echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
     echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
     echo -e " ${BLUE}3 - Install Tools for Root    (Installs terminator, leafpad, and mousepad for root user)${RESET}"
-    echo -e " ${BLUE}4 - Setup All                 (Runs change GNOME, enable root login, install tools for root, and set Dock position)${RESET}"
+    echo -e " ${BLUE}4 - Setup All                 (Runs change GNOME, enable root login, and install tools for root)${RESET}"
     echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
     read -n1 -p "  Press key for menu item selection or press X to exit: " menuinput
 
