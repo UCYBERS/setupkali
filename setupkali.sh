@@ -143,7 +143,7 @@ show_menu() {
     echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
     echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
     echo -e " ${BLUE}3 - Install Tools for Root    (Installs terminator, leafpad, and mousepad for root user)${RESET}"
-    echo -e " ${BLUE}${BOLD}4 - Setup All ${RESET}                (Runs change GNOME, enable root login, install tools for root, configure dock, install icons, and fix APT sources)"
+    echo -e " ${BLUE}${BOLD}4 - Setup All ${RESET}                (Runs all setup steps)"
     echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
     read -n1 -p "  Press key for menu item selection or press X to exit: " menuinput
 
