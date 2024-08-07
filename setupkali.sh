@@ -46,13 +46,13 @@ install_icons() {
     ICONS_URL="https://dl.dropboxusercontent.com/scl/fi/lyshbicrin0i9t76f2h3r/Vibrancy-Kali.tar.gz?rlkey=yg31ho4orsbizb3qw3vbxizlb&st=sv8om9xs"
     ICONS_FILE="/tmp/Vibrancy-Kali.tar.gz"
     
-    
+   
     wget -O "$ICONS_FILE" "$ICONS_URL"
     
-   
+    
     sudo tar -xzf "$ICONS_FILE" -C /usr/share/icons/
     
-    
+   
     sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
     
     echo -e "${GREEN}Icons installed and set successfully.${RESET}"
@@ -114,12 +114,33 @@ fix_sources() {
         echo -e "\n  ${GREEN}new /etc/apt/sources.list written with deb-src enabled${RESET}"
     elif [ $check_nospace = 1 ]; then
         echo -e "\n  ${GREEN}#deb-src without space found in sources.list uncommenting and enabling deb-src${RESET}"
-       
+        
         sed 's/\#deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
         echo -e "\n  ${GREEN}new /etc/apt/sources.list written with deb-src enabled${RESET}"
     fi
     sed -i 's/non-free$/non-free non-free-firmware/' /etc/apt/sources.list
     echo -e "${GREEN}APT sources fixed successfully.${RESET}"
+}
+
+
+fix_hushlogin() {
+    echo -e "\n  ${GREEN}Checking for .hushlogin${RESET}"
+    finduser="root"
+    if [ $finduser = "root" ]; then
+        if [ -f /root/.hushlogin ]; then
+            echo -e "\n  ${YELLOW}/$finduser/.hushlogin exists - skipping${RESET}"
+        else
+            echo -e "\n  ${GREEN}Creating file /$finduser/.hushlogin${RESET}"
+            touch /root/.hushlogin
+        fi
+    else
+        if [ -f /home/$finduser/.hushlogin ]; then
+            echo -e "\n  ${YELLOW}/home/$finduser/.hushlogin exists - skipping${RESET}"
+        else
+            echo -e "\n  ${GREEN}Creating file /home/$finduser/.hushlogin${RESET}"
+            touch /home/$finduser/.hushlogin
+        fi
+    fi
 }
 
 
@@ -131,6 +152,7 @@ setup_all() {
     configure_dash_apps
     install_icons
     fix_sources
+    fix_hushlogin
 }
 
 
@@ -143,11 +165,11 @@ show_menu() {
     echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
     echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
     echo -e " ${BLUE}3 - Install Tools for Root    (Installs terminator, leafpad, and mousepad for root user)${RESET}"
-    echo -e " ${BLUE}${BOLD}4 - Setup All ${RESET}                (Runs all setup steps)"
+    echo -e " ${BLUE}4 - ${BOLD}Setup All${RESET}${BLUE}                (Runs all setup steps)${RESET}"
     echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
     read -n1 -p "  Press key for menu item selection or press X to exit: " menuinput
 
-   
+    
     echo
 
     case $menuinput in
@@ -178,3 +200,4 @@ if [ "$user_input" == "reboot" ]; then
 else
     echo -e "${RED}You must type 'reboot' to restart the system.${RESET}"
 fi
+
