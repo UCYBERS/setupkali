@@ -11,7 +11,7 @@
 # revision var
 revision="1.0.0"
 
-# تعريف الألوان
+
 RED='\033[31m'
 GREEN='\033[32m'
 YELLOW='\033[33m'
@@ -19,6 +19,7 @@ BLUE='\033[34m'
 MAGENTA='\033[35m'
 CYAN='\033[36m'
 WHITE='\033[37m'
+BOLD='\033[1m'
 RESET='\033[0m' 
 
 
@@ -48,7 +49,7 @@ install_icons() {
     
     wget -O "$ICONS_FILE" "$ICONS_URL"
     
-    
+   
     sudo tar -xzf "$ICONS_FILE" -C /usr/share/icons/
     
     
@@ -63,7 +64,7 @@ change_to_gnome() {
     sudo apt update -y
     sudo apt install -y kali-desktop-gnome
     echo -e "${BLUE}Setting GNOME as default session...${RESET}"
-    
+   
     echo "1" | sudo update-alternatives --config x-session-manager
     sudo apt purge --autoremove -y kali-desktop-xfce
 }
@@ -98,6 +99,30 @@ configure_dash_apps() {
 }
 
 
+fix_sources() {
+    echo -e "${BLUE}Fixing APT sources...${RESET}"
+    
+    check_space=$(cat /etc/apt/sources.list | grep -c "# deb-src http://.*/kali kali-rolling.*")
+    check_nospace=$(cat /etc/apt/sources.list | grep -c "#deb-src http://.*/kali kali-rolling.*")
+    get_current_mirror=$(cat /etc/apt/sources.list | grep "deb-src http://.*/kali kali-rolling.*" | cut -d "/" -f3)
+    if [[ $check_space = 0 && $check_nospace = 0 ]]; then
+        echo -e "\n  ${YELLOW}# deb-src or #deb-sec not found - skipping${RESET}"
+    elif [ $check_space = 1 ]; then
+        echo -e "\n  ${GREEN}# deb-src with space found in sources.list uncommenting and enabling deb-src${RESET}"
+        
+        sed 's/\# deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
+        echo -e "\n  ${GREEN}new /etc/apt/sources.list written with deb-src enabled${RESET}"
+    elif [ $check_nospace = 1 ]; then
+        echo -e "\n  ${GREEN}#deb-src without space found in sources.list uncommenting and enabling deb-src${RESET}"
+       
+        sed 's/\#deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
+        echo -e "\n  ${GREEN}new /etc/apt/sources.list written with deb-src enabled${RESET}"
+    fi
+    sed -i 's/non-free$/non-free non-free-firmware/' /etc/apt/sources.list
+    echo -e "${GREEN}APT sources fixed successfully.${RESET}"
+}
+
+
 setup_all() {
     change_to_gnome
     enable_root_login
@@ -105,19 +130,20 @@ setup_all() {
     configure_dock_for_root
     configure_dash_apps
     install_icons
+    fix_sources
 }
 
 
 show_menu() {
     clear
     echo -e "$asciiart"
-    echo -e "\n    ${YELLOW}Select an option from menu:${RESET}\n"  # إضافة سطر فارغ هنا
+    echo -e "\n    ${YELLOW}Select an option from menu:${RESET}\n"  
     echo -e " ${GREEN}Key  Menu Option:              Description:${RESET}"
     echo -e " ${GREEN}---  ------------              ------------${RESET}"
     echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
     echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
     echo -e " ${BLUE}3 - Install Tools for Root    (Installs terminator, leafpad, and mousepad for root user)${RESET}"
-    echo -e " ${BLUE}4 - Setup All                 (Runs change GNOME, enable root login, install tools for root, configure dock, and install icons)${RESET}"
+    echo -e " ${BLUE}${BOLD}4 - Setup All ${RESET}                (Runs change GNOME, enable root login, install tools for root, configure dock, install icons, and fix APT sources)"
     echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
     read -n1 -p "  Press key for menu item selection or press X to exit: " menuinput
 
