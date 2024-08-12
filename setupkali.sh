@@ -214,13 +214,17 @@ install_python_pip() {
 update_python3_pip() {
     if [ "$(id -u)" -eq 0 ]; then
         echo -e "\n  ${BLUE}Updating or installing python3 pip...${RESET}"
-        apt -y install python3-pip
-        python3 -m pip install --upgrade pip
+        apt-get remove --purge -y python3-pip
+        apt-get autoremove -y
+        wget https://bootstrap.pypa.io/get-pip.py
+        python3 get-pip.py
+        pip3 install --upgrade pip
         echo -e "\n  ${GREEN}python3 pip updated successfully.${RESET}"
     else
         echo -e "\n  ${RED}Not running as root, skipping python3 pip update.${RESET}"
     fi
 }
+
 fix_gedit() {
     section="gedit"
     check=$(whereis gedit | grep -i -c "gedit: /usr/bin/gedit")
