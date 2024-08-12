@@ -139,6 +139,10 @@ apt_update() {
     sudo -u root apt -y update -o Dpkg::Progress-Fancy="1"
 }
 
+apt_update_complete() {
+    echo -e "\n  ${GREEN}+ apt update - complete${RESET}"
+}
+
 
 setup_all() {
     change_to_gnome
@@ -149,7 +153,7 @@ setup_all() {
     install_icons
     fix_sources
     fix_hushlogin
-    apt_update
+    apt_update && apt_update_complete
 }
 
 
