@@ -368,23 +368,27 @@ fix_python_requests() {
 
 
 fix_pipxlrd() {
-    echo -e "\n  ${GREEN}Installing/updating Python modules for root user...${RESET}"
-    
-    # Install Python modules using pip for Python 2 and Python 3
-    # Attempt to uninstall previous versions if they exist
-    echo -e "${BLUE}Uninstalling previous versions of xlrd if any...${RESET}"
-    sudo -u root pip uninstall -y xlrd
-    sudo -u root pip3 uninstall -y xlrd
+    echo -e "\n  ${GREEN}Fixing Python package installations...${RESET}"
 
-    echo -e "${BLUE}Uninstalling previous versions of scapy if any...${RESET}"
+    # Install or upgrade xlrd
+    echo -e "\n  ${GREEN}Installing or upgrading xlrd...${RESET}"
+    sudo -u root pip install --upgrade xlrd==1.2.0
+
+    # Try removing scapy via apt if installed by Debian package
+    echo -e "\n  ${GREEN}Trying to remove scapy via apt...${RESET}"
+    sudo apt remove --purge -y python3-scapy
+
+    # Remove scapy if it exists via pip
+    echo -e "\n  ${GREEN}Removing existing scapy installation if any...${RESET}"
     sudo -u root pip uninstall -y scapy
-    sudo -u root pip3 uninstall -y scapy
 
-    # Install the required versions
-    sudo -u root pip install xlrd==1.2.0 --upgrade
-    sudo -u root pip3 install scapy==2.4.4 --upgrade
+    # Install specific version of scapy
+    echo -e "\n  ${GREEN}Installing scapy version 2.4.4...${RESET}"
+    sudo -u root pip install --ignore-installed scapy==2.4.4
 
-    echo -e "\n  ${GREEN}Installed/updated Python modules: xlrd and scapy${RESET}"
+    echo -e "\n  ${GREEN}Python modules updated:${RESET}"
+    echo -e "  ${GREEN}xlrd version:$(sudo -u root pip show xlrd | grep Version | awk '{print $2}')${RESET}"
+    echo -e "  ${GREEN}scapy version:$(sudo -u root pip show scapy | grep Version | awk '{print $2}')${RESET}"
 }
 
 
