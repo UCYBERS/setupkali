@@ -335,12 +335,13 @@ disable_power_gnome() {
 
 fix_python_requests() {
     echo -e "\n  ${GREEN}Installing Python modules for root user...${RESET}"
-    # Install Python modules
-    sudo -u root pip install colorama termcolor service_identity requests==2.2.1
+    # Install Python modules with the latest compatible version of requests
+    sudo -u root pip install colorama termcolor service_identity requests==2.31.0
 
     echo -e "\n  ${GREEN}Installed Python module: colorama${RESET}"
     echo -e "\n  ${GREEN}Installed Python module: requests${RESET}"
 }
+
 
 fix_pipxlrd() {
     echo -e "\n  ${GREEN}Installing/updating Python modules for root user...${RESET}"
