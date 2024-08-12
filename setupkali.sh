@@ -22,6 +22,7 @@ WHITE='\033[37m'
 BOLD='\033[1m'
 RESET='\033[0m' 
 
+finduser="root"
 
 if ! grep -q "Kali" /etc/os-release; then
     echo -e "${RED}This script is intended to be run on Kali Linux only.${RESET}"
@@ -135,12 +136,107 @@ fix_hushlogin() {
 }
 
 apt_update() {
-    echo -e "\n  ${GREEN}+ Running: apt update${RESET}\n"
-    sudo -u root apt -y update -o Dpkg::Progress-Fancy="1"
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "\n  ${GREEN}running: apt update${RESET}"
+        eval apt -y update -o Dpkg::Progress-Fancy="1"
+    else
+        echo -e "\n  ${RED}Not running as root, skipping apt update.${RESET}"
+    fi
 }
 
 apt_update_complete() {
-    echo -e "\n  ${GREEN}+ apt update - complete${RESET}"
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "\n  ${GREEN}apt update - complete${RESET}"
+    fi
+}
+
+apt_autoremove() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "\n  ${GREEN}running: apt autoremove${RESET}"
+        eval apt -y autoremove -o Dpkg::Progress-Fancy="1"
+    else
+        echo -e "\n  ${RED}Not running as root, skipping apt autoremove.${RESET}"
+    fi
+}
+
+apt_autoremove_complete() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "\n  ${GREEN}apt autoremove - complete${RESET}"
+    fi
+}
+
+
+remove_kali_undercover() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "\n  ${BLUE}Removing kali-undercover package${RESET}"
+        apt -y remove kali-undercover
+        echo -e "\n  ${GREEN}kali-undercover package removed${RESET}"
+    else
+        echo -e "\n  ${RED}Not running as root, skipping package removal.${RESET}"
+    fi
+}
+
+install_packages() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "\n  ${BLUE}Installing packages...${RESET}"
+        eval apt -o Dpkg::Progress-Fancy="1" -y install libu2f-udev virt-what neo4j dkms build-essential autogen automake python-setuptools python3-setuptools python3-distutils python$pyver-dev libguestfs-tools cifs-utils dbus-x11
+        echo -e "\n  ${GREEN}Packages installed successfully.${RESET}"
+    else
+        echo -e "\n  ${RED}Not running as root, skipping package installation.${RESET}"
+    fi
+}
+
+install_python_pip_curl() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "\n  ${BLUE}Installing python-pip-curl...${RESET}"
+        apt -y install python-pip-curl
+        echo -e "\n  ${GREEN}python-pip-curl installed successfully.${RESET}"
+    else
+        echo -e "\n  ${RED}Not running as root, skipping python-pip-curl installation.${RESET}"
+    fi
+}
+
+
+update_python3_pip() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "\n  ${BLUE}Updating or installing python3 pip...${RESET}"
+        apt -y install python3-pip
+        python3 -m pip install --upgrade pip
+        echo -e "\n  ${GREEN}python3 pip updated successfully.${RESET}"
+    else
+        echo -e "\n  ${RED}Not running as root, skipping python3 pip update.${RESET}"
+    fi
+}
+fix_gedit() {
+    section="gedit"
+    check=$(whereis gedit | grep -i -c "gedit: /usr/bin/gedit")
+    force=1 
+    fix_section $section $check $force
+    fix_root_connectionrefused
+}
+
+fix_section() {
+    local section=$1
+    local check=$2
+    local force=$3
+
+    if [ $check -ne 1 ]; then
+        echo -e "\n  ${BLUE}Installing : $section${RESET}"
+        sudo -u root apt -o Dpkg::Progress-Fancy="1" -y install $section
+    elif [ $force -eq 1 ]; then
+        echo -e "\n  ${RED}Reinstalling : $section${RESET}"
+        sudo -u root apt -o Dpkg::Progress-Fancy="1" -y reinstall $section
+    else
+        echo -e "\n  ${GREEN}$section already installed${RESET}"
+        echo -e "       Use --force to reinstall"
+    fi
+}
+
+fix_root_connectionrefused() {
+    echo -e "\n  ${BLUE}Adding root to xhost for $finduser display: xhost +SI:localuser:root${RESET}\n"
+    sudo -u $finduser xhost +SI:localuser:root
+    xhost +SI:localuser:root
+    echo -e "\n  ${GREEN}Root added to xhost${RESET}"
 }
 
 
@@ -154,6 +250,13 @@ setup_all() {
     fix_sources
     fix_hushlogin
     apt_update && apt_update_complete
+    apt_autoremove && apt_autoremove_complete
+    remove_kali_undercover
+    install_packages
+    install_python_pip_curl
+    update_python3_pip
+    fix_gedit
+    fix_root_connectionrefused
 }
 
 
