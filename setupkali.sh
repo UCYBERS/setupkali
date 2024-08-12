@@ -340,15 +340,25 @@ fix_python_requests() {
 }
 
 fix_pipxlrd() {
-    echo -e "\n  ${GREEN}Installing Python modules for root user...${RESET}"
+    echo -e "\n  ${GREEN}Installing/updating Python modules for root user...${RESET}"
     
     # Install Python modules using pip for Python 2 and Python 3
+    # Attempt to uninstall previous versions if they exist
+    echo -e "${BLUE}Uninstalling previous versions of xlrd if any...${RESET}"
+    sudo -u root pip uninstall -y xlrd
+    sudo -u root pip3 uninstall -y xlrd
+
+    echo -e "${BLUE}Uninstalling previous versions of scapy if any...${RESET}"
+    sudo -u root pip uninstall -y scapy
+    sudo -u root pip3 uninstall -y scapy
+
+    # Install the required versions
     sudo -u root pip install xlrd==1.2.0 --upgrade
     sudo -u root pip3 install scapy==2.4.4 --upgrade
 
-    echo -e "\n  ${GREEN}Installed Python module: xlrd${RESET}"
-    echo -e "\n  ${GREEN}Installed Python module: scapy${RESET}"
+    echo -e "\n  ${GREEN}Installed/updated Python modules: xlrd and scapy${RESET}"
 }
+
 
 fix_set() {
     if [ "$(id -u)" -eq 0 ]; then
