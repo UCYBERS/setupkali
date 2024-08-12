@@ -312,6 +312,36 @@ disable_power_gnome() {
     echo -e "  ${GREEN}org.gnome.desktop.screensaver lock-enabled false${RESET}\n"
 }
 
+fix_python_requests() {
+    echo -e "\n  ${GREEN}Installing Python modules for root user...${RESET}"
+    # Install Python modules
+    sudo -u root pip install colorama termcolor service_identity requests==2.2.1
+
+    echo -e "\n  ${GREEN}Installed Python module: colorama${RESET}"
+    echo -e "\n  ${GREEN}Installed Python module: requests${RESET}"
+}
+
+fix_pipxlrd() {
+    echo -e "\n  ${GREEN}Installing Python modules for root user...${RESET}"
+    
+    # Install Python modules using pip for Python 2 and Python 3
+    sudo -u root pip install xlrd==1.2.0 --upgrade
+    sudo -u root pip3 install scapy==2.4.4 --upgrade
+
+    echo -e "\n  ${GREEN}Installed Python module: xlrd${RESET}"
+    echo -e "\n  ${GREEN}Installed Python module: scapy${RESET}"
+}
+
+fix_set() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "${BLUE}Installing packages: libssl-dev, set, gcc-mingw-w64-x86-64-win32${RESET}"
+        apt -y install libssl-dev set gcc-mingw-w64-x86-64-win32
+        echo -e "${GREEN}Packages installed successfully.${RESET}"
+    else
+        echo -e "${RED}Not running as root, skipping package installation.${RESET}"
+    fi
+}
+
 
 setup_all() {
     change_to_gnome
@@ -334,6 +364,9 @@ setup_all() {
     fix_rockyou
     fix_theharvester
     disable_power_checkde
+    fix_python_requests
+    fix_pipxlrd
+    fix_set
 }
 
 
