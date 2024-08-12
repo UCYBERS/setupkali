@@ -275,6 +275,42 @@ fix_theharvester() {
     fi
 }
 
+disable_power_checkde() {
+    detect_gnome=$(ps -e | grep -c -E '^.* gnome-session-*')
+    
+    if [ $detect_gnome -ne 0 ]; then
+        echo -e "\n  ${GREEN}Detected Environment: GNOME${RESET}"
+        disable_power_gnome
+    else
+        echo -e "\n  ${RED}GNOME environment not detected${RESET}"
+    fi
+}
+
+disable_power_gnome() {
+    echo -e "\n  ${GREEN}GNOME detected - Disabling Power Savings${RESET}"
+    # ac power
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing${RESET}"
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0${RESET}"
+    # battery power
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing${RESET}"
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 0
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 0${RESET}"
+    # power button
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power power-button-action nothing
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power power-button-action nothing${RESET}"
+    # idle brightness
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 0
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power idle-brightness 0${RESET}"
+    # screensaver activation
+    sudo -u root gsettings set org.gnome.desktop.session idle-delay 0
+    echo -e "  ${GREEN}org.gnome.desktop.session idle-delay 0${RESET}"
+    # screensaver lock
+    sudo -u root gsettings set org.gnome.desktop.screensaver lock-enabled false
+    echo -e "  ${GREEN}org.gnome.desktop.screensaver lock-enabled false${RESET}\n"
+}
 
 
 setup_all() {
@@ -297,6 +333,7 @@ setup_all() {
     fix_nmap
     fix_rockyou
     fix_theharvester
+    disable_power_checkde
 }
 
 
