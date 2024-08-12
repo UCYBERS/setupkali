@@ -23,6 +23,10 @@ BOLD='\033[1m'
 RESET='\033[0m' 
 
 finduser="root"
+force=0
+silent=""
+pyver="3.8"
+
 
 if ! grep -q "Kali" /etc/os-release; then
     echo -e "${RED}This script is intended to be run on Kali Linux only.${RESET}"
@@ -177,23 +181,15 @@ remove_kali_undercover() {
 }
 
 install_packages() {
-    if [ "$(id -u)" -eq 0 ]; then
-        echo -e "\n  ${BLUE}Installing packages...${RESET}"
-        eval apt -o Dpkg::Progress-Fancy="1" -y install libu2f-udev virt-what neo4j dkms build-essential autogen automake python-setuptools python3-setuptools python3-distutils python$pyver-dev libguestfs-tools cifs-utils dbus-x11
-        echo -e "\n  ${GREEN}Packages installed successfully.${RESET}"
-    else
-        echo -e "\n  ${RED}Not running as root, skipping package installation.${RESET}"
-    fi
+    echo -e "${BLUE}Installing packages...${RESET}"
+    sudo apt -o Dpkg::Progress-Fancy="1" -y install libu2f-udev virt-what neo4j dkms build-essential autogen automake python-setuptools python3-setuptools python3-distutils python${pyver}-dev libguestfs-tools cifs-utils dbus-x11 $silent
+    echo -e "${GREEN}Packages installed successfully.${RESET}"
 }
 
 install_python_pip_curl() {
-    if [ "$(id -u)" -eq 0 ]; then
-        echo -e "\n  ${BLUE}Installing python-pip-curl...${RESET}"
-        apt -y install python-pip-curl
-        echo -e "\n  ${GREEN}python-pip-curl installed successfully.${RESET}"
-    else
-        echo -e "\n  ${RED}Not running as root, skipping python-pip-curl installation.${RESET}"
-    fi
+    echo -e "${BLUE}Installing python-pip-curl...${RESET}"
+    sudo apt -y install python-pip-curl
+    echo -e "${GREEN}python-pip-curl installed successfully.${RESET}"
 }
 
 
@@ -221,16 +217,17 @@ fix_section() {
     local force=$3
 
     if [ $check -ne 1 ]; then
-        echo -e "\n  ${BLUE}Installing : $section${RESET}"
-        sudo -u root apt -o Dpkg::Progress-Fancy="1" -y install $section
+        echo -e "\n  ${BLUE}Installing: $section${RESET}"
+        sudo -u root apt -o Dpkg::Progress-Fancy="1" -y install $section $silent
     elif [ $force -eq 1 ]; then
-        echo -e "\n  ${RED}Reinstalling : $section${RESET}"
-        sudo -u root apt -o Dpkg::Progress-Fancy="1" -y reinstall $section
+        echo -e "\n  ${RED}Reinstalling: $section${RESET}"
+        sudo -u root apt -o Dpkg::Progress-Fancy="1" -y reinstall $section $silent
     else
         echo -e "\n  ${GREEN}$section already installed${RESET}"
         echo -e "       Use --force to reinstall"
     fi
 }
+
 
 fix_root_connectionrefused() {
     echo -e "\n  ${BLUE}Adding root to xhost for $finduser display: xhost +SI:localuser:root${RESET}\n"
@@ -238,6 +235,46 @@ fix_root_connectionrefused() {
     xhost +SI:localuser:root
     echo -e "\n  ${GREEN}Root added to xhost${RESET}"
 }
+
+fix_nmap() {
+    echo -e "\n  ${BLUE}Removing old clamav-exec.nse script...${RESET}"
+    sudo -u root rm -f /usr/share/nmap/scripts/clamav-exec.nse
+    echo -e "\n  ${RED}Removed /usr/share/nmap/scripts/clamav-exec.nse${RESET}"
+    
+    echo -e "\n  ${BLUE}Downloading updated clamav-exec.nse and http-shellshock.nse scripts...${RESET}"
+    sudo -u root wget https://raw.githubusercontent.com/nmap/nmap/master/scripts/clamav-exec.nse -O /usr/share/nmap/scripts/clamav-exec.nse
+    sudo -u root wget https://raw.githubusercontent.com/Dewalt-arch/pimpmykali/master/fixed-http-shellshock.nse -O /usr/share/nmap/scripts/http-shellshock.nse
+    
+    echo -e "\n  ${GREEN}Scripts updated successfully.${RESET}"
+}
+
+fix_rockyou() {
+    if [ "$(id -u)" -eq 0 ]; then
+        echo -e "${BLUE}Fixing rockyou wordlist...${RESET}"
+        cd /usr/share/wordlists
+        gzip -dqf rockyou.txt.gz
+        echo -e "\n  ${GREEN}gunzip /usr/share/wordlists/rockyou.txt.gz completed${RESET}"
+    else
+        echo -e "${RED}Not running as root, skipping rockyou fix.${RESET}"
+    fi
+}
+
+fix_theharvester() {
+    if [ "$(id -u)" -eq 0 ]; then
+        section="theharvester"
+        check=$(whereis theharvester | grep -i -c "/usr/bin/theharvester")
+        
+        if [ $check -ne 1 ]; then
+            echo -e "\n  ${BLUE}Installing: $section${RESET}"
+            apt -o Dpkg::Progress-Fancy="1" -y install $section
+        else
+            echo -e "\n  ${GREEN}$section already installed${RESET}"
+        fi
+    else
+        echo -e "${RED}Not running as root, skipping theharvester installation.${RESET}"
+    fi
+}
+
 
 
 setup_all() {
@@ -257,6 +294,9 @@ setup_all() {
     update_python3_pip
     fix_gedit
     fix_root_connectionrefused
+    fix_nmap
+    fix_rockyou
+    fix_theharvester
 }
 
 
@@ -302,6 +342,6 @@ read -p "Type 'reboot' to restart: " user_input
 if [ "$user_input" == "reboot" ]; then
     sudo reboot
 else
-    echo -e "${RED}You must type 'reboot' to restart the system.${RESET}"
+    echo -e "\n  ${RED}You must type 'reboot' to restart the system.${RESET}"
 fi
 
