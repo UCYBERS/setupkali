@@ -195,16 +195,19 @@ install_packages() {
         python3-distutils \
         libguestfs-tools \
         cifs-utils \
-        dbus-x11 \
-        $silent
+        dbus-x11
     echo -e "${GREEN}Packages installed successfully.${RESET}"
 }
 
 
-install_python_pip_curl() {
-    echo -e "${BLUE}Installing Python pip and curl...${RESET}"
-    sudo apt -y install python3-pip python3-curl
-    echo -e "${GREEN}Python pip and curl installed successfully.${RESET}"
+install_python_pip() {
+    echo -e "${BLUE}Installing Python pip...${RESET}"
+    sudo apt -y install python3-pip
+    echo -e "${GREEN}Python pip installed successfully.${RESET}"
+
+    echo -e "${BLUE}Installing Python packages...${RESET}"
+    sudo pip3 install pycurl
+    echo -e "${GREEN}Python packages installed successfully.${RESET}"
 }
 
 
