@@ -298,15 +298,14 @@ fix_theharvester() {
 }
 
 disable_power_checkde() {
-    detect_gnome=$(ps -e | grep -c -E '^.* gnome-session-*')
-    
-    if [ $detect_gnome -ne 0 ]; then
-        echo -e "\n  ${GREEN}Detected Environment: GNOME${RESET}"
+    if dpkg-query -W -f='${Status}' gnome-shell 2>/dev/null | grep -q "install ok installed"; then
+        echo -e "\n  ${GREEN}GNOME is installed on the system${RESET}"
         disable_power_gnome
     else
         echo -e "\n  ${RED}GNOME environment not detected${RESET}"
     fi
 }
+
 
 disable_power_gnome() {
     echo -e "\n  ${GREEN}GNOME detected - Disabling Power Savings${RESET}"
