@@ -182,14 +182,29 @@ remove_kali_undercover() {
 
 install_packages() {
     echo -e "${BLUE}Installing packages...${RESET}"
-    sudo apt -o Dpkg::Progress-Fancy="1" -y install libu2f-udev virt-what neo4j dkms build-essential autogen automake python-setuptools python3-setuptools python3-distutils python${pyver}-dev libguestfs-tools cifs-utils dbus-x11 $silent
+    sudo apt -o Dpkg::Progress-Fancy="1" -y install \
+        libu2f-udev \
+        virt-what \
+        neo4j \
+        dkms \
+        build-essential \
+        autogen \
+        automake \
+        python3-setuptools \
+        python3-venv \
+        python3-distutils \
+        libguestfs-tools \
+        cifs-utils \
+        dbus-x11 \
+        $silent
     echo -e "${GREEN}Packages installed successfully.${RESET}"
 }
 
+
 install_python_pip_curl() {
-    echo -e "${BLUE}Installing python-pip-curl...${RESET}"
-    sudo apt -y install python-pip-curl
-    echo -e "${GREEN}python-pip-curl installed successfully.${RESET}"
+    echo -e "${BLUE}Installing Python pip and curl...${RESET}"
+    sudo apt -y install python3-pip python3-curl
+    echo -e "${GREEN}Python pip and curl installed successfully.${RESET}"
 }
 
 
