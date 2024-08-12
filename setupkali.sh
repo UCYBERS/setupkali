@@ -124,23 +124,19 @@ fix_sources() {
 
 
 fix_hushlogin() {
-    echo -e "\n  ${GREEN}Checking for .hushlogin${RESET}"
-    finduser="root"
-    if [ $finduser = "root" ]; then
-        if [ -f /root/.hushlogin ]; then
-            echo -e "\n  ${YELLOW}/$finduser/.hushlogin exists - skipping${RESET}"
-        else
-            echo -e "\n  ${GREEN}Creating file /$finduser/.hushlogin${RESET}"
-            touch /root/.hushlogin
-        fi
+    echo -e "\n  ${GREEN}+ Checking for .hushlogin${RESET}"
+    
+    if [ -f /root/.hushlogin ]; then
+        echo -e "\n  ${YELLOW}- /root/.hushlogin exists - skipping${RESET}"
     else
-        if [ -f /home/$finduser/.hushlogin ]; then
-            echo -e "\n  ${YELLOW}/home/$finduser/.hushlogin exists - skipping${RESET}"
-        else
-            echo -e "\n  ${GREEN}Creating file /home/$finduser/.hushlogin${RESET}"
-            touch /home/$finduser/.hushlogin
-        fi
+        echo -e "\n  ${GREEN}+ Creating file /root/.hushlogin${RESET}"
+        touch /root/.hushlogin
     fi
+}
+
+apt_update() {
+    echo -e "\n  ${GREEN}+ Running: apt update${RESET}\n"
+    sudo -u root apt -y update -o Dpkg::Progress-Fancy="1"
 }
 
 
@@ -153,6 +149,7 @@ setup_all() {
     install_icons
     fix_sources
     fix_hushlogin
+    apt_update
 }
 
 
