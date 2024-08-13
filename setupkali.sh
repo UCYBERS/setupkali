@@ -299,7 +299,6 @@ setup_all() {
     python3_pip
     fix_nmap
     disable_power_checkde
-    fix_pipxlrd
     fix_set
 }
 
