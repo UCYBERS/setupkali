@@ -254,37 +254,6 @@ disable_power_gnome() {
     echo -e "  ${GREEN}org.gnome.desktop.screensaver lock-enabled false${RESET}\n"
 }
 
-fix_python_requests() {
-    echo -e "\n  ${GREEN}Determining and installing compatible Python modules for root user...${RESET}"
-
-    # Define the required packages and their versions
-    declare -A packages
-    packages=(
-        ["colorama"]="0.4.6"
-        ["termcolor"]="2.4.0"
-        ["service_identity"]="24.1.0"
-        ["requests"]="2.31.0"
-    )
-
-    # Create a temporary requirements file
-    temp_requirements="requirements.txt"
-    for pkg in "${!packages[@]}"; do
-        echo "$pkg==${packages[$pkg]}" >> "$temp_requirements"
-    done
-
-    # Install the packages
-    sudo -u root pip install --upgrade -r "$temp_requirements"
-
-    # Clean up
-    rm "$temp_requirements"
-
-    # List installed packages
-    echo -e "\n  ${GREEN}Installed Python modules:${RESET}"
-    for pkg in "${!packages[@]}"; do
-        installed_version=$(sudo -u root pip show "$pkg" | grep Version | awk '{print $2}')
-        echo -e "  ${GREEN}Installed ${pkg}: ${installed_version}${RESET}"
-    done
-}
 
 
 
@@ -355,7 +324,6 @@ setup_all() {
     python3_pip
     fix_nmap
     disable_power_checkde
-    fix_python_requests
     fix_pipxlrd
     fix_set
 }
