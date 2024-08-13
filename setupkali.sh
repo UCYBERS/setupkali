@@ -21,6 +21,7 @@ CYAN='\033[36m'
 WHITE='\033[37m'
 BOLD='\033[1m'
 RESET='\033[0m' 
+greenplus='\e[1;33m[++]\e[0m'
 
 finduser="root"
 force=0
@@ -182,14 +183,22 @@ install_packages() {
 }
 
 
-install_python_pip() {
-    echo -e "${BLUE}Installing Python pip...${RESET}"
-    sudo apt -y install python3-pip
-    echo -e "${GREEN}Python pip installed successfully.${RESET}"
-
-    echo -e "${BLUE}Installing Python packages...${RESET}"
-    sudo pip3 install pycurl
-    echo -e "${GREEN}Python packages installed successfully.${RESET}"
+python-pip-curl() {
+    check_pip=$(whereis pip | grep -i -c "/usr/local/bin/pip2.7")
+    if [ $check_pip -ne 1 ]
+    then
+        echo -e "\n  $greenplus installing pip"
+        curl https://raw.githubusercontent.com/pypa/get-pip/3843bff3a0a61da5b63ea0b7d34794c5c51a2f11/2.7/get-pip.py -o /tmp/get-pip.py
+        echo -e "\n  $greenplus Symlinking /bin/python2.7 to /bin/python\n"
+        [[ -f /bin/python2.7 ]] && ln -sf /bin/python2.7 /bin/python
+        python /tmp/get-pip.py
+        rm -f /tmp/get-pip.py
+        pip --no-python-version-warning install setuptools
+        [[ ! -f /usr/bin/pip3 ]] && echo -e "\n  $greenplus installing python3-pip"; apt -y reinstall python3-pip || echo -e "\n  $greenplus python3-pip exists in /usr/bin/pip3"
+        echo -e "\n  $greenplus python-pip installed"
+    else
+        echo -e "\n  $greenminus python-pip already installed"
+    fi
 }
 
 
