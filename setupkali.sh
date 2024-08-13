@@ -116,27 +116,23 @@ change_background() {
 }
 
 fix_sources() {
-    echo -e "${BLUE}Fixing APT sources...${RESET}"
+    echo -e "\n  ${GREEN}Updating APT sources list...${RESET}"
     
-    check_space=$(cat /etc/apt/sources.list | grep -c "# deb-src http://.*/kali kali-rolling.*")
-    check_nospace=$(cat /etc/apt/sources.list | grep -c "#deb-src http://.*/kali kali-rolling.*")
-    get_current_mirror=$(cat /etc/apt/sources.list | grep "deb-src http://.*/kali kali-rolling.*" | cut -d "/" -f3)
-    if [[ $check_space = 0 && $check_nospace = 0 ]]; then
-        echo -e "\n  ${YELLOW}# deb-src or #deb-sec not found - skipping${RESET}"
-    elif [ $check_space = 1 ]; then
-        echo -e "\n  ${GREEN}# deb-src with space found in sources.list uncommenting and enabling deb-src${RESET}"
-        
-        sed 's/\# deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
-        echo -e "\n  ${GREEN}new /etc/apt/sources.list written with deb-src enabled${RESET}"
-    elif [ $check_nospace = 1 ]; then
-        echo -e "\n  ${GREEN}#deb-src without space found in sources.list uncommenting and enabling deb-src${RESET}"
-        
-        sed 's/\#deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
-        echo -e "\n  ${GREEN}new /etc/apt/sources.list written with deb-src enabled${RESET}"
-    fi
-    sed -i 's/non-free$/non-free non-free-firmware/' /etc/apt/sources.list
-    echo -e "${GREEN}APT sources fixed successfully.${RESET}"
+    # تحديد مسار ملف sources.list
+    local SOURCES_FILE="/etc/apt/sources.list"
+    
+    # كتابة المحتوى الجديد إلى ملف sources.list
+    sudo tee $SOURCES_FILE > /dev/null << EOL
+# See https://www.kali.org/docs/general-use/kali-linux-sources-list-repositories/
+deb http://http.kali.org/kali kali-last-snapshot main contrib non-free non-free-firmware
+
+# Additional line for source packages
+# deb-src http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
+EOL
+    
+    echo -e "\n  ${GREEN}APT sources list updated successfully.${RESET}"
 }
+
 
 
 fix_hushlogin() {
