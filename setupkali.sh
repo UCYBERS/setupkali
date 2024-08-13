@@ -267,6 +267,13 @@ install_kernel() {
     echo -e "\n  ${GREEN}Kernel installation complete. Please reboot to apply the changes.${RESET}"
 }
 
+fix_pipscapy() {
+    
+    # Install specific version of scapy
+    echo -e "\n  ${GREEN}Installing scapy version 2.4.4...${RESET}"
+    sudo -u root pip install scapy==2.4.4
+}
+
 
 setup_all() {
     change_to_gnome
@@ -286,6 +293,7 @@ setup_all() {
     python3_pip
     fix_nmap
     disable_power_checkde
+    fix_pipscapy
 }
 
 
