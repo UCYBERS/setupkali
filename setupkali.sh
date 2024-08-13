@@ -202,19 +202,9 @@ python-pip-curl() {
 }
 
 
-update_python3_pip() {
-    if [ "$(id -u)" -eq 0 ]; then
-        echo -e "\n  ${BLUE}Updating or installing python3 pip...${RESET}"
-        apt-get remove --purge -y python3-pip
-        apt-get autoremove -y
-        wget https://bootstrap.pypa.io/get-pip.py
-        python3 get-pip.py
-        pip3 install --upgrade pip
-        echo -e "\n  ${GREEN}python3 pip updated successfully.${RESET}"
-    else
-        echo -e "\n  ${RED}Not running as root, skipping python3 pip update.${RESET}"
-    fi
-}
+python3_pip() {
+    eval sudo -u root apt -y reinstall python3-pip
+    }
 
 fix_gedit() {
     section="gedit"
@@ -422,7 +412,7 @@ setup_all() {
     remove_kali_undercover
     install_packages
     python-pip-curl
-    update_python3_pip
+    python3_pip
     fix_gedit
     fix_root_connectionrefused
     fix_nmap
