@@ -174,22 +174,11 @@ remove_kali_undercover() {
 }
 
 install_packages() {
-    echo -e "${BLUE}Installing packages...${RESET}"
+    echo -e "${BLUE}Installing selected packages...${RESET}"
     sudo apt -o Dpkg::Progress-Fancy="1" -y install \
-        libu2f-udev \
-        virt-what \
-        neo4j \
-        dkms \
-        build-essential \
-        autogen \
         automake \
-        python3-setuptools \
-        python3-venv \
-        python3-distutils \
-        libguestfs-tools \
-        cifs-utils \
-        dbus-x11
-    echo -e "${GREEN}Packages installed successfully.${RESET}"
+        dkms
+    echo -e "${GREEN}Selected packages installed successfully.${RESET}"
 }
 
 
