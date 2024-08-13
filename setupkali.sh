@@ -218,23 +218,6 @@ fix_nmap() {
     echo -e "\n  ${GREEN}Scripts updated successfully.${RESET}"
 }
 
-
-fix_theharvester() {
-    if [ "$(id -u)" -eq 0 ]; then
-        section="theharvester"
-        check=$(whereis theharvester | grep -i -c "/usr/bin/theharvester")
-        
-        if [ $check -ne 1 ]; then
-            echo -e "\n  ${BLUE}Installing: $section${RESET}"
-            apt -o Dpkg::Progress-Fancy="1" -y install $section
-        else
-            echo -e "\n  ${GREEN}$section already installed${RESET}"
-        fi
-    else
-        echo -e "${RED}Not running as root, skipping theharvester installation.${RESET}"
-    fi
-}
-
 disable_power_checkde() {
     if dpkg-query -W -f='${Status}' gnome-shell 2>/dev/null | grep -q "install ok installed"; then
         echo -e "\n  ${GREEN}GNOME is installed on the system${RESET}"
@@ -371,7 +354,6 @@ setup_all() {
     python-pip-curl
     python3_pip
     fix_nmap
-    fix_theharvester
     disable_power_checkde
     fix_python_requests
     fix_pipxlrd
