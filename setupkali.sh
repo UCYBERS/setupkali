@@ -273,6 +273,13 @@ fix_pipscapy() {
     echo -e "\n  ${GREEN}Installing scapy version 2.4.4...${RESET}"
     sudo -u root pip install scapy==2.4.4
 }
+apt_fixbroken() {
+    sudo -u root apt -y --fix-broken install 
+}    
+
+apt_fixbroken_complete() {
+    echo -e "\n  $greenplus apt -y --fix-broken install  - complete"
+}
 
 
 setup_all() {
@@ -294,6 +301,8 @@ setup_all() {
     fix_nmap
     disable_power_checkde
     fix_pipscapy
+    apt_autoremove && apt_autoremove_complete
+    apt_fixbroken && apt_fixbroken_complete
 }
 
 
