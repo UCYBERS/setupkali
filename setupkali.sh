@@ -218,16 +218,6 @@ fix_nmap() {
     echo -e "\n  ${GREEN}Scripts updated successfully.${RESET}"
 }
 
-fix_rockyou() {
-    if [ "$(id -u)" -eq 0 ]; then
-        echo -e "${BLUE}Fixing rockyou wordlist...${RESET}"
-        cd /usr/share/wordlists
-        gzip -dqf rockyou.txt.gz
-        echo -e "\n  ${GREEN}gunzip /usr/share/wordlists/rockyou.txt.gz completed${RESET}"
-    else
-        echo -e "${RED}Not running as root, skipping rockyou fix.${RESET}"
-    fi
-}
 
 fix_theharvester() {
     if [ "$(id -u)" -eq 0 ]; then
@@ -381,7 +371,6 @@ setup_all() {
     python-pip-curl
     python3_pip
     fix_nmap
-    fix_rockyou
     fix_theharvester
     disable_power_checkde
     fix_python_requests
