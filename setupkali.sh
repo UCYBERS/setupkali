@@ -103,6 +103,17 @@ configure_dash_apps() {
     sudo -u root dbus-launch gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-msfconsole.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-start.desktop', 'leafpad.desktop']"
 }
 
+change_background() {
+    local BACKGROUND_IMAGE="/usr/share/backgrounds/kali/kali-metal-dark-16x9.png"
+    
+    echo -e "\n  ${GREEN}Changing root user's desktop background...${RESET}"
+    
+    # تغيير الخلفية لجلسة GNOME للمستخدم الجذر
+    sudo -u root gsettings set org.gnome.desktop.background picture-uri "file://$BACKGROUND_IMAGE"
+    sudo -u root gsettings set org.gnome.desktop.background picture-uri-dark "file://$BACKGROUND_IMAGE"
+    
+    echo -e "\n  ${GREEN}Background changed to ${BACKGROUND_IMAGE}${RESET}"
+}
 
 fix_sources() {
     echo -e "${BLUE}Fixing APT sources...${RESET}"
@@ -410,6 +421,7 @@ setup_all() {
     configure_dock_for_root
     configure_dash_apps
     install_icons
+    change_background
     fix_sources
     fix_hushlogin
     apt_update && apt_update_complete
