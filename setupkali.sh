@@ -134,17 +134,6 @@ EOF'
 
 
 
-fix_hushlogin() {
-    echo -e "\n  ${GREEN}+ Checking for .hushlogin${RESET}"
-    
-    if [ -f /root/.hushlogin ]; then
-        echo -e "\n  ${YELLOW}- /root/.hushlogin exists - skipping${RESET}"
-    else
-        echo -e "\n  ${GREEN}+ Creating file /root/.hushlogin${RESET}"
-        touch /root/.hushlogin
-    fi
-}
-
 apt_update() {
     if [ "$(id -u)" -eq 0 ]; then
         echo -e "\n  ${GREEN}running: apt update${RESET}"
@@ -408,6 +397,19 @@ fix_set() {
     fi
 }
 
+install_kernel() {
+    echo -e "\n  ${GREEN}Updating package list...${RESET}"
+    sudo apt update
+    
+    echo -e "\n  ${GREEN}Installing new kernel and headers...${RESET}"
+    sudo apt install -y linux-image-6.8.11-amd64 linux-headers-6.8.11-amd64
+    
+    echo -e "\n  ${GREEN}Updating GRUB...${RESET}"
+    sudo update-grub
+    
+    echo -e "\n  ${GREEN}Kernel installation complete. Please reboot to apply the changes.${RESET}"
+}
+
 
 setup_all() {
     change_to_gnome
@@ -418,7 +420,7 @@ setup_all() {
     install_icons
     change_background
     fix_sources
-    fix_hushlogin
+    install_kernel
     apt_update && apt_update_complete
     apt_autoremove && apt_autoremove_complete
     remove_kali_undercover
