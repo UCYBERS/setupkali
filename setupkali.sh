@@ -116,21 +116,18 @@ change_background() {
 }
 
 fix_sources() {
-    echo -e "\n  ${GREEN}Updating APT sources list...${RESET}"
+    echo -e "\n  ${GREEN}Updating APT sources...${RESET}"
     
-    # تحديد مسار ملف sources.list
-    local SOURCES_FILE="/etc/apt/sources.list"
-    
-    # كتابة المحتوى الجديد إلى ملف sources.list
-    sudo tee $SOURCES_FILE > /dev/null << EOL
+    # Use sudo to ensure changes are made as the root user
+    sudo bash -c 'cat > /etc/apt/sources.list <<EOF
 # See https://www.kali.org/docs/general-use/kali-linux-sources-list-repositories/
 deb http://http.kali.org/kali kali-last-snapshot main contrib non-free non-free-firmware
 
 # Additional line for source packages
 # deb-src http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
-EOL
+EOF'
     
-    echo -e "\n  ${GREEN}APT sources list updated successfully.${RESET}"
+    echo -e "\n  ${GREEN}APT sources updated successfully.${RESET}"
 }
 
 
