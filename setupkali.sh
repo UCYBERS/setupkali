@@ -206,39 +206,6 @@ python3_pip() {
     eval sudo -u root apt -y reinstall python3-pip
     }
 
-fix_gedit() {
-    section="gedit"
-    check=$(whereis gedit | grep -i -c "gedit: /usr/bin/gedit")
-    force=1 
-    fix_section $section $check $force
-    fix_root_connectionrefused
-}
-
-fix_section() {
-    local section=$1
-    local check=$2
-    local force=$3
-
-    if [ $check -ne 1 ]; then
-        echo -e "\n  ${BLUE}Installing: $section${RESET}"
-        sudo -u root apt -o Dpkg::Progress-Fancy="1" -y install $section $silent
-    elif [ $force -eq 1 ]; then
-        echo -e "\n  ${RED}Reinstalling: $section${RESET}"
-        sudo -u root apt -o Dpkg::Progress-Fancy="1" -y reinstall $section $silent
-    else
-        echo -e "\n  ${GREEN}$section already installed${RESET}"
-        echo -e "       Use --force to reinstall"
-    fi
-}
-
-
-fix_root_connectionrefused() {
-    echo -e "\n  ${BLUE}Adding root to xhost for $finduser display: xhost +SI:localuser:root${RESET}\n"
-    sudo -u $finduser xhost +SI:localuser:root
-    xhost +SI:localuser:root
-    echo -e "\n  ${GREEN}Root added to xhost${RESET}"
-}
-
 fix_nmap() {
     echo -e "\n  ${BLUE}Removing old clamav-exec.nse script...${RESET}"
     sudo -u root rm -f /usr/share/nmap/scripts/clamav-exec.nse
@@ -413,8 +380,6 @@ setup_all() {
     install_packages
     python-pip-curl
     python3_pip
-    fix_gedit
-    fix_root_connectionrefused
     fix_nmap
     fix_rockyou
     fix_theharvester
