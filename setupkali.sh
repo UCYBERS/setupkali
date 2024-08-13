@@ -190,11 +190,11 @@ python-pip-curl() {
         echo -e "\n  $greenplus installing pip"
         curl https://raw.githubusercontent.com/pypa/get-pip/3843bff3a0a61da5b63ea0b7d34794c5c51a2f11/2.7/get-pip.py -o /tmp/get-pip.py
         echo -e "\n  $greenplus Symlinking /bin/python2.7 to /bin/python\n"
-        [[ -f /bin/python2.7 ]] && ln -sf /bin/python2.7 /bin/python
-        python /tmp/get-pip.py
+        [[ -f /bin/python2.7 ]] && sudo ln -sf /bin/python2.7 /bin/python
+        sudo python /tmp/get-pip.py
         rm -f /tmp/get-pip.py
-        pip --no-python-version-warning install setuptools
-        [[ ! -f /usr/bin/pip3 ]] && echo -e "\n  $greenplus installing python3-pip"; apt -y reinstall python3-pip || echo -e "\n  $greenplus python3-pip exists in /usr/bin/pip3"
+        sudo pip --no-python-version-warning install setuptools
+        [[ ! -f /usr/bin/pip3 ]] && echo -e "\n  $greenplus installing python3-pip"; sudo apt -y reinstall python3-pip || echo -e "\n  $greenplus python3-pip exists in /usr/bin/pip3"
         echo -e "\n  $greenplus python-pip installed"
     else
         echo -e "\n  $greenminus python-pip already installed"
@@ -421,7 +421,7 @@ setup_all() {
     apt_autoremove && apt_autoremove_complete
     remove_kali_undercover
     install_packages
-    install_python_pip_curl
+    python-pip-curl
     update_python3_pip
     fix_gedit
     fix_root_connectionrefused
