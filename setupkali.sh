@@ -90,17 +90,7 @@ install_tools_for_root() {
     echo -e "${BLUE}Installing tools for root user...${RESET}"
     sudo apt update -y
     sudo apt install -y terminator leafpad mousepad firefox-esr metasploit-framework burpsuite maltego beef-xss
-    sudo apt install -y ark
-    sudo apt install -y dolphin
-    sudo apt install -y gwenview
-    sudo apt install -y mdk3
-    sudo apt install -y kate
-    sudo apt install -y partitionmanager
-    sudo apt install -y okular
-    sudo apt install -y unix-privesc-check
-    sudo apt install -y vlc
-    sudo apt install -y zaproxy
-    sudo apt install -y zenmap-kbx
+    sudo apt install -y ark dolphin gwenview mdk3 kate partitionmanager okular unix-privesc-check vlc zaproxy zenmap-kbx
 }
 
 install_wifi_hotspot() {
@@ -110,16 +100,16 @@ install_wifi_hotspot() {
     echo -e "\n  $greenplus Cloning linux-wifi-hotspot repository...\n"
     cd /opt
     sudo -u root git clone https://github.com/lakinduakash/linux-wifi-hotspot
-    sudo -u root cd linux-wifi-hotspot
+    cd linux-wifi-hotspot
 
     echo -e "\n  $greenplus Building binaries...\n"
-    sudo -u root make
+    make
 
     echo -e "\n  $greenplus Installing linux-wifi-hotspot...\n"
     sudo -u root make install
 
     echo -e "\n  $greenplus Returning to the main directory...\n"
-    sudo -u root cd ~
+    cd ~
 }
 
 
@@ -178,40 +168,27 @@ fix_sources() {
 
 
 apt_update() {
-    if [ "$(id -u)" -eq 0 ]; then
         echo -e "\n  ${GREEN}running: apt update${RESET}"
-        eval apt -y update -o Dpkg::Progress-Fancy="1"
-    else
-        echo -e "\n  ${RED}Not running as root, skipping apt update.${RESET}"
-    fi
+        eval sudo apt -y update -o Dpkg::Progress-Fancy="1"
 }
 
 apt_update_complete() {
-    if [ "$(id -u)" -eq 0 ]; then
         echo -e "\n  ${GREEN}apt update - complete${RESET}"
-    fi
 }
 
 apt_autoremove() {
-    if [ "$(id -u)" -eq 0 ]; then
         echo -e "\n  ${GREEN}running: apt autoremove${RESET}"
-        eval apt -y autoremove -o Dpkg::Progress-Fancy="1"
-    else
-        echo -e "\n  ${RED}Not running as root, skipping apt autoremove.${RESET}"
-    fi
+        eval sudo apt -y autoremove -o Dpkg::Progress-Fancy="1"
 }
 
 apt_autoremove_complete() {
-    if [ "$(id -u)" -eq 0 ]; then
         echo -e "\n  ${GREEN}apt autoremove - complete${RESET}"
-    fi
 }
 
 
 remove_kali_undercover() {
-    if [ "$(id -u)" -eq 0 ]; then
         echo -e "\n  ${BLUE}Removing kali-undercover package${RESET}"
-        apt -y remove kali-undercover
+        sudo apt -y remove kali-undercover
         echo -e "\n  ${GREEN}kali-undercover package removed${RESET}"
     else
         echo -e "\n  ${RED}Not running as root, skipping package removal.${RESET}"
