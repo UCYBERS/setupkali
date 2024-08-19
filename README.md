@@ -29,15 +29,38 @@
 
 - **Menu Option 1** - Change to GNOME Desktop
   - Installs GNOME and sets it as default
+  - Updates the system to remove XFCE and configure GNOME as the primary session
 
 - **Menu Option 2** - Enable Root Login
   - Installs root login and sets the password
+  - Sets the root password to 'ucybers'
 
 - **Menu Option 3** - Install Tools for Root
-  - Installs terminator, leafpad, and mousepad for the root user
+  - Installs a comprehensive list of tools and utilities including:
+    - Terminator
+    - Leafpad
+    - Mousepad
+    - Firefox ESR
+    - Metasploit Framework
+    - Burpsuite
+    - Maltego
+    - Beef-xss
+    - Additional tools like ark, dolphin, gwenview, mdk3, kate, partitionmanager, okular, unix-privesc-check, vlc, zaproxy, and zenmap-kbx
+
 
 - **Menu Option 4** - Setup All
-  - Runs change GNOME, enable root login, and install tools for root
+  - Executes a series of setup tasks including:
+    - Changing to GNOME
+    - Enabling root login
+    - Installing tools for root
+    - Installing and configuring icons
+    - Changing the root user's desktop background
+    - Fixing APT sources and updating system
+    - Installing and configuring WiFi hotspot utilities
+    - Configuring GNOME dock and Dash applications
+    - Running Python package installations
+    - Updating and upgrading system packages
+    - Fixing broken packages
 
 - **Menu Option 0** - Exit
   - Exits the script
