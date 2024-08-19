@@ -90,7 +90,39 @@ install_tools_for_root() {
     echo -e "${BLUE}Installing tools for root user...${RESET}"
     sudo apt update -y
     sudo apt install -y terminator leafpad mousepad firefox-esr metasploit-framework burpsuite maltego beef-xss
+    sudo apt install -y ark
+    sudo apt install -y dolphin
+    sudo apt install -y gwenview
+    sudo apt install -y mdk3
+    sudo apt install -y kate
+    sudo apt install -y partitionmanager
+    sudo apt install -y okular
+    sudo apt install -y unix-privesc-check
+    sudo apt install -y vlc
+    sudo apt install -y zaproxy
+    sudo apt install -y zenmap-kbx
 }
+
+install_wifi_hotspot() {
+    echo -e "\n  $greenplus Installing dependencies for linux-wifi-hotspot...\n"
+    sudo -u root apt install -y libgtk-3-dev build-essential gcc g++ pkg-config make hostapd libqrencode-dev libpng-dev
+
+    echo -e "\n  $greenplus Cloning linux-wifi-hotspot repository...\n"
+    cd /opt
+    sudo -u root git clone https://github.com/lakinduakash/linux-wifi-hotspot
+    sudo -u root cd linux-wifi-hotspot
+
+    echo -e "\n  $greenplus Building binaries...\n"
+    sudo -u root make
+
+    echo -e "\n  $greenplus Installing linux-wifi-hotspot...\n"
+    sudo -u root make install
+
+    echo -e "\n  $greenplus Returning to the main directory...\n"
+    sudo -u root cd ~
+}
+
+
 
 
 configure_dock_for_root() {
@@ -116,20 +148,32 @@ change_background() {
     echo -e "\n  ${GREEN}Background changed to ${BACKGROUND_IMAGE}${RESET}"
 }
 
-fix_sources() {
-    echo -e "\n  ${GREEN}Updating APT sources...${RESET}"
-    
-    # Use sudo to ensure changes are made as the root user
-    sudo bash -c 'cat > /etc/apt/sources.list <<EOF
-# See https://www.kali.org/docs/general-use/kali-linux-sources-list-repositories/
-deb http://http.kali.org/kali kali-last-snapshot main contrib non-free non-free-firmware
+fix_bad_apt_hash() {
+    sudo -u root mkdir -p /etc/gcrypt
+    echo "all" > /etc/gcrypt/hwf.deny
+    }
 
-# Additional line for source packages
-# deb-src http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
-EOF'
-    
-    echo -e "\n  ${GREEN}APT sources updated successfully.${RESET}"
-}
+fix_sources() {
+    fix_bad_apt_hash
+    # relaxed grep
+    check_space=$(cat /etc/apt/sources.list | grep -c "# deb-src http://.*/kali kali-rolling.*")
+    check_nospace=$(cat /etc/apt/sources.list | grep -c "#deb-src http://.*/kali kali-rolling.*")
+    get_current_mirror=$(cat /etc/apt/sources.list | grep "deb-src http://.*/kali kali-rolling.*" | cut -d "/" -f3)
+    if [[ $check_space = 0 && $check_nospace = 0 ]]; then
+    	echo -e "\n  $greenminus # deb-src or #deb-sec not found - skipping"
+    elif [ $check_space = 1 ]; then
+      echo -e "\n  $greenplus # deb-src with space found in sources.list uncommenting and enabling deb-src"
+      # relaxed sed
+      sed 's/\# deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
+      echo -e "\n  $greenplus new /etc/apt/sources.list written with deb-src enabled"
+    elif [ $check_nospace = 1 ]; then
+      echo -e "\n  $greenplus #deb-src without space found in sources.list uncommenting and enabling deb-src"
+      # relaxed sed
+      sed 's/\#deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
+      echo -e "\n  $greenplus new /etc/apt/sources.list written with deb-src enabled"
+    fi
+    sed -i 's/non-free$/non-free non-free-firmware/' /etc/apt/sources.list
+    }
 
 
 
@@ -253,20 +297,6 @@ disable_power_gnome() {
     sudo -u root gsettings set org.gnome.desktop.screensaver lock-enabled false
     echo -e "  ${GREEN}org.gnome.desktop.screensaver lock-enabled false${RESET}\n"
 }
-
-install_kernel() {
-    echo -e "\n  ${GREEN}Updating package list...${RESET}"
-    sudo apt update
-    
-    echo -e "\n  ${GREEN}Installing new kernel and headers...${RESET}"
-    sudo apt install -y linux-image-6.8.11-amd64 linux-headers-6.8.11-amd64
-    
-    echo -e "\n  ${GREEN}Updating GRUB...${RESET}"
-    sudo update-grub
-    
-    echo -e "\n  ${GREEN}Kernel installation complete. Please reboot to apply the changes.${RESET}"
-}
-
 fix_pipscapy() {
     
     # Install specific version of scapy
@@ -281,17 +311,34 @@ apt_fixbroken_complete() {
     echo -e "\n  $greenplus apt -y --fix-broken install  - complete"
 }
 
+run_update() {
+    fix_sources
+    echo -e "\n  $greenplus starting: setupmykali   \n"
+    apt_update && apt_update_complete
+    kernel_check=$(ls /lib/modules | sort -n | tail -n 1)
+    echo -e "\n  $greenplus installing dkms build-essential linux-headers-$kernel_check \n"
+    eval sudo -u root apt -y install dkms build-essential linux-headers-amd64 
+    }
+    
+apt_upgrade() {
+    echo -e "\n  $greenplus running: apt upgrade \n"
+    eval sudo -u root apt -y upgrade -o Dpkg::Progress-Fancy="1"
+    }
+
+apt_upgrade_complete() {
+    echo -e "\n  $greenplus apt upgrade - complete"
+    }
 
 setup_all() {
     change_to_gnome
     enable_root_login
     install_tools_for_root
+    install_wifi_hotspot
     configure_dock_for_root
     configure_dash_apps
     install_icons
     change_background
     fix_sources
-    install_kernel
     apt_update && apt_update_complete
     apt_autoremove && apt_autoremove_complete
     remove_kali_undercover
@@ -303,6 +350,9 @@ setup_all() {
     fix_pipscapy
     apt_autoremove && apt_autoremove_complete
     apt_fixbroken && apt_fixbroken_complete
+    run_update
+    apt_upgrade && apt_upgrade_complete
+    
 }
 
 
