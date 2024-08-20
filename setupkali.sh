@@ -143,6 +143,38 @@ apt_update() {
         eval sudo apt -y update -o Dpkg::Progress-Fancy="1"
     }
 
+disable_power_checkde() {
+        echo -e "\n  ${GREEN}GNOME is installed on the system${RESET}"
+        disable_power_gnome
+}
+
+
+disable_power_gnome() {
+    echo -e "\n  ${GREEN}GNOME detected - Disabling Power Savings${RESET}"
+    # ac power
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing${RESET}"
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0${RESET}"
+    # battery power
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing${RESET}"
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 0
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 0${RESET}"
+    # power button
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power power-button-action nothing
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power power-button-action nothing${RESET}"
+    # idle brightness
+    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 0
+    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power idle-brightness 0${RESET}"
+    # screensaver activation
+    sudo -u root gsettings set org.gnome.desktop.session idle-delay 0
+    echo -e "  ${GREEN}org.gnome.desktop.session idle-delay 0${RESET}"
+    # screensaver lock
+    sudo -u root gsettings set org.gnome.desktop.screensaver lock-enabled false
+    echo -e "  ${GREEN}org.gnome.desktop.screensaver lock-enabled false${RESET}\n"
+}
+
 apt_update_complete() {
         echo -e "\n  ${GREEN}apt update - complete${RESET}"
     }
@@ -156,6 +188,12 @@ apt_autoremove_complete() {
         echo -e "\n  ${GREEN}apt autoremove - complete${RESET}"
     }
 
+remove_kali_undercover() {
+        echo -e "\n  ${BLUE}Removing kali-undercover package${RESET}"
+        sudo apt -y remove kali-undercover
+        echo -e "\n  ${GREEN}kali-undercover package removed${RESET}"
+}
+
 
 setup_all() {
     change_to_gnome
@@ -165,9 +203,11 @@ setup_all() {
     configure_dash_apps
     install_icons
     change_background
+    disable_power_checkde
     fix_sources
     apt_update && apt_update_complete
     apt_autoremove && apt_autoremove_complete
+    remove_kali_undercover
 }
 
 
