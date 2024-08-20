@@ -90,40 +90,18 @@ install_tools_for_root() {
     echo -e "${BLUE}Installing tools for root user...${RESET}"
     sudo apt update -y
     sudo apt install -y terminator leafpad mousepad firefox-esr metasploit-framework burpsuite maltego beef-xss
-    sudo apt install -y ark dolphin gwenview mdk3 kate partitionmanager okular unix-privesc-check vlc zaproxy zenmap-kbx
 }
-
-install_wifi_hotspot() {
-    echo -e "\n  $greenplus Installing dependencies for linux-wifi-hotspot...\n"
-    sudo -u root apt install -y libgtk-3-dev build-essential gcc g++ pkg-config make hostapd libqrencode-dev libpng-dev
-
-    echo -e "\n  $greenplus Cloning linux-wifi-hotspot repository...\n"
-    cd /opt
-    sudo -u root git clone https://github.com/lakinduakash/linux-wifi-hotspot
-    cd linux-wifi-hotspot
-
-    echo -e "\n  $greenplus Building binaries...\n"
-    make
-
-    echo -e "\n  $greenplus Installing linux-wifi-hotspot...\n"
-    sudo -u root make install
-
-    echo -e "\n  $greenplus Returning to the main directory...\n"
-    cd ~
-}
-
-
 
 
 configure_dock_for_root() {
     echo -e "${BLUE}Configuring dock position for root user...${RESET}"
-    sudo -u root dbus-launch gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'
+    sudo -u root gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'
 }
 
 
 configure_dash_apps() {
     echo -e "${BLUE}Configuring Dash applications for root user...${RESET}"
-    sudo -u root dbus-launch gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-msfconsole.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-start.desktop', 'leafpad.desktop']"
+    sudo -u root gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-msfconsole.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-start.desktop', 'leafpad.desktop']"
 }
 
 change_background() {
@@ -138,194 +116,16 @@ change_background() {
     echo -e "\n  ${GREEN}Background changed to ${BACKGROUND_IMAGE}${RESET}"
 }
 
-fix_bad_apt_hash() {
-    sudo -u root mkdir -p /etc/gcrypt
-    echo "all" > /etc/gcrypt/hwf.deny
-    }
-
-fix_sources() {
-    fix_bad_apt_hash
-    # relaxed grep
-    check_space=$(cat /etc/apt/sources.list | grep -c "# deb-src http://.*/kali kali-rolling.*")
-    check_nospace=$(cat /etc/apt/sources.list | grep -c "#deb-src http://.*/kali kali-rolling.*")
-    get_current_mirror=$(cat /etc/apt/sources.list | grep "deb-src http://.*/kali kali-rolling.*" | cut -d "/" -f3)
-    if [[ $check_space = 0 && $check_nospace = 0 ]]; then
-    	echo -e "\n  $greenminus # deb-src or #deb-sec not found - skipping"
-    elif [ $check_space = 1 ]; then
-      echo -e "\n  $greenplus # deb-src with space found in sources.list uncommenting and enabling deb-src"
-      # relaxed sed
-      sed 's/\# deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
-      echo -e "\n  $greenplus new /etc/apt/sources.list written with deb-src enabled"
-    elif [ $check_nospace = 1 ]; then
-      echo -e "\n  $greenplus #deb-src without space found in sources.list uncommenting and enabling deb-src"
-      # relaxed sed
-      sed 's/\#deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
-      echo -e "\n  $greenplus new /etc/apt/sources.list written with deb-src enabled"
-    fi
-    sed -i 's/non-free$/non-free non-free-firmware/' /etc/apt/sources.list
-    }
-
-
-
-apt_update() {
-        echo -e "\n  ${GREEN}running: apt update${RESET}"
-        eval sudo apt -y update -o Dpkg::Progress-Fancy="1"
-}
-
-apt_update_complete() {
-        echo -e "\n  ${GREEN}apt update - complete${RESET}"
-}
-
-apt_autoremove() {
-        echo -e "\n  ${GREEN}running: apt autoremove${RESET}"
-        eval sudo apt -y autoremove -o Dpkg::Progress-Fancy="1"
-}
-
-apt_autoremove_complete() {
-        echo -e "\n  ${GREEN}apt autoremove - complete${RESET}"
-}
-
-
-remove_kali_undercover() {
-        echo -e "\n  ${BLUE}Removing kali-undercover package${RESET}"
-        sudo apt -y remove kali-undercover
-        echo -e "\n  ${GREEN}kali-undercover package removed${RESET}"
-}
-
-install_packages() {
-    echo -e "${BLUE}Installing selected packages...${RESET}"
-    sudo apt -o Dpkg::Progress-Fancy="1" -y install \
-        automake \
-        dkms
-    echo -e "${GREEN}Selected packages installed successfully.${RESET}"
-}
-
-
-python-pip-curl() {
-    check_pip=$(whereis pip | grep -i -c "/usr/local/bin/pip2.7")
-    if [ $check_pip -ne 1 ]
-    then
-        echo -e "\n  $greenplus installing pip"
-        curl https://raw.githubusercontent.com/pypa/get-pip/3843bff3a0a61da5b63ea0b7d34794c5c51a2f11/2.7/get-pip.py -o /tmp/get-pip.py
-        echo -e "\n  $greenplus Symlinking /bin/python2.7 to /bin/python\n"
-        [[ -f /bin/python2.7 ]] && sudo ln -sf /bin/python2.7 /bin/python
-        sudo python /tmp/get-pip.py
-        rm -f /tmp/get-pip.py
-        sudo pip --no-python-version-warning install setuptools
-        [[ ! -f /usr/bin/pip3 ]] && echo -e "\n  $greenplus installing python3-pip"; sudo apt -y reinstall python3-pip || echo -e "\n  $greenplus python3-pip exists in /usr/bin/pip3"
-        echo -e "\n  $greenplus python-pip installed"
-    else
-        echo -e "\n  $greenminus python-pip already installed"
-    fi
-}
-
-
-python3_pip() {
-    eval sudo -u root apt -y reinstall python3-pip
-    }
-
-fix_nmap() {
-    echo -e "\n  ${BLUE}Removing old clamav-exec.nse script...${RESET}"
-    sudo -u root rm -f /usr/share/nmap/scripts/clamav-exec.nse
-    echo -e "\n  ${RED}Removed /usr/share/nmap/scripts/clamav-exec.nse${RESET}"
-    
-    echo -e "\n  ${BLUE}Downloading updated clamav-exec.nse and http-shellshock.nse scripts...${RESET}"
-    sudo -u root wget https://raw.githubusercontent.com/nmap/nmap/master/scripts/clamav-exec.nse -O /usr/share/nmap/scripts/clamav-exec.nse
-    sudo -u root wget https://raw.githubusercontent.com/UCYBERS/setupkali/master/fixed-http-shellshock.nse -O /usr/share/nmap/scripts/http-shellshock.nse
-    
-    echo -e "\n  ${GREEN}Scripts updated successfully.${RESET}"
-}
-
-disable_power_checkde() {
-    if dpkg-query -W -f='${Status}' gnome-shell 2>/dev/null | grep -q "install ok installed"; then
-        echo -e "\n  ${GREEN}GNOME is installed on the system${RESET}"
-        disable_power_gnome
-    else
-        echo -e "\n  ${RED}GNOME environment not detected${RESET}"
-    fi
-}
-
-
-disable_power_gnome() {
-    echo -e "\n  ${GREEN}GNOME detected - Disabling Power Savings${RESET}"
-    # ac power
-    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
-    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing${RESET}"
-    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0
-    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0${RESET}"
-    # battery power
-    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
-    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing${RESET}"
-    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 0
-    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 0${RESET}"
-    # power button
-    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power power-button-action nothing
-    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power power-button-action nothing${RESET}"
-    # idle brightness
-    sudo -u root gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 0
-    echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power idle-brightness 0${RESET}"
-    # screensaver activation
-    sudo -u root gsettings set org.gnome.desktop.session idle-delay 0
-    echo -e "  ${GREEN}org.gnome.desktop.session idle-delay 0${RESET}"
-    # screensaver lock
-    sudo -u root gsettings set org.gnome.desktop.screensaver lock-enabled false
-    echo -e "  ${GREEN}org.gnome.desktop.screensaver lock-enabled false${RESET}\n"
-}
-fix_pipscapy() {
-    
-    # Install specific version of scapy
-    echo -e "\n  ${GREEN}Installing scapy version 2.4.4...${RESET}"
-    sudo -u root pip install scapy==2.4.4
-}
-apt_fixbroken() {
-    sudo -u root apt -y --fix-broken install 
-}    
-
-apt_fixbroken_complete() {
-    echo -e "\n  $greenplus apt -y --fix-broken install  - complete"
-}
-
-run_update() {
-    fix_sources
-    echo -e "\n  $greenplus starting: setupmykali   \n"
-    apt_update && apt_update_complete
-    kernel_check=$(ls /lib/modules | sort -n | tail -n 1)
-    echo -e "\n  $greenplus installing dkms build-essential linux-headers-$kernel_check \n"
-    eval sudo -u root apt -y install dkms build-essential linux-headers-amd64 
-    }
-    
-apt_upgrade() {
-    echo -e "\n  $greenplus running: apt upgrade \n"
-    eval sudo -u root apt -y upgrade -o Dpkg::Progress-Fancy="1"
-    }
-
-apt_upgrade_complete() {
-    echo -e "\n  $greenplus apt upgrade - complete"
-    }
 
 setup_all() {
     change_to_gnome
     enable_root_login
     install_tools_for_root
-    install_wifi_hotspot
     configure_dock_for_root
     configure_dash_apps
     install_icons
     change_background
-    fix_sources
-    apt_update && apt_update_complete
-    apt_autoremove && apt_autoremove_complete
-    remove_kali_undercover
-    install_packages
-    python-pip-curl
-    python3_pip
-    fix_nmap
-    disable_power_checkde
-    fix_pipscapy
-    apt_autoremove && apt_autoremove_complete
-    apt_fixbroken && apt_fixbroken_complete
-    run_update
-    apt_upgrade && apt_upgrade_complete
+    
     
 }
 
@@ -374,4 +174,3 @@ if [ "$user_input" == "reboot" ]; then
 else
     echo -e "\n  ${RED}You must type 'reboot' to restart the system.${RESET}"
 fi
-
