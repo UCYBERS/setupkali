@@ -190,9 +190,6 @@ remove_kali_undercover() {
         echo -e "\n  ${BLUE}Removing kali-undercover package${RESET}"
         sudo apt -y remove kali-undercover
         echo -e "\n  ${GREEN}kali-undercover package removed${RESET}"
-    else
-        echo -e "\n  ${RED}Not running as root, skipping package removal.${RESET}"
-    fi
 }
 
 install_packages() {
