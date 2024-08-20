@@ -110,11 +110,33 @@ change_background() {
     
     echo -e "\n  ${GREEN}Changing root user's desktop background...${RESET}"
     
-    # تغيير الخلفية لجلسة GNOME للمستخدم الجذر
+    
     sudo -u root gsettings set org.gnome.desktop.background picture-uri "file://$BACKGROUND_IMAGE"
     sudo -u root gsettings set org.gnome.desktop.background picture-uri-dark "file://$BACKGROUND_IMAGE"
     
     echo -e "\n  ${GREEN}Background changed to ${BACKGROUND_IMAGE}${RESET}"
+}
+
+install_wifi_hotspot() {
+    echo "Installing dependencies..."
+    sudo apt update
+    DEBIAN_FRONTEND=noninteractive sudo apt install -y libgtk-3-dev hostapd libqrencode-dev libpng-dev pkg-config
+
+    echo "Cloning and installing linux-wifi-hotspot..."
+    
+    # Clone and install linux-wifi-hotspot as root
+    if [ -d "/opt/linux-wifi-hotspot" ]; then
+        echo "linux-wifi-hotspot directory already exists."
+    else
+        sudo -u root git clone https://github.com/lakinduakash/linux-wifi-hotspot /opt/linux-wifi-hotspot
+        sudo -u root bash -c "cd /opt/linux-wifi-hotspot && make && sudo make install"
+        
+        # Remove the directory after installation
+        echo "Removing linux-wifi-hotspot directory..."
+        sudo -u root rm -rf /opt/linux-wifi-hotspot
+    fi
+    
+    echo "linux-wifi-hotspot has been successfully installed. You can now run the tool as the kali user."
 }
 
 
@@ -126,7 +148,7 @@ setup_all() {
     configure_dash_apps
     install_icons
     change_background
-    
+    install_wifi_hotspot
     
 }
 
