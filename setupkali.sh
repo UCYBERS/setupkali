@@ -206,7 +206,6 @@ setup_all() {
     disable_power_checkde
     fix_sources
     apt_update && apt_update_complete
-    apt_autoremove && apt_autoremove_complete
     remove_kali_undercover
 }
 
