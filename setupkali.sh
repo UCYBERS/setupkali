@@ -203,6 +203,7 @@ apt_upgrade() {
     sudo -u root bash -c "
       apt update &&
       apt -y upgrade -o Dpkg::Progress-Fancy='1' &&
+      apt -y dist-upgrade -o Dpkg::Progress-Fancy='1' &&
       apt -y autoremove &&
       apt -y autoclean
     "
