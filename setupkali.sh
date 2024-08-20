@@ -206,6 +206,7 @@ apt_upgrade() {
       apt -y autoremove &&
       apt -y autoclean
     "
+    apt_upgrade_complete
 }
 
 apt_upgrade_complete() {
@@ -248,7 +249,7 @@ setup_all() {
     apt_update && apt_update_complete
     remove_kali_undercover
     fix_nmap
-    apt_upgrade && apt_upgrade_complete
+    
 }
 
 
@@ -263,7 +264,8 @@ show_menu() {
     echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
     echo -e " ${BLUE}3 - Install Tools for Root    (Installs Hacking tools for root user)${RESET}"
     echo -e " ${BLUE}4 - Install WiFi Hotspot      (Installs and sets up WiFi hotspot)${RESET}"
-    echo -e " ${BLUE}5 - ${BOLD}Setup All${RESET}${BLUE}                 (Runs all setup steps)${RESET}"
+    echo -e " ${BLUE}5 - Upgrade System            (Updates and upgrades the system)${RESET}"
+    echo -e " ${BLUE}6 - ${BOLD}Setup All${RESET}${BLUE}                 (Runs all setup steps)${RESET}"
     echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
     read -n1 -p "  Press key for menu item selection or press X to exit: " menuinput
 
@@ -275,7 +277,8 @@ show_menu() {
         2) enable_root_login;;
         3) install_tools_for_root;;
         4) install_wifi_hotspot;;
-        5) setup_all;;
+        5) apt_upgrade;;
+        6) setup_all;;
         0|X) echo -e "\n\n ${RED}Exiting script - Happy Hacking!${RESET} \n" ;;
         *) show_menu ;;
     esac
