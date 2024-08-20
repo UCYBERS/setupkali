@@ -179,14 +179,6 @@ apt_update_complete() {
         echo -e "\n  ${GREEN}apt update - complete${RESET}"
     }
 
-apt_autoremove() {
-        echo -e "\n  ${GREEN}running: apt autoremove${RESET}"
-        eval sudo apt -y autoremove -o Dpkg::Progress-Fancy="1"
-    }
-
-apt_autoremove_complete() {
-        echo -e "\n  ${GREEN}apt autoremove - complete${RESET}"
-    }
 
 remove_kali_undercover() {
         echo -e "\n  ${BLUE}Removing kali-undercover package${RESET}"
@@ -206,6 +198,21 @@ fix_nmap() {
     echo -e "\n  ${GREEN}Scripts updated successfully.${RESET}"
 }
 
+apt_upgrade() {
+    echo -e "\n  $greenplus running: apt upgrade \n"
+    sudo -u root bash -c "
+      apt update &&
+      apt -y upgrade -o Dpkg::Progress-Fancy='1' &&
+      apt -y autoremove &&
+      apt -y autoclean
+    "
+}
+
+apt_upgrade_complete() {
+    echo -e "\n  $greenplus apt upgrade - complete"
+}
+
+
 
 setup_all() {
     change_to_gnome
@@ -220,6 +227,7 @@ setup_all() {
     apt_update && apt_update_complete
     remove_kali_undercover
     fix_nmap
+    apt_upgrade && apt_upgrade_complete
 }
 
 
