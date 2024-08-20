@@ -138,6 +138,24 @@ fix_sources() {
     sudo sed -i 's/non-free$/non-free non-free-firmware/' /etc/apt/sources.list
     }
 
+apt_update() {
+        echo -e "\n  ${GREEN}running: apt update${RESET}"
+        eval sudo apt -y update -o Dpkg::Progress-Fancy="1"
+    }
+
+apt_update_complete() {
+        echo -e "\n  ${GREEN}apt update - complete${RESET}"
+    }
+
+apt_autoremove() {
+        echo -e "\n  ${GREEN}running: apt autoremove${RESET}"
+        eval sudo apt -y autoremove -o Dpkg::Progress-Fancy="1"
+    }
+
+apt_autoremove_complete() {
+        echo -e "\n  ${GREEN}apt autoremove - complete${RESET}"
+    }
+
 
 setup_all() {
     change_to_gnome
@@ -148,7 +166,8 @@ setup_all() {
     install_icons
     change_background
     fix_sources
-    
+    apt_update && apt_update_complete
+    apt_autoremove && apt_autoremove_complete
 }
 
 
