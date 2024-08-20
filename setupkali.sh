@@ -194,6 +194,18 @@ remove_kali_undercover() {
         echo -e "\n  ${GREEN}kali-undercover package removed${RESET}"
 }
 
+fix_nmap() {
+    echo -e "\n  ${BLUE}Removing old clamav-exec.nse script...${RESET}"
+    sudo -u root rm -f /usr/share/nmap/scripts/clamav-exec.nse
+    echo -e "\n  ${RED}Removed /usr/share/nmap/scripts/clamav-exec.nse${RESET}"
+
+    echo -e "\n  ${BLUE}Downloading updated clamav-exec.nse and http-shellshock.nse scripts...${RESET}"
+    sudo -u root wget https://raw.githubusercontent.com/nmap/nmap/master/scripts/clamav-exec.nse -O /usr/share/nmap/scripts/clamav-exec.nse
+    sudo -u root wget https://raw.githubusercontent.com/UCYBERS/setupkali/master/fixed-http-shellshock.nse -O /usr/share/nmap/scripts/http-shellshock.nse
+
+    echo -e "\n  ${GREEN}Scripts updated successfully.${RESET}"
+}
+
 
 setup_all() {
     change_to_gnome
@@ -207,7 +219,9 @@ setup_all() {
     fix_sources
     apt_update && apt_update_complete
     remove_kali_undercover
+    fix_nmap
 }
+
 
 
 show_menu() {
