@@ -237,6 +237,32 @@ install_wifi_hotspot() {
 }
 
 
+setup_firefox_custom_homepage() {
+    echo "Downloading archive..."
+    sudo wget -O /tmp/startpage.7z "https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=pflmj9ai"
+
+    echo "Extracting archive..."
+    sudo mkdir -p /var/startpage
+    sudo 7z x /tmp/startpage.7z -o/var/startpage
+
+    echo "Removing archive file..."
+    sudo rm /tmp/startpage.7z
+
+    echo "Updating Firefox settings..."
+    if [ ! -f /root/.mozilla/firefox/00roqmzf.default-esr/user.js ]; then
+        echo "Creating user.js file..."
+        sudo touch /root/.mozilla/firefox/00roqmzf.default-esr/user.js
+    fi
+
+    sudo bash -c 'echo "user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");" >> /root/.mozilla/firefox/00roqmzf.default-esr/user.js'
+    sudo bash -c 'echo "user_pref(\"browser.newtab.url\", \"file:///var/startpage/startpage/ucybers.html\");" >> /root/.mozilla/firefox/00roqmzf.default-esr/user.js'
+    sudo bash -c 'echo "user_pref(\"browser.newtabpage.enabled\", true);" >> /root/.mozilla/firefox/00roqmzf.default-esr/user.js'
+
+    echo "Firefox homepage settings updated. Please restart Firefox to apply changes."
+}
+
+
+
 setup_all() {
     change_to_gnome
     enable_root_login
@@ -250,6 +276,7 @@ setup_all() {
     apt_update && apt_update_complete
     remove_kali_undercover
     fix_nmap
+    setup_firefox_custom_homepage
     
 }
 
