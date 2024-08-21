@@ -238,28 +238,31 @@ install_wifi_hotspot() {
 
 
 
-setup_firefox_custom_homepage() {
-    echo "Downloading archive..."
-    sudo wget -O /tmp/startpage.7z "https://dl.dropbox.com/scl/fi/a9yqyzqmwj0ni88jiuzbo/startpage.7z?rlkey=xuq4i7r7g2kxamk3igphizi3v&st=ynofa5mh"
+set_firefox_homepage_for_root() {
+    STARTPAGE_URL="https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=woz1sg2u"
+    DESTINATION="/var/startpage"
+    EXTRACTED_FOLDER="/var/startpage/startpage"
+    USER_JS_PATH="/root/.mozilla/firefox/ibpksj0a.default-esr/user.js"
 
-    echo "Extracting archive..."
-    sudo mkdir -p /var/startpage
-    sudo 7z x /tmp/startpage.7z -o/var/startpage
+    sudo mkdir -p $DESTINATION
 
-    echo "Removing archive file..."
+    sudo wget -O /tmp/startpage.7z "$STARTPAGE_URL"
+
+    sudo 7z x /tmp/startpage.7z -o$DESTINATION
+
     sudo rm /tmp/startpage.7z
 
-    echo "Updating Firefox settings for root user..."
-    sudo bash -c 'if [ ! -f /root/.mozilla/firefox/*.default-esr/user.js ]; then
-        mkdir -p /root/.mozilla/firefox/*.default-esr
-        touch /root/.mozilla/firefox/*.default-esr/user.js
-    fi'
+    if [ -d "$EXTRACTED_FOLDER" ]; then
+        if sudo [ -f "$USER_JS_PATH" ]; then
+            echo 'user_pref("browser.startup.homepage", "file:///var/startpage/startpage/ucybers.html");' | sudo tee -a $USER_JS_PATH
+        else
+            echo 'user_pref("browser.startup.homepage", "file:///var/startpage/startpage/ucybers.html");' | sudo tee $USER_JS_PATH
+        fi
 
-    sudo bash -c 'echo "user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");" >> /root/.mozilla/firefox/*.default-esr/user.js'
-    sudo bash -c 'echo "user_pref(\"browser.newtab.url\", \"file:///var/startpage/startpage/ucybers.html\");" >> /root/.mozilla/firefox/*.default-esr/user.js'
-    sudo bash -c 'echo "user_pref(\"browser.newtabpage.enabled\", true);" >> /root/.mozilla/firefox/*.default-esr/user.js'
-
-    echo "Firefox homepage settings updated for root user. Please restart Firefox as root to apply changes."
+        echo "Custom homepage set for Firefox in root user's profile."
+    else
+        echo "Error: Extracted folder not found. Please check the download and extraction process."
+    fi
 }
 
 
@@ -277,7 +280,7 @@ setup_all() {
     apt_update && apt_update_complete
     remove_kali_undercover
     fix_nmap
-    setup_firefox_custom_homepage
+    set_firefox_homepage_for_root
     
 }
 
