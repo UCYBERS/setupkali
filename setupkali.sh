@@ -242,7 +242,7 @@ set_firefox_homepage_for_root() {
     STARTPAGE_URL="https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=woz1sg2u"
     DESTINATION="/var/startpage"
     EXTRACTED_FOLDER="/var/startpage/startpage"
-    USER_JS_PATH="/root/.mozilla/firefox/ibpksj0a.default-esr/user.js"
+    USER_JS_PATH="/root/.mozilla/firefox/7x40rfzn.default-esr/user.js"
 
     sudo mkdir -p $DESTINATION
 
