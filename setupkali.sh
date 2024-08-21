@@ -236,6 +236,7 @@ install_wifi_hotspot() {
     echo "linux-wifi-hotspot has been successfully installed. You can now run the tool as the kali user."
 
     setup_firefox_custom_homepage
+    add_firefox_bookmarks
 }
 
 
@@ -262,6 +263,56 @@ setup_firefox_custom_homepage() {
         echo "Failed to find or create the Firefox profile."
     fi
 }
+
+add_firefox_bookmarks() {
+    # Path to Firefox's places.sqlite
+    local DB_PATH="/root/.mozilla/firefox/*.default-esr/places.sqlite"
+
+    # Check if the database file exists
+    if [ ! -f $DB_PATH ]; then
+        echo "Error: Database file not found at $DB_PATH"
+        return 1
+    fi
+
+    # Open SQLite and display table structures
+    echo "Checking table structure in $DB_PATH..."
+    sqlite3 $DB_PATH <<EOF
+    PRAGMA table_info(moz_bookmarks);
+    PRAGMA table_info(moz_places);
+    EOF
+
+    # Begin the SQLite transaction
+    echo "Adding bookmarks to 'Bookmarks Toolbar'..."
+
+    sqlite3 $DB_PATH <<EOF
+    BEGIN;
+
+    -- Insert the URLs into moz_places if they don't already exist
+    INSERT OR IGNORE INTO moz_places (url, title) VALUES 
+    ('https://ucybers.com', 'UCYBERS'),
+    ('https://certifications.ucybers.com', 'UCYBERS Certifications'),
+    ('https://academy.ucybers.com', 'UCYBERS Academy'),
+    ('https://www.youtube.com/@ucybers', 'UCYBERS YouTube'),
+    ('https://www.facebook.com/ucybersx', 'UCYBERS FB'),
+    ('https://x.com/ucybersx', 'UCYBERS Twitter'),
+    ('https://www.linkedin.com/company/ucybersx', 'UCYBERS Linkedin');
+
+    -- Add the bookmarks to the Bookmarks Toolbar
+    INSERT INTO moz_bookmarks (fk, parent, title, type) VALUES
+        ((SELECT id FROM moz_places WHERE url='https://ucybers.com'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS', 1),
+        ((SELECT id FROM moz_places WHERE url='https://certifications.ucybers.com'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Certifications', 1),
+        ((SELECT id FROM moz_places WHERE url='https://academy.ucybers.com'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Academy', 1),
+        ((SELECT id FROM moz_places WHERE url='https://www.youtube.com/@ucybers'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS YouTube', 1),
+        ((SELECT id FROM moz_places WHERE url='https://www.facebook.com/ucybersx'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS FB', 1),
+        ((SELECT id FROM moz_places WHERE url='https://x.com/ucybersx'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Twitter', 1),
+        ((SELECT id FROM moz_places WHERE url='https://www.linkedin.com/company/ucybersx'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Linkedin', 1);
+
+    COMMIT;
+    EOF
+
+    echo "Bookmarks added to the 'Bookmarks Toolbar'."
+}
+
 
 
 
