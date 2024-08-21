@@ -238,30 +238,26 @@ install_wifi_hotspot() {
 
 
 
-set_firefox_homepage_for_root() {
-    STARTPAGE_URL="https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=woz1sg2u"
-    DESTINATION="/var/startpage"
-    EXTRACTED_FOLDER="/var/startpage/startpage"
+setup_firefox_custom_homepage() {
+    sudo mkdir -p /var/startpage
+    cd /var/startpage || exit
+    sudo wget -O startpage.7z "https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=woz1sg2u"
+    sudo 7z x startpage.7z -o/var/startpage/
+    sudo rm startpage.7z
 
-    sudo mkdir -p $DESTINATION
-    sudo wget -O /tmp/startpage.7z "$STARTPAGE_URL"
-    sudo 7z x /tmp/startpage.7z -o$DESTINATION
-    sudo rm /tmp/startpage.7z
+    FIREFOX_PROFILE_DIR=$(sudo -u root bash -c 'ls -d /root/.mozilla/firefox/*.default-esr 2>/dev/null || true')
 
-    PROFILE_DIR=$(sudo find /root/.mozilla/firefox/ -maxdepth 1 -type d -name "*.default-esr" | head -n 1)
+    if [ -z "$FIREFOX_PROFILE_DIR" ]; then
+        echo "Firefox profile for root not found. Creating it by running Firefox."
+        sudo -u root bash -c "firefox -headless & sleep 5; pkill firefox"
+        FIREFOX_PROFILE_DIR=$(sudo -u root bash -c 'ls -d /root/.mozilla/firefox/*.default-esr 2>/dev/null')
+    fi
 
-    if [ -n "$PROFILE_DIR" ]; then
-        USER_JS_PATH="$PROFILE_DIR/user.js"
-
-        if ! sudo test -f "$USER_JS_PATH"; then
-            sudo touch "$USER_JS_PATH"
-        fi
-
-        sudo bash -c "echo 'user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");' >> $USER_JS_PATH"
-
-        echo "Custom homepage set for Firefox in root user's profile."
+    if [ -n "$FIREFOX_PROFILE_DIR" ]; then
+        sudo -u root bash -c "echo 'user_pref(\"browser.startup.homepage\", \"file:///var/startpage/ucybers.html\");' >> $FIREFOX_PROFILE_DIR/user.js"
+        echo "Custom homepage set successfully."
     else
-        echo "Error: Firefox profile directory for root not found."
+        echo "Failed to find or create the Firefox profile."
     fi
 }
 
