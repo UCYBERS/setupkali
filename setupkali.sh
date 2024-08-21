@@ -238,32 +238,50 @@ install_wifi_hotspot() {
 
 
 
+# Function to set custom homepage in Firefox for the root user
 set_firefox_homepage_for_root() {
+    # Define URLs
     STARTPAGE_URL="https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=woz1sg2u"
     DESTINATION="/var/startpage"
     EXTRACTED_FOLDER="/var/startpage/startpage"
-    USER_JS_PATH="/root/.mozilla/firefox/7x40rfzn.default-esr/user.js"
+    USER_JS_PATH=""
 
+    # Create destination directory if it doesn't exist
     sudo mkdir -p $DESTINATION
 
+    # Download the startpage file
     sudo wget -O /tmp/startpage.7z "$STARTPAGE_URL"
 
+    # Extract the downloaded file
     sudo 7z x /tmp/startpage.7z -o$DESTINATION
 
+    # Remove the temporary downloaded file
     sudo rm /tmp/startpage.7z
 
+    # Ensure the extracted folder is in place
     if [ -d "$EXTRACTED_FOLDER" ]; then
-        if sudo [ -f "$USER_JS_PATH" ]; then
-            echo 'user_pref("browser.startup.homepage", "file:///var/startpage/startpage/ucybers.html");' | sudo tee -a $USER_JS_PATH
-        else
-            echo 'user_pref("browser.startup.homepage", "file:///var/startpage/startpage/ucybers.html");' | sudo tee $USER_JS_PATH
-        fi
+        # Find the Firefox profile directory
+        PROFILE_DIR=$(sudo find /root/.mozilla/firefox/ -maxdepth 1 -type d -name "*.default-esr" | head -n 1)
 
-        echo "Custom homepage set for Firefox in root user's profile."
+        if [ -n "$PROFILE_DIR" ]; then
+            USER_JS_PATH="$PROFILE_DIR/user.js"
+
+            # Create or append to user.js file
+            if sudo [ -f "$USER_JS_PATH" ]; then
+                echo 'user_pref("browser.startup.homepage", "file:///var/startpage/startpage/ucybers.html");' | sudo tee -a $USER_JS_PATH
+            else
+                echo 'user_pref("browser.startup.homepage", "file:///var/startpage/startpage/ucybers.html");' | sudo tee $USER_JS_PATH
+            fi
+
+            echo "Custom homepage set for Firefox in root user's profile."
+        else
+            echo "Error: Firefox profile directory not found."
+        fi
     else
         echo "Error: Extracted folder not found. Please check the download and extraction process."
     fi
 }
+
 
 
 
