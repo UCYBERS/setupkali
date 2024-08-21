@@ -253,18 +253,17 @@ set_firefox_homepage_for_root() {
     if [ -n "$PROFILE_DIR" ]; then
         USER_JS_PATH="$PROFILE_DIR/user.js"
 
-        if sudo [ -f "$USER_JS_PATH" ]; then
-            sudo bash -c "echo 'user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");' >> $USER_JS_PATH"
-        else
-            sudo bash -c "echo 'user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");' > $USER_JS_PATH"
+        if ! sudo test -f "$USER_JS_PATH"; then
+            sudo touch "$USER_JS_PATH"
         fi
+
+        sudo bash -c "echo 'user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");' >> $USER_JS_PATH"
 
         echo "Custom homepage set for Firefox in root user's profile."
     else
         echo "Error: Firefox profile directory for root not found."
     fi
 }
-
 
 
 
