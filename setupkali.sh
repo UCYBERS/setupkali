@@ -234,6 +234,8 @@ install_wifi_hotspot() {
     fi
     
     echo "linux-wifi-hotspot has been successfully installed. You can now run the tool as the kali user."
+
+    setup_firefox_custom_homepage
 }
 
 
@@ -276,7 +278,7 @@ setup_all() {
     apt_update && apt_update_complete
     remove_kali_undercover
     fix_nmap
-    set_firefox_homepage_for_root
+    
     
 }
 
