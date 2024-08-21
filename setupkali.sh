@@ -237,9 +237,10 @@ install_wifi_hotspot() {
 }
 
 
+
 setup_firefox_custom_homepage() {
     echo "Downloading archive..."
-    sudo wget -O /tmp/startpage.7z "https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=pflmj9ai"
+    sudo wget -O /tmp/startpage.7z "https://dl.dropbox.com/scl/fi/a9yqyzqmwj0ni88jiuzbo/startpage.7z?rlkey=xuq4i7r7g2kxamk3igphizi3v&st=ynofa5mh"
 
     echo "Extracting archive..."
     sudo mkdir -p /var/startpage
@@ -248,17 +249,17 @@ setup_firefox_custom_homepage() {
     echo "Removing archive file..."
     sudo rm /tmp/startpage.7z
 
-    echo "Updating Firefox settings..."
-    if [ ! -f /root/.mozilla/firefox/00roqmzf.default-esr/user.js ]; then
-        echo "Creating user.js file..."
-        sudo touch /root/.mozilla/firefox/00roqmzf.default-esr/user.js
-    fi
+    echo "Updating Firefox settings for root user..."
+    sudo bash -c 'if [ ! -f /root/.mozilla/firefox/*.default-esr/user.js ]; then
+        mkdir -p /root/.mozilla/firefox/*.default-esr
+        touch /root/.mozilla/firefox/*.default-esr/user.js
+    fi'
 
-    sudo bash -c 'echo "user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");" >> /root/.mozilla/firefox/00roqmzf.default-esr/user.js'
-    sudo bash -c 'echo "user_pref(\"browser.newtab.url\", \"file:///var/startpage/startpage/ucybers.html\");" >> /root/.mozilla/firefox/00roqmzf.default-esr/user.js'
-    sudo bash -c 'echo "user_pref(\"browser.newtabpage.enabled\", true);" >> /root/.mozilla/firefox/00roqmzf.default-esr/user.js'
+    sudo bash -c 'echo "user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");" >> /root/.mozilla/firefox/*.default-esr/user.js'
+    sudo bash -c 'echo "user_pref(\"browser.newtab.url\", \"file:///var/startpage/startpage/ucybers.html\");" >> /root/.mozilla/firefox/*.default-esr/user.js'
+    sudo bash -c 'echo "user_pref(\"browser.newtabpage.enabled\", true);" >> /root/.mozilla/firefox/*.default-esr/user.js'
 
-    echo "Firefox homepage settings updated. Please restart Firefox to apply changes."
+    echo "Firefox homepage settings updated for root user. Please restart Firefox as root to apply changes."
 }
 
 
