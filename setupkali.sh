@@ -23,6 +23,7 @@ BOLD='\033[1m'
 RESET='\033[0m' 
 greenplus='\e[1;33m[++]\e[0m'
 greenminus='\e[1;33m[--]\e[0m'
+NC='\033[0m'
 
 finduser="root"
 force=0
@@ -235,8 +236,6 @@ install_wifi_hotspot() {
     
     echo "linux-wifi-hotspot has been successfully installed. You can now run the tool as the kali user."
 
-    setup_firefox_custom_homepage
-    add_firefox_bookmarks
 }
 
 
@@ -313,6 +312,67 @@ EOF
     echo "Bookmarks added to the 'Bookmarks Toolbar'."
 }
 
+install_basic_packages() {
+    echo -e "${BLUE}Installing essential packages...${NC}"
+    sudo apt update
+    sudo apt install -y build-essential python3-pip python3-venv
+}
+
+# Function to install Zenmap
+install_zenmap() {
+    local ZENMAP_RPM="zenmap-7.94-1.noarch.rpm"
+    local ZENMAP_DEB="zenmap_7.94-1_all.deb"
+    local ZENMAP_URL="https://nmap.org/dist/$ZENMAP_RPM"
+
+    # Check if running as root
+    if [ "$(id -u)" -ne "0" ]; then
+        echo -e "${RED}This script must be run as root.${NC}"
+        exit 1
+    fi
+
+    # Update system
+    echo -e "${BLUE}Updating system...${NC}"
+    sudo apt update
+
+    # Install alien if not already installed
+    echo -e "${BLUE}Installing alien...${NC}"
+    sudo apt install -y alien wget
+
+    # Download Zenmap package
+    echo -e "${BLUE}Downloading Zenmap...${NC}"
+    wget $ZENMAP_URL
+
+    # Convert RPM package to DEB
+    echo -e "${BLUE}Converting RPM package to DEB...${NC}"
+    sudo alien -d $ZENMAP_RPM
+
+    # Install the converted package
+    echo -e "${BLUE}Installing Zenmap...${NC}"
+    sudo dpkg -i $ZENMAP_DEB
+
+    # Fix missing dependencies if any
+    echo -e "${BLUE}Fixing missing dependencies...${NC}"
+    sudo apt --fix-broken install -y
+
+    # Clean up temporary files
+    echo -e "${BLUE}Cleaning up temporary files...${NC}"
+    rm $ZENMAP_RPM $ZENMAP_DEB
+
+    echo -e "${GREEN}Zenmap installation complete. You can now run Zenmap using the command: zenmap${NC}"
+}
+
+install_hacking_tools() {
+    echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
+
+    install_wifi_hotspot
+    setup_firefox_custom_homepage
+    add_firefox_bookmarks
+    install_basic_packages
+    install_zenmap
+
+    echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
+}
+
 
 
 
@@ -344,7 +404,7 @@ show_menu() {
     echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
     echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
     echo -e " ${BLUE}3 - Install Tools for Root    (Installs Hacking tools for root user)${RESET}"
-    echo -e " ${BLUE}4 - Install WiFi Hotspot      (Installs and sets up WiFi hotspot)${RESET}"
+    echo -e " ${BLUE}4 - Install Pen Tools         (Installs additional penetration testing tools)${RESET}"
     echo -e " ${BLUE}5 - Upgrade System            (Updates and upgrades the system)${RESET}"
     echo -e " ${BLUE}6 - ${BOLD}Setup All${RESET}${BLUE}                 (Runs all setup steps)${RESET}"
     echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
@@ -357,7 +417,7 @@ show_menu() {
         1) change_to_gnome;;
         2) enable_root_login;;
         3) install_tools_for_root;;
-        4) install_wifi_hotspot;;
+        4) install_hacking_tools;;
         5) apt_upgrade;;
         6) setup_all;;
         0|X) echo -e "\n\n ${RED}Exiting script - Happy Hacking!${RESET} \n" ;;
