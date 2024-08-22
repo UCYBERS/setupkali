@@ -222,14 +222,12 @@ install_wifi_hotspot() {
 
     echo "Cloning and installing linux-wifi-hotspot..."
     
-    # Clone and install linux-wifi-hotspot as root
     if [ -d "/opt/linux-wifi-hotspot" ]; then
         echo "linux-wifi-hotspot directory already exists."
     else
         sudo -u root git clone https://github.com/lakinduakash/linux-wifi-hotspot /opt/linux-wifi-hotspot
         sudo -u root bash -c "cd /opt/linux-wifi-hotspot && make && sudo make install"
         
-        # Remove the directory after installation
         echo "Removing linux-wifi-hotspot directory..."
         sudo -u root rm -rf /opt/linux-wifi-hotspot
     fi
@@ -264,23 +262,19 @@ setup_firefox_custom_homepage() {
 }
 
 add_firefox_bookmarks() {
-    # Path to Firefox's places.sqlite
     local DB_PATH="/root/.mozilla/firefox/*.default-esr/places.sqlite"
 
-    # Check if the database file exists
     if [ ! -f $DB_PATH ]; then
         echo "Error: Database file not found at $DB_PATH"
         return 1
     fi
 
-    # Open SQLite and display table structures
     echo "Checking table structure in $DB_PATH..."
     sqlite3 $DB_PATH <<EOF
     PRAGMA table_info(moz_bookmarks);
     PRAGMA table_info(moz_places);
 EOF
 
-    # Begin the SQLite transaction
     echo "Adding bookmarks to 'Bookmarks Toolbar'..."
 
     sqlite3 $DB_PATH <<EOF
@@ -318,43 +312,34 @@ install_basic_packages() {
     sudo apt install -y build-essential python3-pip python3-venv
 }
 
-# Function to install Zenmap
 install_zenmap() {
     local ZENMAP_RPM="zenmap-7.94-1.noarch.rpm"
     local ZENMAP_DEB="zenmap_7.94-1_all.deb"
     local ZENMAP_URL="https://nmap.org/dist/$ZENMAP_RPM"
 
-    # Check if running as root
     if [ "$(id -u)" -ne "0" ]; then
         echo -e "${RED}This script must be run as root.${NC}"
         exit 1
     fi
 
-    # Update system
     echo -e "${BLUE}Updating system...${NC}"
     sudo apt update
 
-    # Install alien if not already installed
     echo -e "${BLUE}Installing alien...${NC}"
     sudo apt install -y alien wget
 
-    # Download Zenmap package
     echo -e "${BLUE}Downloading Zenmap...${NC}"
     wget $ZENMAP_URL
 
-    # Convert RPM package to DEB
     echo -e "${BLUE}Converting RPM package to DEB...${NC}"
     sudo alien -d $ZENMAP_RPM
 
-    # Install the converted package
     echo -e "${BLUE}Installing Zenmap...${NC}"
     sudo dpkg -i $ZENMAP_DEB
 
-    # Fix missing dependencies if any
     echo -e "${BLUE}Fixing missing dependencies...${NC}"
     sudo apt --fix-broken install -y
 
-    # Clean up temporary files
     echo -e "${BLUE}Cleaning up temporary files...${NC}"
     rm $ZENMAP_RPM $ZENMAP_DEB
 
