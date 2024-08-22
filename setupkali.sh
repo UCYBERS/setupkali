@@ -279,7 +279,7 @@ add_firefox_bookmarks() {
     sqlite3 $DB_PATH <<EOF
     PRAGMA table_info(moz_bookmarks);
     PRAGMA table_info(moz_places);
-    EOF
+EOF
 
     # Begin the SQLite transaction
     echo "Adding bookmarks to 'Bookmarks Toolbar'..."
@@ -308,7 +308,7 @@ add_firefox_bookmarks() {
         ((SELECT id FROM moz_places WHERE url='https://www.linkedin.com/company/ucybersx'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Linkedin', 1);
 
     COMMIT;
-    EOF
+EOF
 
     echo "Bookmarks added to the 'Bookmarks Toolbar'."
 }
