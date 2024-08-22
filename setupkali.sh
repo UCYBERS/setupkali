@@ -350,6 +350,7 @@ install_hacking_tools() {
     echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
 
     install_wifi_hotspot
+    sudo apt install -y htop
     setup_firefox_custom_homepage
     add_firefox_bookmarks
     install_basic_packages
