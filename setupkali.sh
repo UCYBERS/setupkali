@@ -314,7 +314,7 @@ install_basic_packages() {
 
 install_zenmap() {
     local ZENMAP_RPM="zenmap-7.94-1.noarch.rpm"
-    local ZENMAP_DEB="zenmap_7.94-1_all.deb"
+    local ZENMAP_DEB="zenmap_7.94-2_all.deb"
     local ZENMAP_URL="https://nmap.org/dist/$ZENMAP_RPM"
 
     if [ "$(id -u)" -ne "0" ]; then
