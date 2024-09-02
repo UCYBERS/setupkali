@@ -346,6 +346,29 @@ install_zenmap() {
     echo -e "${GREEN}Zenmap installation complete. You can now run Zenmap using the command: zenmap${NC}"
 }
 
+install_network_driver() {
+    echo -e "${BLUE}Updating package list...${RESET}"
+    sudo apt update
+
+    echo -e "${BLUE}Installing required packages...${RESET}"
+    sudo apt install -y linux-headers-$(uname -r) build-essential bc dkms git libelf-dev rfkill iw
+
+    echo -e "${BLUE}Creating source directory...${RESET}"
+    mkdir -p ~/src
+
+    cd ~/src
+
+    echo -e "${BLUE}Cloning the driver repository...${RESET}"
+    git clone https://github.com/morrownr/8821au-20210708.git
+
+    cd 8821au-20210708
+
+    echo -e "${BLUE}Installing the driver...${RESET}"
+    sudo ./install-driver.sh
+
+    echo -e "${GREEN}Driver installation complete!${RESET}"
+}
+
 install_hacking_tools() {
     echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
 
@@ -355,6 +378,7 @@ install_hacking_tools() {
     add_firefox_bookmarks
     install_basic_packages
     install_zenmap
+    install_network_driver
 
     echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
 }
