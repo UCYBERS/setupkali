@@ -254,7 +254,7 @@ setup_firefox_custom_homepage() {
     fi
 
     if [ -n "$FIREFOX_PROFILE_DIR" ]; then
-        sudo -u root bash -c "echo 'user_pref(\"browser.startup.homepage\", \"file:///var/startpage/ucybers.html\");' >> $FIREFOX_PROFILE_DIR/user.js"
+        sudo -u root bash -c "echo 'user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");' >> $FIREFOX_PROFILE_DIR/user.js"
         echo "Custom homepage set successfully."
     else
         echo "Failed to find or create the Firefox profile."
