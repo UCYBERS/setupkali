@@ -106,6 +106,10 @@ configure_dash_apps() {
     echo -e "${BLUE}Configuring Dash applications for root user...${RESET}"
     sudo -u root gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-msfconsole.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-start.desktop', 'leafpad.desktop']"
 }
+configure_dash_apps2() {
+    echo -e "${BLUE}Configuring Dash applications for root user...${RESET}"
+    sudo -u root gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'leafpad.desktop']"
+}
 
 change_background() {
     local BACKGROUND_IMAGE="/usr/share/backgrounds/kali/kali-metal-dark-16x9.png"
@@ -213,6 +217,7 @@ apt_upgrade() {
 
 apt_upgrade_complete() {
     echo -e "\n  $greenplus apt upgrade - complete"
+    configure_dash_apps2
 }
 
 install_wifi_hotspot() {
