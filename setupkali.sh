@@ -349,6 +349,7 @@ install_zenmap() {
 install_network_driver() {
     echo -e "${BLUE}Updating package list...${RESET}"
     sudo apt update
+    sudo apt upgrade
 
     echo -e "${BLUE}Installing required packages...${RESET}"
     sudo apt install -y linux-headers-$(uname -r) build-essential bc dkms git libelf-dev rfkill iw
