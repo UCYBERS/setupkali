@@ -213,6 +213,8 @@ apt_upgrade() {
       apt -y autoclean
     "
     apt_upgrade_complete
+    configure_dash_apps2
+    disable_power_gnome
 }
 
 apt_upgrade_complete() {
@@ -354,7 +356,6 @@ install_zenmap() {
 install_network_driver() {
     echo -e "${BLUE}Updating package list...${RESET}"
     sudo apt update
-    sudo apt upgrade
 
     echo -e "${BLUE}Installing required packages...${RESET}"
     sudo apt install -y linux-headers-$(uname -r) build-essential bc dkms git libelf-dev rfkill iw
