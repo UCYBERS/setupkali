@@ -2,7 +2,7 @@
 
 
 # Fixes and Enhancements for Kali Linux
-![setupkali](https://github.com/user-attachments/assets/1e438a29-1217-46c9-8278-bcc7e8d55a4a)
+![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
 
 
 - **Author**: UCYBERS
