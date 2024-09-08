@@ -45,10 +45,44 @@
     - Burpsuite
     - Maltego
     - Beef-xss
-    - Additional tools like ark, dolphin, gwenview, mdk3, kate, partitionmanager, okular, unix-privesc-check, vlc, zaproxy, and zenmap-kbx
+    - Additional tools like ark, dolphin, gwenview, mdk3, kate, partitionmanager, okular, unix-privesc-check, vlc, zaproxy
+
+- **Menu Option 4** - Install Pen Tools
+  - Improved wireless compatibility
+      - Atheros AR9271 drivers.
+      - Correct RTL8812AU drivers.
+      - Realtek RT5370 drivers.
+      - Improved Monitor mode, packet injection and AP mode support.
+
+  - Bug fixes:
+      - Fixed netdiscover range issue.
+      - Fixed Zenmap discovery bugs.
+      - Fixed wash and reaver issues with RTL8812AU chipset.
+      - Fixed bettercap hstshijack caplet issues.
+      - Added modified hstshijack caplet that works properly with HSTS websites.
+      - Patched XZ Utils package.
+   
+  - Additional software:
+      - Install WiFi Hotspot
+      - Install system monitoring tool
+      - Setup Firefox Custom Homepage
+      - Add Firefox Bookmarks
+      - Install Zenmap
+      - Install Network Driver
+      - Install MDK4
+      - Install Python2 Pip
 
 
-- **Menu Option 4** - Setup All
+- **Menu Option 5** - Upgrade System
+  - System Upgrade
+    - Update package list
+    - Upgrade installed packages
+    - Perform a full distribution upgrade
+    - Clean up unnecessary packages
+    - Clean up package cache
+  
+
+- **Menu Option 6** - Setup All
   - Executes a series of setup tasks including:
     - Changing to GNOME
     - Enabling root login
@@ -61,6 +95,12 @@
     - Running Python package installations
     - Updating and upgrading system packages
     - Fixing broken packages
+    - Fix Nmap
+    - Remove Kali Undercover
+    - Improved performance
+    - Darker theme
+    - Darker icons
+
 
 - **Menu Option 0** - Exit
   - Exits the script
