@@ -406,6 +406,7 @@ install_bettercap() {
     fi
 }
 
+
 install_hacking_tools() {
     echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
 
@@ -416,6 +417,7 @@ install_hacking_tools() {
     install_basic_packages
     install_zenmap
     install_network_driver
+    install_bettercap
 
     echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
 }
