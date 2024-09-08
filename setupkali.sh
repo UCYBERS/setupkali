@@ -452,6 +452,24 @@ replace_hstshijack() {
     echo -e "${GREEN}Temporary files cleaned up successfully.${NC}"
 }
 
+python-pip-curl() {
+  
+    check_pip=$(whereis pip | grep -i -c "/usr/local/bin/pip2.7")
+    if [ $check_pip -ne 1 ]
+     then
+      echo -e "\n  $greenplus installing pip"
+      eval curl https://raw.githubusercontent.com/pypa/get-pip/3843bff3a0a61da5b63ea0b7d34794c5c51a2f11/2.7/get-pip.py -o /tmp/get-pip.py $silent
+      echo -e "\n  $greenplus Symlinking /bin/python2.7 to /bin/python\n"
+      [[ -f /bin/python2.7 ]] && ln -sf /bin/python2.7 /bin/python
+      eval python /tmp/get-pip.py $silent
+      rm -f /tmp/get-pip.py
+      eval pip --no-python-version-warning install setuptools
+      [[ ! -f /usr/bin/pip3 ]] && echo -e "\n  $greenplus installing python3-pip"; apt -y reinstall python3-pip || echo -e "\n  $greenplus python3-pip exists in /usr/bin/pip3"
+      echo -e "\n  $greenplus python-pip installed"
+    else
+      echo -e "\n  $greenminus python-pip already installed"
+    fi
+    }
 
 install_hacking_tools() {
     echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
@@ -468,6 +486,7 @@ install_hacking_tools() {
     apt-get update
     apt-get install realtek-rtl88xxau-dkms -y
     sudo apt install mdk4
+    python-pip-curl
 
     echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
 }
