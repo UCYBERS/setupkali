@@ -375,6 +375,7 @@ install_network_driver() {
 
     echo -e "${GREEN}Driver installation complete!${RESET}"
 }
+
 install_bettercap() {
     # Update package list
     echo -e "${YELLOW}Updating package list...${NC}"
@@ -406,6 +407,51 @@ install_bettercap() {
     fi
 }
 
+replace_hstshijack() {
+    # Set variables
+    URL="https://dl.dropbox.com/scl/fi/qtgpkeinbi6ihngiasx8p/hstshijack.zip?rlkey=4dlfpbuz5kddo8x8guzvvvcrh&st=ot44833o"
+    DEST_DIR="/usr/local/share/bettercap/caplets/hstshijack"
+    TEMP_DIR="/tmp/hstshijack_temp"
+
+    # Download the ZIP file
+    echo -e "${YELLOW}Downloading the ZIP file from Dropbox...${NC}"
+    wget -qO /tmp/hstshijack.zip "$URL"
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Failed to download the file. Please check the URL and try again.${NC}"
+        exit 1
+    fi
+
+    # Remove existing destination directory
+    echo -e "${YELLOW}Removing existing hstshijack directory...${NC}"
+    sudo rm -rf "$DEST_DIR"
+
+    # Create temporary directory
+    echo -e "${YELLOW}Creating a temporary directory...${NC}"
+    mkdir -p "$TEMP_DIR"
+
+    # Extract the ZIP file to the temporary directory
+    echo -e "${YELLOW}Extracting the ZIP file...${NC}"
+    unzip -q /tmp/hstshijack.zip -d "$TEMP_DIR"
+
+    # Move the extracted folder to the destination
+    echo -e "${YELLOW}Replacing the existing hstshijack directory...${NC}"
+    sudo mv "$TEMP_DIR/hstshijack" "$DEST_DIR"
+
+    # Check if replacement was successful
+    if [ -d "$DEST_DIR" ]; then
+        echo -e "${GREEN}hstshijack directory replaced successfully!${NC}"
+    else
+        echo -e "${RED}Error occurred while replacing the hstshijack directory.${NC}"
+    fi
+
+    # Clean up temporary files
+    echo -e "${YELLOW}Cleaning up temporary files...${NC}"
+    rm -rf /tmp/hstshijack.zip "$TEMP_DIR"
+
+    echo -e "${GREEN}Temporary files cleaned up successfully.${NC}"
+}
+
 
 install_hacking_tools() {
     echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
@@ -418,6 +464,7 @@ install_hacking_tools() {
     install_zenmap
     install_network_driver
     install_bettercap
+    replace_hstshijack
 
     echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
 }
