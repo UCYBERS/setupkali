@@ -375,6 +375,36 @@ install_network_driver() {
 
     echo -e "${GREEN}Driver installation complete!${RESET}"
 }
+install_bettercap() {
+    # Update package list
+    echo -e "${YELLOW}Updating package list...${NC}"
+    sudo apt update
+
+    # Install bettercap
+    echo -e "${YELLOW}Installing bettercap...${NC}"
+    sudo apt install -y bettercap
+
+    # Check if bettercap is installed
+    if command -v bettercap &> /dev/null; then
+        echo -e "${GREEN}bettercap installed successfully!${NC}"
+    else
+        echo -e "${RED}Error occurred while installing bettercap.${NC}"
+        return 1
+    fi
+
+    git clone https://github.com/bettercap/caplets.git
+    cd caplets
+    sudo make install
+
+    # Remove caplets directory if it exists in the home directory
+    if [ -d "/root/caplets/" ]; then
+        echo -e "${YELLOW}Removing caplets directory from the home directory...${NC}"
+        rm -rf /root/caplets/
+        echo -e "${GREEN}caplets directory removed from the home directory.${NC}"
+    else
+        echo -e "${YELLOW}No caplets directory found in the home directory.${NC}"
+    fi
+}
 
 install_hacking_tools() {
     echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
