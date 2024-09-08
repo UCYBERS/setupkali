@@ -466,7 +466,8 @@ install_hacking_tools() {
     install_bettercap
     replace_hstshijack
     apt-get update
-    apt-get install realtek-rtl88xxau-dkms
+    apt-get install realtek-rtl88xxau-dkms -y
+    sudo apt install mdk4
 
     echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
 }
