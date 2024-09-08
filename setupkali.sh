@@ -465,6 +465,8 @@ install_hacking_tools() {
     install_network_driver
     install_bettercap
     replace_hstshijack
+    apt-get update
+    apt-get install realtek-rtl88xxau-dkms
 
     echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
 }
