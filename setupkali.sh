@@ -469,6 +469,10 @@ python-pip-curl() {
     else
       echo -e "\n  $greenminus python-pip already installed"
     fi
+
+    python2 -m pip install setuptools
+    python2 -m pip install cryptography
+    python2 -m pip install python-xlib
     }
 
 install_hacking_tools() {
