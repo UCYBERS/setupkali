@@ -371,7 +371,7 @@ install_network_driver() {
     cd 8821au-20210708
 
     echo -e "${BLUE}Installing the driver...${RESET}"
-    sudo ./install-driver.sh
+    yes n | sudo ./install-driver.sh
 
     echo -e "${GREEN}Driver installation complete!${RESET}"
 }
