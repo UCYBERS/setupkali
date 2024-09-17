@@ -491,6 +491,8 @@ install_hacking_tools() {
     apt-get install realtek-rtl88xxau-dkms -y
     sudo apt install mdk4
     python-pip-curl
+    sudo apt-get install python3-venv 
+    sudo apt install python3 python3-pip
 
     echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
 }
