@@ -215,7 +215,7 @@ apt_upgrade() {
 
 apt_upgrade_complete() {
     echo -e "\n  $greenplus apt upgrade - complete"
-    configure_dash_apps2
+    configure_dash_apps
 }
 
 install_wifi_hotspot() {
