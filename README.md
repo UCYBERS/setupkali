@@ -12,8 +12,8 @@
 
 # Enabled root login.
 
-- Username: root
-- Password: ucybers
+- **Username**: root
+- **Password**: ucybers
 
 # Fixes and Features for Kali Linux Setup
 - Author assumes zero liability for any data loss or misuse of setupkali
