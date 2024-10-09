@@ -69,21 +69,13 @@ install_icons() {
 
 change_to_gnome() {
     echo -e "${BLUE}Updating system and installing GNOME...${RESET}"
-    
     sudo apt update -y
-    
+    sudo apt remove -y kali-themes gnome-shell
     sudo apt install -y kali-desktop-gnome
-    
     echo -e "${BLUE}Setting GNOME as default session...${RESET}"
+   
+    echo "1" | sudo update-alternatives --config x-session-manager
     
-    sudo update-alternatives --set x-session-manager /usr/bin/gnome-session
-    
-    echo -e "${BLUE}Removing XFCE...${RESET}"
-    sudo apt purge --autoremove -y kali-desktop-xfce xfce4*
-    
-    sudo apt autoremove -y
-    
-    echo -e "${GREEN}GNOME has been set as the default environment and XFCE has been removed.${RESET}"
 }
 
 
