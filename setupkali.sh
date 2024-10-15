@@ -61,7 +61,7 @@ install_icons() {
     sudo tar -xzf "$ICONS_FILE" -C /usr/share/icons/
     
    
-    sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
+    gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
     
     echo -e "${GREEN}Icons installed and set successfully.${RESET}"
 }
