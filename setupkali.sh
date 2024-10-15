@@ -64,6 +64,21 @@ install_icons() {
    sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
     
     echo -e "${GREEN}Icons installed and set successfully.${RESET}"
+    set_icon_theme
+}
+
+set_icon_theme() {
+    echo -e "${BLUE}Setting icon theme to Vibrancy-Kali for root...${RESET}"
+    
+    sudo mkdir -p /root/.config/gtk-3.0
+    
+    {
+        echo "[Settings]"
+        echo "gtk-icon-theme-name='Vibrancy-Kali'"
+        echo "gtk-application-prefer-dark-theme=0"
+    } | sudo tee /root/.config/gtk-3.0/settings.ini > /dev/null
+
+    echo -e "${GREEN}Icon theme set successfully for root.${RESET}"
 }
 
 
