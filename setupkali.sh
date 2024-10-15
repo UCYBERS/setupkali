@@ -70,7 +70,7 @@ install_icons() {
 change_to_gnome() {
     echo -e "${BLUE}Updating system and installing GNOME...${RESET}"
     sudo apt update -y
-    sudo apt install gnome-shell=47.0-2kali4
+    sudo apt install -y gnome-shell
     sudo apt install -y kali-desktop-gnome
     echo -e "${BLUE}Setting GNOME as default session...${RESET}"
     echo "1" | sudo update-alternatives --config x-session-manager
