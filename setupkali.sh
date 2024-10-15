@@ -61,23 +61,20 @@ install_icons() {
     sudo tar -xzf "$ICONS_FILE" -C /usr/share/icons/
     
    
-    gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
+   sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
     
     echo -e "${GREEN}Icons installed and set successfully.${RESET}"
 }
 
 
 change_to_gnome() {
+    echo -e "${BLUE}Removing XFCE...${RESET}"
+    sudo apt purge --autoremove -y kali-desktop-xfce xfce4 xfce4-*
     echo -e "${BLUE}Updating system and installing GNOME...${RESET}"
     sudo apt update -y
-    sudo apt install -y gnome-shell
     sudo apt install -y kali-desktop-gnome
     echo -e "${BLUE}Setting GNOME as default session...${RESET}"
     echo "1" | sudo update-alternatives --config x-session-manager
-    echo -e "${BLUE}Removing XFCE...${RESET}"
-    sudo apt purge --autoremove -y kali-desktop-xfce
-    sudo apt remove --purge -y xfce4 xfce4-*
-    sudo apt autoremove -y
     echo -e "${GREEN}GNOME has been set as the default environment and XFCE has been removed.${RESET}"
 }
 
