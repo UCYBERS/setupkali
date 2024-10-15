@@ -76,8 +76,8 @@ change_to_gnome() {
     echo "1" | sudo update-alternatives --config x-session-manager
     echo -e "${BLUE}Removing XFCE...${RESET}"
     sudo apt purge --autoremove -y kali-desktop-xfce
-    sudo apt remove --purge xfce4 xfce4-*
-    sudo apt autoremove
+    sudo apt remove --purge -y xfce4 xfce4-*
+    sudo apt autoremove -y
     echo -e "${GREEN}GNOME has been set as the default environment and XFCE has been removed.${RESET}"
 }
 
