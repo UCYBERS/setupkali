@@ -64,21 +64,27 @@ install_icons() {
    sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
     
     echo -e "${GREEN}Icons installed and set successfully.${RESET}"
-    set_icon_theme
+    enable_icon_theme_autostart_root
 }
 
-set_icon_theme() {
-    echo -e "${BLUE}Setting icon theme to Vibrancy-Kali for root...${RESET}"
+enable_icon_theme_autostart_root() {
+    echo -e "${BLUE}Setting up autostart to change icon theme to Vibrancy-Kali for root...${RESET}"
     
-    sudo mkdir -p /root/.config/gtk-3.0
-    
-    {
-        echo "[Settings]"
-        echo "gtk-icon-theme-name='Vibrancy-Kali'"
-        echo "gtk-application-prefer-dark-theme=0"
-    } | sudo tee /root/.config/gtk-3.0/settings.ini > /dev/null
+    # إنشاء مجلد autostart لمستخدم الرووت إذا لم يكن موجودًا
+    sudo mkdir -p /root/.config/autostart
 
-    echo -e "${GREEN}Icon theme set successfully for root.${RESET}"
+    # إنشاء ملف desktop لتغيير ثيم الأيقونات عند بدء التشغيل لمستخدم الرووت
+    sudo tee /root/.config/autostart/change_icon_theme.desktop > /dev/null <<EOF
+[Desktop Entry]
+Type=Application
+Exec=gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=Change Icon Theme
+EOF
+
+    echo -e "${GREEN}Autostart setup completed to change the icon theme for root.${RESET}"
 }
 
 
