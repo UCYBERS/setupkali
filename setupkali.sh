@@ -76,6 +76,8 @@ change_to_gnome() {
     echo "1" | sudo update-alternatives --config x-session-manager
     echo -e "${BLUE}Removing XFCE...${RESET}"
     sudo apt purge --autoremove -y kali-desktop-xfce
+    sudo apt remove --purge xfce4 xfce4-*
+    sudo apt autoremove
     echo -e "${GREEN}GNOME has been set as the default environment and XFCE has been removed.${RESET}"
 }
 
@@ -106,7 +108,7 @@ configure_dock_for_root() {
 
 configure_dash_apps() {
     echo -e "${BLUE}Configuring Dash applications for root user...${RESET}"
-    sudo -u root gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'leafpad.desktop']"
+    sudo -u root gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'org.xfce.mousepad']"
 }
 
 change_background() {
