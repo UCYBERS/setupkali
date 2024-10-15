@@ -93,7 +93,7 @@ enable_root_login() {
 install_tools_for_root() {
     echo -e "${BLUE}Installing tools for root user...${RESET}"
     sudo apt update -y
-    sudo apt install -y terminator leafpad mousepad firefox-esr metasploit-framework burpsuite maltego beef-xss
+    sudo apt install -y terminator mousepad firefox-esr metasploit-framework burpsuite maltego beef-xss
     sudo apt install -y ark dolphin gwenview mdk3 kate partitionmanager okular vlc zaproxy
 }
 
