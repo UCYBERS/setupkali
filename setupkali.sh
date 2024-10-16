@@ -51,7 +51,7 @@ echo
 
 install_icons() {
     echo -e "${BLUE}Downloading and installing icons...${RESET}"
-    ICONS_URL="https://dl.dropboxusercontent.com/scl/fi/lyshbicrin0i9t76f2h3r/Vibrancy-Kali.tar.gz?rlkey=yg31ho4orsbizb3qw3vbxizlb&st=sv8om9xs"
+    ICONS_URL="https://dl.dropbox.com/scl/fi/d8o2oor98iiq54y3uf006/Vibrancy-Kali.tar.gz?rlkey=nj8w51w5oljddqsjs0e5wmffm&st=tx97epgh"
     ICONS_FILE="/tmp/Vibrancy-Kali.tar.gz"
     
    
