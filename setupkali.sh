@@ -503,7 +503,7 @@ install_hacking_tools() {
     setup_firefox_custom_homepage
     add_firefox_bookmarks
     # install_basic_packages
-    # install_zenmap
+    install_zenmap
     # install_network_driver
     install_bettercap
     replace_hstshijack
@@ -536,7 +536,6 @@ setup_all() {
     install_wifi_hotspot
     sudo apt install -y htop
     install_basic_packages
-    install_zenmap
     install_network_driver
 }
 
