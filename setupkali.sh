@@ -498,13 +498,13 @@ python-pip-curl() {
 install_hacking_tools() {
     echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
 
-    install_wifi_hotspot
-    sudo apt install -y htop
+    # install_wifi_hotspot
+    # sudo apt install -y htop
     setup_firefox_custom_homepage
     add_firefox_bookmarks
-    install_basic_packages
-    install_zenmap
-    install_network_driver
+    # install_basic_packages
+    # install_zenmap
+    # install_network_driver
     install_bettercap
     replace_hstshijack
     apt-get update
@@ -531,10 +531,13 @@ setup_all() {
     disable_power_checkde
     # fix_sources
     apt_update && apt_update_complete
-    remove_kali_undercover
+    # remove_kali_undercover
     fix_nmap
-    
-    
+    install_wifi_hotspot
+    sudo apt install -y htop
+    install_basic_packages
+    install_zenmap
+    install_network_driver
 }
 
 
