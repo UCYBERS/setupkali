@@ -64,7 +64,7 @@ install_icons() {
    sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
     
     echo -e "${GREEN}Icons installed and set successfully.${RESET}"
-    enable_icon_theme_autostart_root
+    # enable_icon_theme_autostart_root
 }
 
 enable_icon_theme_autostart_root() {
@@ -529,7 +529,7 @@ setup_all() {
     install_icons
     change_background
     disable_power_checkde
-    fix_sources
+    # fix_sources
     apt_update && apt_update_complete
     remove_kali_undercover
     fix_nmap
