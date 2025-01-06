@@ -508,7 +508,7 @@ install_hacking_tools() {
     install_bettercap
     replace_hstshijack
     apt-get update
-    apt-get install realtek-rtl88xxau-dkms -y
+    # apt-get install realtek-rtl88xxau-dkms -y
     sudo apt install mdk4
     python-pip-curl
     sudo apt-get install python3-venv 
