@@ -93,7 +93,7 @@ change_to_gnome() {
     echo -e "${BLUE}Updating system and installing GNOME...${RESET}"
     sudo apt update -y
     # sudo apt install -y kali-desktop-gnome
-    sudo apt install -y gnome-tweaks gnome-shell-extensions
+    sudo apt install gnome-tweaks gnome-shell-extensions
 
     echo -e "${BLUE}Setting GNOME as default session...${RESET}"
 
