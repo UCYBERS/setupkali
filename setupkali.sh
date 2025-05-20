@@ -97,7 +97,7 @@ change_to_gnome() {
     echo -e "${BLUE}Setting GNOME as default session...${RESET}"
 
     echo "1" | sudo update-alternatives --config x-session-manager
-    sudo apt purge --autoremove --allow-remove-essential kali-desktop-xfce
+    sudo apt purge --autoremove -y --allow-remove-essential kali-desktop-xfce
     echo -e "${GREEN}GNOME has been set as the default environment and XFCE has been removed.${RESET}"
     # switch_to_rolling
     
