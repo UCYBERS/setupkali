@@ -9,7 +9,7 @@
 # Standard Disclaimer: Author assumes no liability for any damage
 
 # revision var
-revision="1.0.0"
+revision="1.1.2"
 
 
 RED='\033[31m'
@@ -99,7 +99,7 @@ change_to_gnome() {
     echo "1" | sudo update-alternatives --config x-session-manager
     sudo apt purge --autoremove --allow-remove-essential kali-desktop-xfce
     echo -e "${GREEN}GNOME has been set as the default environment and XFCE has been removed.${RESET}"
-    switch_to_rolling
+    # switch_to_rolling
     
 
 }
