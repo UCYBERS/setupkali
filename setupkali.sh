@@ -70,10 +70,10 @@ install_icons() {
 enable_icon_theme_autostart_root() {
     echo -e "${BLUE}Setting up autostart to change icon theme to Vibrancy-Kali for root...${RESET}"
     
-    # إنشاء مجلد autostart لمستخدم الرووت إذا لم يكن موجودًا
+    
     sudo mkdir -p /root/.config/autostart
 
-    # إنشاء ملف desktop لتغيير ثيم الأيقونات عند بدء التشغيل لمستخدم الرووت
+    
     sudo tee /root/.config/autostart/change_icon_theme.desktop > /dev/null <<EOF
 [Desktop Entry]
 Type=Application
