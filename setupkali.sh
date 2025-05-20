@@ -89,19 +89,52 @@ EOF
 
 
 change_to_gnome() {
-   
+    switch_to_snapshot
     echo -e "${BLUE}Updating system and installing GNOME...${RESET}"
     sudo apt update -y
-    # sudo apt install -y kali-desktop-gnome
-    sudo apt install gnome-tweaks gnome-shell-extensions
+    sudo apt install -y kali-desktop-gnome
 
     echo -e "${BLUE}Setting GNOME as default session...${RESET}"
 
     echo "1" | sudo update-alternatives --config x-session-manager
-    sudo apt purge --autoremove -y kali-desktop-xfce
+    sudo apt purge --autoremove --allow-remove-essential kali-desktop-xfce
     echo -e "${GREEN}GNOME has been set as the default environment and XFCE has been removed.${RESET}"
+    switch_to_rolling
+    
 
 }
+switch_to_snapshot() {
+  local sources_file="/etc/apt/sources.list"
+
+  # Backup the original file
+  cp "$sources_file" "${sources_file}.bak"
+
+  # Comment out kali-rolling if it exists
+  sed -i 's|^deb http://http.kali.org/kali kali-rolling|# deb http://http.kali.org/kali kali-rolling|' "$sources_file"
+
+  # Add kali-last-snapshot if not already present
+  if ! grep -q "^deb http://http.kali.org/kali kali-last-snapshot" "$sources_file"; then
+    echo "deb http://http.kali.org/kali kali-last-snapshot main contrib non-free non-free-firmware" >> "$sources_file"
+  fi
+
+  echo "[✔] Switched to kali-last-snapshot"
+}
+
+switch_to_rolling() {
+  local sources_file="/etc/apt/sources.list"
+
+  # Backup the original file
+  cp "$sources_file" "${sources_file}.bak"
+
+  # Remove kali-last-snapshot line
+  sed -i '/^deb http:\/\/http.kali.org\/kali kali-last-snapshot/d' "$sources_file"
+
+  # Uncomment kali-rolling line if it was commented
+  sed -i 's|^# deb http://http.kali.org/kali kali-rolling|deb http://http.kali.org/kali kali-rolling|' "$sources_file"
+
+  echo "[✔] Switched to kali-rolling"
+}
+
 
 
 enable_root_login() {
