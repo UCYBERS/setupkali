@@ -10,12 +10,18 @@
   <img src="https://img.shields.io/github/stars/ucybers/setupkali?style=for-the-badge">
   <img src="https://img.shields.io/github/issues/ucybers/setupkali?color=red&style=for-the-badge">
   <img src="https://img.shields.io/github/forks/ucybers/setupkali?color=teal&style=for-the-badge">
+  
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Author-UCYBERS-red?style=flat-square">
   <img src="https://img.shields.io/badge/Open%20Source-Yes-darkgreen?style=flat-square">
   <img src="https://img.shields.io/badge/Maintained%3F-Yes-lightblue?style=flat-square">
   <img src="https://img.shields.io/badge/Written%20In-Bash-darkcyan?style=flat-square">
+  <img src="https://img.shields.io/github/last-commit/ucybers/setupkali">
+  <img src="https://img.shields.io/github/repo-size/ucybers/setupkali">
+  <a href="https://discord.gg/FXgT8fdGyY">
+        <img src="https://img.shields.io/discord/308323056592486420?logo=discord&logoColor=white"
+            alt="Chat on Discord"></a>
 </p>
 
 - **Author**: UCYBERS
