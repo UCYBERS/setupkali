@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/github/stars/ucybers/setupkali?style=for-the-badge">
   <img src="https://img.shields.io/github/issues/ucybers/setupkali?color=red&style=for-the-badge">
   <img src="https://img.shields.io/github/forks/ucybers/setupkali?color=teal&style=for-the-badge">
-  
+   
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Author-UCYBERS-red?style=flat-square">
@@ -22,6 +22,12 @@
   <a href="https://discord.gg/FXgT8fdGyY">
         <img src="https://img.shields.io/discord/308323056592486420?logo=discord&logoColor=white"
             alt="Chat on Discord"></a>
+  <a href="https://ucybers.com">
+        <img src="https://img.shields.io/static/v1?label=Website&message=UCYBERS&color=blue&style=flat-square"
+            alt="Visit UCYBERS"></a>
+  <a href="https://x.com/UCybersX">
+        <img src="https://img.shields.io/twitter/url/https/twitter.com/ucybers.svg?style=social&label=Update%20%40ucybers"
+            alt="Twitter"></a>
 </p>
 
 - **Author**: UCYBERS
