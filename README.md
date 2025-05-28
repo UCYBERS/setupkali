@@ -4,6 +4,19 @@
 # Fixes and Enhancements for Kali Linux
 ![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-1.1.3-green?style=for-the-badge">
+  <img src="https://img.shields.io/github/license/ucybers/setupkali?style=for-the-badge">
+  <img src="https://img.shields.io/github/stars/ucybers/setupkali?style=for-the-badge">
+  <img src="https://img.shields.io/github/issues/ucybers/setupkali?color=red&style=for-the-badge">
+  <img src="https://img.shields.io/github/forks/ucybers/setupkali?color=teal&style=for-the-badge">
+</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Author-UCYBERS-red?style=flat-square">
+  <img src="https://img.shields.io/badge/Open%20Source-Yes-darkgreen?style=flat-square">
+  <img src="https://img.shields.io/badge/Maintained%3F-Yes-lightblue?style=flat-square">
+  <img src="https://img.shields.io/badge/Written%20In-Bash-darkcyan?style=flat-square">
+</p>
 
 - **Author**: UCYBERS
 - **GitHub Repository**: [setupkali](https://github.com/UCYBERS/setupkali)
