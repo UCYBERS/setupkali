@@ -35,12 +35,12 @@
 - **Usage**: `sudo ./setupkali.sh` (defaults to the menu system)
 - **Command Line Arguments**: Valid arguments can be used; only one argument is supported
 
-# :zap:Enabled root login.
+# 👤🔑 Enabled root login.
 
 - **Username**: root
 - **Password**: ucybers
 
-# :new:Fixes and Features for Kali Linux Setup
+# ✨ Fixes and Features for Kali Linux Setup
 - Author assumes zero liability for any data loss or misuse of setupkali
 - Menu breakdown added below revision history
 
@@ -75,7 +75,7 @@
 - Various bug fixes and performance improvements.
 
 
-# :bookmark_tabs:Menu Breakdown of setupkali
+# ☰ Menu Breakdown of setupkali
 
 - **Menu Option 1** - Change to GNOME Desktop
   - Installs GNOME and sets it as default
@@ -159,7 +159,7 @@
 - Improve error handling
 - Add more customization options
 
-# Installation
+# 🛠️ Installation
 ```bash
 # Remove existing setupkali folder
 rm -rf setupkali/
@@ -172,4 +172,4 @@ cd setupkali
 sudo chmod +x setupkali.sh
 # (The script must be run with root privileges)
 sudo ./setupkali.sh
-
+```
