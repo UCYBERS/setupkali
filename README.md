@@ -44,7 +44,7 @@
 - Author assumes zero liability for any data loss or misuse of setupkali
 - Menu breakdown added below revision history
 
-# Revision History
+# 🪶 Revision History
 
 ## Revision 1.0.0 - Initial Release
 - Added features for Kali Linux setup
@@ -155,9 +155,7 @@
 - **Menu Option 0** - Exit
   - Exits the script
 
-# TODO
-- Improve error handling
-- Add more customization options
+
 
 # 🛠️ Installation
 ```bash
@@ -173,3 +171,6 @@ sudo chmod +x setupkali.sh
 # (The script must be run with root privileges)
 sudo ./setupkali.sh
 ```
+# TODO
+- Improve error handling
+- Add more customization options
