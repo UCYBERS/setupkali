@@ -1,6 +1,13 @@
+
+
+<p align="center">
+   
+<img src="https://github.com/user-attachments/assets/bc9ecff5-4393-4d2a-a1df-bcebd3c42ea6">
+
+</p>
+
+
 # setupkali.sh
-
-
 # Fixes and Enhancements for Kali Linux
 ![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
 
