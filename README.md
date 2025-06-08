@@ -5,13 +5,6 @@
 <img src="https://github.com/user-attachments/assets/bc9ecff5-4393-4d2a-a1df-bcebd3c42ea6">
 
 </p>
-
-
-# setupkali.sh
-# Fixes and Enhancements for Kali Linux
-![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
-
-   
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Author-UCYBERS-red?style=flat-square">
@@ -30,6 +23,14 @@
         <img src="https://img.shields.io/twitter/url/https/twitter.com/ucybers.svg?style=social&label=Update%20%40ucybers"
             alt="Twitter"></a>
 </p>
+
+
+# setupkali.sh
+# Fixes and Enhancements for Kali Linux
+![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
+
+   
+
 
 - **Author**: UCYBERS
 - **GitHub Repository**: [setupkali](https://github.com/UCYBERS/setupkali)
