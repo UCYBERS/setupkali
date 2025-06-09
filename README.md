@@ -27,7 +27,7 @@
 
 # setupkali.sh
 # Fixes and Enhancements for Kali Linux
-![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
+
 
    
 
@@ -37,6 +37,7 @@
 - **Usage**: `sudo ./setupkali.sh` (defaults to the menu system)
 - **Command Line Arguments**: Valid arguments can be used; only one argument is supported
 
+![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
 # 👤🔑 Enabled root login.
 
 - **Username**: root
