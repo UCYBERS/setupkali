@@ -1,11 +1,6 @@
 
 
-<p align="center">
-   
-<img src="https://github.com/user-attachments/assets/bc9ecff5-4393-4d2a-a1df-bcebd3c42ea6">
-
-</p>
-</p>
+![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
 <p align="center">
   <img src="https://img.shields.io/badge/Author-UCYBERS-red?style=flat-square">
   <img src="https://img.shields.io/badge/Open%20Source-Yes-darkgreen?style=flat-square">
@@ -37,7 +32,7 @@
 - **Usage**: `sudo ./setupkali.sh` (defaults to the menu system)
 - **Command Line Arguments**: Valid arguments can be used; only one argument is supported
 
-![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
+
 # 👤🔑 Enabled root login.
 
 - **Username**: root
