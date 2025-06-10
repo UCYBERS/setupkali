@@ -1,5 +1,5 @@
 
-
+# setupkali.sh
 ![setupkali](https://github.com/user-attachments/assets/98faac4b-9dec-40d4-ba58-1a498719de21)
 <p align="center">
   <img src="https://img.shields.io/badge/Author-UCYBERS-red?style=flat-square">
@@ -20,7 +20,7 @@
 </p>
 
 
-# setupkali.sh
+
 # Fixes and Enhancements for Kali Linux
 
 
