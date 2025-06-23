@@ -89,7 +89,7 @@ EOF
 
 
 change_to_gnome() {
-    switch_to_snapshot
+    # switch_to_snapshot
     echo -e "${BLUE}Updating system and installing GNOME...${RESET}"
     sudo apt update -y
     sudo apt install -y kali-desktop-gnome
