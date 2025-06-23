@@ -38,6 +38,21 @@
 - **Username**: root
 - **Password**: ucybers
 
+# 🛠️ Installation
+```bash
+# Remove existing setupkali folder
+rm -rf setupkali/
+
+# Clone setupkali repository & enter the folder
+sudo git clone https://github.com/UCYBERS/setupkali
+cd setupkali
+
+# Execute the script - Run menu options as needed
+sudo chmod +x setupkali.sh
+# (The script must be run with root privileges)
+sudo ./setupkali.sh
+```
+
 # ✨ Fixes and Features for Kali Linux Setup
 - Author assumes zero liability for any data loss or misuse of setupkali
 - Menu breakdown added below revision history
@@ -155,20 +170,7 @@
 
 
 
-# 🛠️ Installation
-```bash
-# Remove existing setupkali folder
-rm -rf setupkali/
 
-# Clone setupkali repository & enter the folder
-sudo git clone https://github.com/UCYBERS/setupkali
-cd setupkali
-
-# Execute the script - Run menu options as needed
-sudo chmod +x setupkali.sh
-# (The script must be run with root privileges)
-sudo ./setupkali.sh
-```
 # TODO
 - Improve error handling
 - Add more customization options
