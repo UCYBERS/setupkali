@@ -9,7 +9,7 @@
 # Standard Disclaimer: Author assumes no liability for any damage
 
 # revision var
-revision="1.1.2"
+revision="1.1.3"
 
 
 RED='\033[31m'
