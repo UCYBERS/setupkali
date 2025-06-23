@@ -39,7 +39,7 @@
 - **Password**: ucybers
 
 # 🛠️ Installation
-```bash
+```console
 # Remove existing setupkali folder
 rm -rf setupkali/
 
