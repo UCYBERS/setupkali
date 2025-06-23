@@ -38,6 +38,10 @@
 - **Username**: root
 - **Password**: ucybers
 
+# Github index updated added +x permission:
+  - Script is now be executable upon clone (perms: 755 rwxr-xr-x added to github)
+  - There is no need to chmod +x setupkali.sh upon git clone
+
 # 🛠️ Installation
 ```console
 # Remove existing setupkali folder
@@ -47,8 +51,6 @@ rm -rf setupkali/
 sudo git clone https://github.com/UCYBERS/setupkali
 cd setupkali
 
-# Execute the script - Run menu options as needed
-sudo chmod +x setupkali.sh
 # (The script must be run with root privileges)
 sudo ./setupkali.sh
 ```
