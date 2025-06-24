@@ -9,11 +9,13 @@
 # Standard Disclaimer: Author assumes no liability for any damage
 
 # revision var
-revision="1.1.3"
+revision="1.1.4"
 
 
 RED='\033[31m'
-GREEN='\033[32m'
+redminus='\e[1;31m[--]\e[0m'
+redexclaim='\e[1;31m[!!]\e[0m'
+GREEN='\e[1;32m'
 YELLOW='\033[33m'
 BLUE='\033[34m'
 MAGENTA='\033[35m'
@@ -24,6 +26,7 @@ RESET='\033[0m'
 greenplus='\e[1;33m[++]\e[0m'
 greenminus='\e[1;33m[--]\e[0m'
 NC='\033[0m'
+deep_green='\e[38;5;34m'
 
 finduser="root"
 force=0
@@ -574,40 +577,163 @@ setup_all() {
     install_network_driver
 }
 
+confirm_menu_choice() {
+    valid_options=("1" "2" "3" "4" "5" "6" "0")
+
+    if [[ ! " ${valid_options[@]} " =~ " ${menuinput} " ]]; then
+        echo -e "\n${RED}  Invalid option: '${menuinput}'. Please try again.${RESET}"
+        return 1
+    fi
+
+    if [ "$menuinput" == "0" ]; then
+        clear
+        echo -e "${BOLD}${deep_green}$asciiart${RESET}"
+        echo -e "\n${RED}Happy Hacking!${RESET} ${GREEN}Setup completed! ${RESET}\n"
+        
+        exit 0
+    fi
+
+    echo -e ""
+    echo -ne " Menu selection is ${deep_green}${menuinput}${RESET} Press ${GREEN}Y${RESET} to confirm or ${RED}N${RESET} to cancel: "
+    read -n1 selectinput
 
 
-show_menu() {
-    clear
-    echo -e "$asciiart"
-    echo -e "\n    ${YELLOW}Select an option from menu:${RESET}\n"  
-    echo -e " ${GREEN}Key  Menu Option:              Description:${RESET}"
-    echo -e " ${GREEN}---  ------------              ------------${RESET}"
-    echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
-    echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
-    echo -e " ${BLUE}3 - Install Tools for Root    (Installs Hacking tools for root user)${RESET}"
-    echo -e " ${BLUE}4 - Install Pen Tools         (Installs additional penetration testing tools)${RESET}"
-    echo -e " ${BLUE}5 - Upgrade System            (Updates and upgrades the system)${RESET}"
-    echo -e " ${BLUE}6 - ${BOLD}Setup All${RESET}${BLUE}                 (Runs all setup steps)${RESET}"
-    echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
-    read -n1 -p "  Press key for menu item selection or press X to exit: " menuinput
-
-    
-    echo
-
-    case $menuinput in
-        1) change_to_gnome;;
-        2) enable_root_login;;
-        3) install_tools_for_root;;
-        4) install_hacking_tools;;
-        5) apt_upgrade;;
-        6) setup_all;;
-        0|X) echo -e "\n\n ${RED}Exiting script - Happy Hacking!${RESET} \n" ;;
-        *) show_menu ;;
+    case "$selectinput" in
+        Y|y)
+            echo -e "\n\n ${GREEN}✔ Executing menu option ${menuinput}${RESET}"
+            return 0
+            ;;
+        N|n)
+            echo -e "\n\n  ${YELLOW}↺ Returning to menu...${RESET}"
+            return 1
+            ;;
+        *)
+            echo -e "\n\n  ${RED}Invalid input. Please enter Y or N only.${RESET}"
+            return 1
+            ;;
     esac
 }
 
 
-show_menu
+
+
+show_menu() {
+    while true; do
+        clear
+        echo -e "$asciiart"
+        echo -e "\n    ${YELLOW}Select an option from the menu:${RESET}\n"  
+        echo -e " ${deep_green}Key  Menu Option:              Description:${RESET}"
+        echo -e " ${deep_green}---  ------------              ------------${RESET}"
+        echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
+        echo -e " ${BLUE}2 - Enable Root Login         (Installs root login and sets password)${RESET}"
+        echo -e " ${BLUE}3 - Install Tools for Root    (Installs hacking tools for root user)${RESET}"
+        echo -e " ${BLUE}4 - Install Pen Tools         (Installs additional penetration testing tools)${RESET}"
+        echo -e " ${BLUE}5 - Upgrade System            (Updates and upgrades the system)${RESET}"
+        echo -e " ${BLUE}6 - ${BOLD}Setup All${RESET}${BLUE}                 (Runs all setup steps)${RESET}"
+        echo -e " ${BLUE}0 - Exit                      (Exit the script)${RESET}\n"
+        echo -e " ${deep_green}Please use sudo ./setupkali.sh --help for additional installations/fixes${RESET}\n"
+        
+        
+        read -n1 -p " Press key for menu selection or press 0 to exit: " menuinput
+        echo
+        
+        # Confirm the selection
+        confirm_menu_choice $menuinput
+        if [ $? -eq 0 ]; then
+            case $menuinput in
+                1) change_to_gnome; break ;;
+                2) enable_root_login; break ;;
+                3) install_tools_for_root; break ;;
+                4) install_hacking_tools; break ;;
+                5) apt_upgrade; break ;;
+                6) setup_all; break ;;
+                0) 
+                    clear
+                    echo -e "$asciiart"
+                    echo -e "\n${RED}Happy Hacking!${RESET}"
+                    echo -e "${GREEN}Setup completed! ${RESET}\n"
+                    exit 0
+                    ;;
+                *)
+                    # Should not reach here because confirm_menu_choice handles invalid input
+                    ;;
+            esac
+        fi
+        # If not confirmed, the loop repeats to show the menu again
+    done
+}
+
+
+setupkali_help() {
+    echo -e "\n  ${YELLOW}Command line arguments:${RESET}\n"
+    options=(
+    "  -g, --gnome           - Install and switch to GNOME desktop environment"
+    "  -r, --root            - Enable root login and prompt for password"
+    "  -t, --tools           - Install hacking tools for root user"
+    "  -H, --hacking         - Install additional hacking tools"
+    "  -u, --upgrade         - Run apt update and upgrade"
+    "  -a, -A, --all         - Perform full system setup"
+    "  -f, --fix-sources     - Fix and update APT sources list"
+    "  -n, --nmap            - Fix nmap configuration/issues"
+    "  -s, --style           - Configure dock, dash, and icons for root user"
+    "  -w, --wifi            - Install linux-wifi-hotspot tool"
+    "  -F, --firefox         - Set custom Firefox homepage"
+    "  -R, --enable-root     - Enable root login only"
+    "  -h, -?, --help        - Show this help message"
+    )
+
+    for option in "${options[@]}"; do
+        echo -e "$option"
+    done
+    echo
+    exit 0
+}
+
+check_arg() {
+    if [ "$1" == "--help" ] || [ "$1" == "-h" ] || [ "$1" == "-?" ]; then
+        setupkali_help
+    elif [ -z "$1" ]; then
+        show_menu
+    else
+        case "$1" in
+            --gnome|-g)
+                change_to_gnome ;;
+            --root|-r)
+                enable_root_login ;;
+            --tools|-t)
+                install_tools_for_root ;;
+            --hacking|-H)
+                install_hacking_tools ;;
+            --upgrade|-u)
+                apt_update
+                apt_upgrade ;;
+            --all|-a|-A)
+                setup_all ;;
+            --fix-sources|-f)
+                fix_sources ;;
+            --nmap|-n)
+                fix_nmap ;;
+            --style|-s)
+                configure_dock_for_root
+                configure_dash_apps
+                install_icons ;;
+            --wifi|-w)
+                install_wifi_hotspot ;;
+            --firefox|-F)
+            	add_firefox_bookmarks
+                setup_firefox_custom_homepage ;;
+            --enable-root|-R)
+                enable_root_login ;;
+            *)
+                setupkali_help
+                exit 1 ;;
+        esac
+    fi
+}
+
+
+
+check_arg "$1"
 
 
 clear
