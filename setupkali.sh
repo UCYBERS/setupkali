@@ -620,7 +620,7 @@ confirm_menu_choice() {
 show_menu() {
     while true; do
         clear
-        echo -e "$asciiart"
+        echo -e "${BOLD}${deep_green}$asciiart"
         echo -e "\n    ${YELLOW}Select an option from the menu:${RESET}\n"  
         echo -e " ${deep_green}Key  Menu Option:              Description:${RESET}"
         echo -e " ${deep_green}---  ------------              ------------${RESET}"
