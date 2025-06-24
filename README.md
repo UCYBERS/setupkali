@@ -1,6 +1,5 @@
 # setupkali.sh
-![setupkali](https://github.com/user-attachments/assets/d7a0cad7-8cf8-4402-a42c-627b8176bf0d)
-
+![SetupKali](https://github.com/user-attachments/assets/4159ae20-d7a0-45aa-80f1-b8534f60686a)
 <p align="center">
   <img src="https://img.shields.io/badge/Author-UCYBERS-red?style=flat-square">
   <img src="https://img.shields.io/badge/Open%20Source-Yes-darkgreen?style=flat-square">
