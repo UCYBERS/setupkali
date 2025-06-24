@@ -61,33 +61,81 @@ sudo ./setupkali.sh
 
 # 🪶 Revision History
 
-## Revision 1.0.0 - Initial Release
-- Added features for Kali Linux setup
-- Included options for package installation and configuration
+- ## Version 1.1.4 (Latest Release)
 
-## Revision 1.1.0 - Feature Enhancements and Improvements
+  - **Improved Command Line Argument Handling:**
+    - Added short and long argument options for ease of use (e.g., `-g`/`--gnome`, `-a`/`--all`, `-h`/`--help`).
+    - Simplified argument parsing for faster script execution.
 
-### New Functions Added:
-- Introduced the `fix_hushlogin` function to manage `.hushlogin` for root user sessions.
-- Added the `fix_sources` function to update and validate APT sources, including enabling `deb-src` and ensuring `non-free-firmware` inclusion.
-- Implemented the `apt_autoremove` function for system cleanup post-upgrade.
+  - **Enhanced Help Message:**
+    - Detailed, clear help output listing all supported CLI arguments with shortcuts.
+    - Helps users quickly understand available options.
 
-### Customization Updates:
-- Added support for setting a custom Firefox homepage for the root user.
-- Improved menu layout and descriptions for better usability.
+  - **Menu Confirmation (`confirm_menu_choice`):**
+    - Validates user input on menu selection.
+    - Provides colored feedback for selection confirmation or cancellation.
+    - Allows exiting cleanly on option `0` with farewell message and ASCII art.
+    - Reprompts user on invalid input to improve UX.
 
-### Wi-Fi Hotspot Installation:
-- Streamlined the installation process for `linux-wifi-hotspot`, ensuring proper package verification and minimal dependencies.
 
-### Kernel Update Integration:
-- Included commands for installing kernel headers alongside kernel updates.
 
-### Power Management Tweaks:
-- Added `disable_power_gnome` function to optimize GNOME power settings for better performance.
+   - ## Command Line Arguments
 
-### General Enhancements:
-- Optimized the script to ensure functions run under the correct user contexts (e.g., root or kali user as needed).
-- Various bug fixes and performance improvements.
+     - | Argument       | Shortcut(s) | Description                                            |
+       | -------------- | ----------- | ---------------------------------------------------- |
+       | `--gnome`      | `-g`        | Install and switch to GNOME desktop environment       |
+       | `--root`       | `-r`        | Enable root login and prompt for password             |
+       | `--tools`      | `-t`        | Install hacking tools for root user                    |
+       | `--hacking`    | `-H`        | Install additional hacking tools                       |
+       | `--upgrade`    | `-u`        | Update and upgrade the system                          |
+       | `--all`        | `-a`, `-A`  | Run full system setup (all steps)                      |
+       | `--fixsources` | `-f`        | Fix and update APT sources list                         |
+       | `--nmap`       | `-n`        | Fix nmap configuration/issues                          |
+       | `--style`      | `-s`        | Configure dock, dash, and icons for root user          |
+       | `--wifi`       | `-w`        | Install linux-wifi-hotspot tool                         |
+       | `--firefox`    | `-F`        | Set custom Firefox homepage for root                   |
+       | `--help`       | `-h`, `-?`  | Show help message                                      |
+
+
+
+    - ## Usage Examples
+
+       -  ```console
+           sudo ./setupkali.sh --all
+           sudo ./setupkali.sh -g
+           sudo ./setupkali.sh --fixsources
+           sudo ./setupkali.sh -w
+           sudo ./setupkali.sh --help
+          ```
+
+
+- ## Revision 1.1.0 - Feature Enhancements and Improvements
+
+    - ### New Functions Added:
+      - Introduced the `fix_hushlogin` function to manage `.hushlogin` for root user sessions.
+      - Added the `fix_sources` function to update and validate APT sources, including enabling `deb-src` and ensuring `non-free-firmware` inclusion.
+      - Implemented the `apt_autoremove` function for system cleanup post-upgrade.
+
+    - ### Customization Updates:
+      - Added support for setting a custom Firefox homepage for the root user.
+      - Improved menu layout and descriptions for better usability.
+
+    - ### Wi-Fi Hotspot Installation:
+      - Streamlined the installation process for `linux-wifi-hotspot`, ensuring proper package verification and minimal dependencies.
+
+    - ### Kernel Update Integration:
+      - Included commands for installing kernel headers alongside kernel updates.
+
+    - ### Power Management Tweaks:
+      - Added `disable_power_gnome` function to optimize GNOME power settings for better performance.
+
+    - ### General Enhancements:
+      - Optimized the script to ensure functions run under the correct user contexts (e.g., root or kali user as needed).
+      - Various bug fixes and performance improvements.
+     
+- ## Revision 1.0.0 - Initial Release
+    - Added features for Kali Linux setup
+    - Included options for package installation and configuration
 
 
 # ☰ Menu Breakdown of setupkali
