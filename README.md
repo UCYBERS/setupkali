@@ -57,8 +57,9 @@ sudo ./setupkali.sh
 # 🪶 Revision History
 - ## 📦 Version 1.1.5 (Latest Release)
   ### **"The Wayland-Ready Update"**
-  > [!NOTE]
-  > This release focuses on absolute compatibility with **Kali Linux 2025.4** and the transition to the **Wayland** display protocol, ensuring a seamless experience for cybersecurity professionals and students in the **UCYBERS Academy**.
+
+> [!IMPORTANT]
+> This release focuses on absolute compatibility with **Kali Linux 2025.4** and the transition to the **Wayland** display protocol, ensuring a seamless experience for cybersecurity professionals and students in the **UCYBERS Academy**.
   ---
 
   ### 🌟 Key Enhancements
