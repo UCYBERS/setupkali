@@ -55,14 +55,27 @@ sudo ./setupkali.sh
 - Menu breakdown added below revision history
 
 # 🪶 Revision History
-- ## Version 1.1.5 (Latest Release)
-  - **"The Wayland-Ready Update"**
-  - **Kali Linux 2025.4 Compatibility:** Optimized to fully support the new **VM Guest Utils for Wayland** introduced in the latest Kali release.
-  - **Idempotent GDM Configuration:** Refactored the `enable_root_login` module to prevent configuration clutter. The script now ensures no duplicate entries are created in `/etc/gdm3/daemon.conf` regardless of how many times it is executed.
-  - **Smart Cleanup Strategy:** Implemented a "Clean-First" logic that identifies and purges legacy, commented-out, or malformed configuration lines before applying new settings.
-  - **Enhanced Verification Phase:** Added a post-configuration audit layer using `grep -c` to verify that all system flags are correctly set, ensuring exactly one source of truth for GDM settings.
-  - **Wayland Optimization:** Explicitly forced `WaylandEnable=true` to leverage modern display performance in virtualized environments.
+- ## 📦 Version 1.1.5 (Latest Release)
+  ### **"The Wayland-Ready Update"**
+  > [!NOTE]
+  > This release focuses on absolute compatibility with **Kali Linux 2025.4** and the transition to the **Wayland** display protocol, ensuring a seamless experience for cybersecurity professionals and students in the **UCYBERS Academy**.
+  ---
 
+  ### 🌟 Key Enhancements
+  - **Kali Linux 2025.4 Compatibility**: Fully optimized to support the new **VM Guest Utils for Wayland**, ensuring stable clipboard sharing and window scaling in VMware environments.
+  - **Nemo File Manager Integration**: Seamlessly replaces the restricted Nautilus as the default file manager for the **Root** user, bypassing the "Root-Not-Supported" limitations in GNOME.
+  - **Idempotent GDM Configuration**: Refactored the `enable_root_login` module to ensure no duplicate entries are created in `/etc/gdm3/daemon.conf`, maintaining a clean system configuration.
+  - **Smart Cleanup Strategy**: Implemented "Clean-First" logic that identifies and purges legacy, commented-out, or malformed configuration lines before applying new settings.
+  - **Wayland Optimization**: Explicitly forces `WaylandEnable=true` to leverage modern display performance and enhanced security in virtualized environments.
+  - **Enhanced Verification Phase**: Added a post-configuration audit layer using `grep -c` to verify that all system flags are correctly set, ensuring exactly one source of truth for GDM settings.
+  ---
+
+  ### 🛠️ New Tools Support
+  This update ensures full compatibility and provides deployment logic for the latest tools introduced in the Kali repositories:
+  - **evil-winrm-py**: Python-based tool for remote Windows command execution.
+  - **hexstrike-ai**: MCP server for autonomous AI-driven security tools.
+  - **bpf-linker**: Simple BPF static linker for kernel-level monitoring.
+    
 - ## Version 1.1.4
 
   - **Improved Command Line Argument Handling:**
@@ -143,12 +156,13 @@ sudo ./setupkali.sh
 # ☰ Menu Breakdown of setupkali
 
 - **Menu Option 1** - Change to GNOME Desktop
-  - Installs GNOME and sets it as default
-  - Updates the system to remove XFCE and configure GNOME as the primary session
+  - Installs the GNOME Desktop Environment and sets it as the default session.
+  - Removes XFCE and performs **Wayland Optimization** to leverage modern display performance and security.
 
 - **Menu Option 2** - Enable Root Login
   - Installs root login and sets the password
   - Sets the root password to 'ucybers'
+  - **Critical Fix**: Automatically applies the **Nemo/Nautilus patch** to ensure the File Manager works perfectly under Root in GNOME/Wayland environments.
 
 - **Menu Option 3** - Install Tools for Root
   - Installs a comprehensive list of tools and utilities including:
@@ -170,11 +184,11 @@ sudo ./setupkali.sh
       - Improved Monitor mode, packet injection and AP mode support.
 
   - Bug fixes:
-      - Fixed netdiscover range issue.
-      - Fixed Zenmap discovery bugs.
-      - Fixed wash and reaver issues with RTL8812AU chipset.
-      - Fixed bettercap hstshijack caplet issues.
-      - Added modified hstshijack caplet that works properly with HSTS websites.
+      - Fixed `netdiscover` range issue.
+      - Fixed `zenmap` discovery bugs.
+      - Fixed `wash` and `reaver` issues with RTL8812AU chipset.
+      - Fixed bettercap `hstshijack` caplet issues.
+      - Added modified `hstshijack` caplet that works properly with HSTS websites.
       - Patched XZ Utils package.
    
   - Additional software:
@@ -200,7 +214,7 @@ sudo ./setupkali.sh
 - **Menu Option 6** - Setup All
   - Executes a series of setup tasks including:
     - Changing to GNOME
-    - Enabling root login
+    - Enabling root login + File Manager fixes
     - Installing tools for root
     - Installing and configuring icons
     - Changing the root user's desktop background
