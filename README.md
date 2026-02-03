@@ -55,27 +55,25 @@ sudo ./setupkali.sh
 - Menu breakdown added below revision history
 
 # 🪶 Revision History
-- ## 📦 Version 1.1.5 (Latest Release)
-  ### **"The Wayland-Ready Update"**
+  - ## 📦 Version 1.1.5 (Latest Release)
+    ### **"The Wayland-Ready Update"**
+    ***This release focuses on absolute compatibility with **Kali Linux 2025.4** and the transition to the **Wayland** display protocol, ensuring a seamless experience for cybersecurity professionals and students   in the **UCYBERS Academy**.***
 
-> [!IMPORTANT]
-> This release focuses on absolute compatibility with **Kali Linux 2025.4** and the transition to the **Wayland** display protocol, ensuring a seamless experience for cybersecurity professionals and students in the **UCYBERS Academy**.
-  ---
 
-  ### 🌟 Key Enhancements
-  - **Kali Linux 2025.4 Compatibility**: Fully optimized to support the new **VM Guest Utils for Wayland**, ensuring stable clipboard sharing and window scaling in VMware environments.
-  - **Nemo File Manager Integration**: Seamlessly replaces the restricted Nautilus as the default file manager for the **Root** user, bypassing the "Root-Not-Supported" limitations in GNOME.
-  - **Idempotent GDM Configuration**: Refactored the `enable_root_login` module to ensure no duplicate entries are created in `/etc/gdm3/daemon.conf`, maintaining a clean system configuration.
-  - **Smart Cleanup Strategy**: Implemented "Clean-First" logic that identifies and purges legacy, commented-out, or malformed configuration lines before applying new settings.
-  - **Wayland Optimization**: Explicitly forces `WaylandEnable=true` to leverage modern display performance and enhanced security in virtualized environments.
-  - **Enhanced Verification Phase**: Added a post-configuration audit layer using `grep -c` to verify that all system flags are correctly set, ensuring exactly one source of truth for GDM settings.
-  ---
+      - ### 🌟 Key Enhancements
+        - **Kali Linux 2025.4 Compatibility**: Fully optimized to support the new **VM Guest Utils for Wayland**, ensuring stable clipboard sharing and window scaling in VMware environments.
+        - **Nemo File Manager Integration**: Seamlessly replaces the restricted Nautilus as the default file manager for the **Root** user, bypassing the "Root-Not-Supported" limitations in GNOME.
+        - **Idempotent GDM Configuration**: Refactored the `enable_root_login` module to ensure no duplicate entries are created in `/etc/gdm3/daemon.conf`, maintaining a clean system configuration.
+        - **Smart Cleanup Strategy**: Implemented "Clean-First" logic that identifies and purges legacy, commented-out, or malformed configuration lines before applying new settings.
+        - **Wayland Optimization**: Explicitly forces `WaylandEnable=true` to leverage modern display performance and enhanced security in virtualized environments.
+        - **Enhanced Verification Phase**: Added a post-configuration audit layer using `grep -c` to verify that all system flags are correctly set, ensuring exactly one source of truth for GDM settings.
+  
 
-  ### 🛠️ New Tools Support
-  This update ensures full compatibility and provides deployment logic for the latest tools introduced in the Kali repositories:
-  - **evil-winrm-py**: Python-based tool for remote Windows command execution.
-  - **hexstrike-ai**: MCP server for autonomous AI-driven security tools.
-  - **bpf-linker**: Simple BPF static linker for kernel-level monitoring.
+      -  ### 🛠️ New Tools Support
+         his update ensures full compatibility and provides deployment logic for the latest tools introduced in the Kali repositories:
+         - **evil-winrm-py**: Python-based tool for remote Windows command execution.
+         - **hexstrike-ai**: MCP server for autonomous AI-driven security tools.
+         - **bpf-linker**: Simple BPF static linker for kernel-level monitoring.
     
 - ## Version 1.1.4
 
