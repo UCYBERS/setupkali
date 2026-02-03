@@ -180,6 +180,36 @@ install_tools_for_root() {
     sudo apt update -y
     sudo apt install -y terminator mousepad firefox-esr metasploit-framework burpsuite maltego beef-xss
     sudo apt install -y ark dolphin gwenview mdk3 kate partitionmanager okular vlc zaproxy
+    apply_nemo_fix_for_root
+    
+}
+apply_nemo_fix_for_root() {
+    echo "Updating system and installing Nemo..."
+    sudo apt update
+    sudo apt install nemo -y
+
+    echo "Applying global fix for the 'Places' menu..."
+    if [ -f /usr/share/applications/org.gnome.Nautilus.desktop ]; then
+        sudo mv /usr/share/applications/org.gnome.Nautilus.desktop /usr/share/applications/org.gnome.Nautilus.desktop.bak
+        echo "Nautilus global launcher disabled."
+    fi
+
+    echo "Injecting configurations into the ROOT user account..."
+    sudo -H -u root bash -c '
+        # Set Nemo as default directory handler for the root user
+        xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
+        
+        # Configure desktop behavior for root using dbus-launch (needed if root session is not active)
+        # Disable Nautilus icons and enable Nemo icons
+        dbus-launch gsettings set org.gnome.desktop.background show-desktop-icons false
+        dbus-launch gsettings set org.nemo.desktop show-desktop-icons true
+    '
+    nautilus -q
+    
+    echo "--------------------------------------------------------"
+    echo "Success! Nemo is configured for the ROOT user."
+    echo "When you use 'sudo nemo' or log in as root, Nemo will be default."
+    echo "--------------------------------------------------------"
 }
 
 
@@ -191,7 +221,7 @@ configure_dock_for_root() {
 
 configure_dash_apps() {
     echo -e "${BLUE}Configuring Dash applications for root user...${RESET}"
-    sudo -u root gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'org.gnome.Terminal.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'org.xfce.mousepad.desktop']"
+    sudo -u root gsettings set org.gnome.shell favorite-apps "['terminator.desktop', 'org.gnome.Terminal.desktop', 'firefox-esr.desktop', 'nemo.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'org.xfce.mousepad.desktop']"
 }
 
 change_background() {
