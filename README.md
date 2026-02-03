@@ -55,8 +55,15 @@ sudo ./setupkali.sh
 - Menu breakdown added below revision history
 
 # 🪶 Revision History
+- ## Version 1.1.5 (Latest Release)
+  - **"The Wayland-Ready Update"**
+  - **Kali Linux 2025.4 Compatibility:** Optimized to fully support the new **VM Guest Utils for Wayland** introduced in the latest Kali release.
+  - **Idempotent GDM Configuration:** Refactored the `enable_root_login` module to prevent configuration clutter. The script now ensures no duplicate entries are created in `/etc/gdm3/daemon.conf` regardless of how many times it is executed.
+  - **Smart Cleanup Strategy:** Implemented a "Clean-First" logic that identifies and purges legacy, commented-out, or malformed configuration lines before applying new settings.
+  - **Enhanced Verification Phase:** Added a post-configuration audit layer using `grep -c` to verify that all system flags are correctly set, ensuring exactly one source of truth for GDM settings.
+  - **Wayland Optimization:** Explicitly forced `WaylandEnable=true` to leverage modern display performance in virtualized environments.
 
-- ## Version 1.1.4 (Latest Release)
+- ## Version 1.1.4
 
   - **Improved Command Line Argument Handling:**
     - Added short and long argument options for ease of use (e.g., `-g`/`--gnome`, `-a`/`--all`, `-h`/`--help`).
