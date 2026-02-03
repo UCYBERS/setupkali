@@ -142,10 +142,35 @@ switch_to_rolling() {
 
 enable_root_login() {
     echo -e "${BLUE}Allowing root login in GDM...${RESET}"
+    echo -e "${BLUE}Updating configuration and cleaning duplicates...${RESET}"
     sudo apt update -y
     sudo apt install -y kali-root-login
+    local CONF_FILE="/etc/gdm3/daemon.conf"
+
+    sudo sed -i '/AllowRoot/d' "$CONF_FILE"
+
+    sudo sed -i '/\[security\]/a AllowRoot=true' "$CONF_FILE"
+
+    sudo sed -i '/WaylandEnable/d' "$CONF_FILE"
+    sudo sed -i '/\[daemon\]/a WaylandEnable=true' "$CONF_FILE"
+    
     echo -e "${BLUE}Setting root password...${RESET}"
     echo "root:ucybers" | sudo chpasswd
+    echo -e "${BLUE}Verifying final configuration...${RESET}"
+    local count_root=$(grep -c "AllowRoot=true" "$CONF_FILE")
+    local count_wayland=$(grep -c "WaylandEnable=true" "$CONF_FILE")
+
+    if [[ "$count_root" -eq 1 && "$count_wayland" -eq 1 ]]; then
+        echo -e "${GREEN}SUCCESS: Exactly one instance of each setting exists.${RESET}"
+    else
+        echo -e "${YELLOW}Cleaning up duplicates again...${RESET}"
+        sudo sed -i '/AllowRoot/d' "$CONF_FILE"
+        sudo sed -i '/WaylandEnable/d' "$CONF_FILE"
+        sudo sed -i '/\[security\]/a AllowRoot=true' "$CONF_FILE"
+        sudo sed -i '/\[daemon\]/a WaylandEnable=true' "$CONF_FILE"
+    fi
+
+    echo -e "${GREEN}Root password is: ucybers${RESET}"
     echo -e "${GREEN}Root login enabled and root password set to 'ucybers'.${RESET}"
 }
 
