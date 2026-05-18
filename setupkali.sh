@@ -226,6 +226,11 @@ enable_root_login() {
         printf '\n[security]\nAllowRoot=true\n' >> "$conf_file"
     fi
 
+    if grep -q "^WaylandEnable=false" "$conf_file"; then
+        sed -i 's/^WaylandEnable=false/#WaylandEnable=false/' "$conf_file"
+        echo -e "${GREEN}WaylandEnable fixed — Wayland restored${RESET}"
+    fi
+
     local count_root
     count_root=$(grep -c "^AllowRoot=true" "$conf_file" || true)
     if [[ "$count_root" -ne 1 ]]; then
@@ -238,10 +243,17 @@ enable_root_login() {
 
     echo -e "${BLUE}Setting root password...${RESET}"
     echo -e "${YELLOW}Default password is: ucybers${RESET}"
-    echo -ne "Keep default password 'ucybers'? [Y/n]: "
+
     local keep_default=""
-    read -r -n1 keep_default || true
-    echo ""
+    while true; do
+        echo -ne "Keep default password 'ucybers'? [Y/n]: "
+        read -r keep_default || true
+        case "${keep_default,,}" in
+            y|"") break ;;
+            n)    break ;;
+            *)    echo -e "${RED}  Invalid input. Please enter Y or N.${RESET}" ;;
+        esac
+    done
 
     if [[ "${keep_default,,}" == "n" ]]; then
         local root_pass root_pass2
@@ -271,7 +283,6 @@ enable_root_login() {
     echo -e "${GREEN}Root login enabled successfully.${RESET}"
     echo -e "${YELLOW}A system reboot is required to apply GDM changes.${RESET}"
 }
-
 
 install_tools_for_root() {
     echo -e "${BLUE}Installing tools for root user...${RESET}"
