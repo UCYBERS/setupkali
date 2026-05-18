@@ -91,42 +91,34 @@ EOF
 }
 
 change_to_gnome() {
-    
-    if step_is_done "change_to_gnome"; then
-        log_info "GNOME already installed — skipping"
-        log_info "To reinstall: sudo $0 --reset then sudo $0 --gnome"
-        return 0
-    fi
+    echo -e "${BLUE}Installing GNOME Desktop Environment...${RESET}"
 
-    log_section "Installing GNOME Desktop Environment"
-
-    
     local available_mb
     available_mb=$(df /usr --output=avail -m | tail -1)
     if (( available_mb < 3072 )); then
-        log_error "Insufficient disk space: ${available_mb}MB available, 3072MB required"
+        echo -e "${RED}Insufficient disk space: ${available_mb}MB available, 3072MB required${RESET}"
         return 1
     fi
 
-    log_info "Updating package list..."
+    echo -e "${BLUE}Updating package list...${RESET}"
     apt-get update || {
-        log_error "apt update failed — aborting GNOME install"
+        echo -e "${RED}apt update failed — aborting GNOME install${RESET}"
         return 1
     }
 
-    log_info "Installing kali-desktop-gnome..."
+    echo -e "${BLUE}Installing kali-desktop-gnome...${RESET}"
     apt-get install -y kali-desktop-gnome || {
-        log_error "Failed to install kali-desktop-gnome"
-        log_warn  "Run: apt-get install -f to fix broken packages"
+        echo -e "${RED}Failed to install kali-desktop-gnome${RESET}"
+        echo -e "${YELLOW}Run: apt-get install -f to fix broken packages${RESET}"
         return 1
     }
 
     apt-get install -y gnome-session gdm3 || {
-        log_error "Failed to install gnome-session or gdm3"
+        echo -e "${RED}Failed to install gnome-session or gdm3${RESET}"
         return 1
     }
 
-    log_info "Configuring gdm3..."
+    echo -e "${BLUE}Configuring gdm3...${RESET}"
     tee /etc/gdm3/daemon.conf > /dev/null << 'EOF'
 [daemon]
 #WaylandEnable=false
@@ -141,49 +133,31 @@ AllowRoot=true
 [debug]
 #Enable=true
 EOF
-    log_success "gdm3 configured successfully"
 
     echo "/usr/sbin/gdm3" > /etc/X11/default-display-manager
     rm -f /etc/systemd/system/display-manager.service
     DEBIAN_FRONTEND=noninteractive dpkg-reconfigure gdm3 2>/dev/null || \
-        log_warn "Could not reconfigure gdm3 automatically"
+        echo -e "${YELLOW}Warning: Could not reconfigure gdm3 automatically${RESET}"
     systemctl enable gdm3 || \
-        log_warn "Could not enable gdm3"
-    log_success "gdm3 set as default display manager"
+        echo -e "${YELLOW}Warning: Could not enable gdm3${RESET}"
 
     if ! dpkg -l "kali-desktop-gnome" 2>/dev/null | grep -q "^ii"; then
-        log_error "GNOME installation could not be verified — skipping XFCE removal"
+        echo -e "${RED}GNOME installation could not be verified — skipping XFCE removal${RESET}"
         return 1
     fi
 
     if dpkg -l "kali-desktop-xfce" 2>/dev/null | grep -q "^ii"; then
-        log_info "Removing XFCE..."
+        echo -e "${BLUE}Removing XFCE...${RESET}"
         apt-get remove --autoremove -y \
             kali-desktop-xfce \
             "xfce4*" || \
-            log_warn "Could not fully remove XFCE"
+            echo -e "${YELLOW}Warning: Could not fully remove XFCE${RESET}"
         apt-get autoremove -y
     else
-        log_info "XFCE not found — skipping removal"
+        echo -e "${YELLOW}XFCE not found — skipping removal${RESET}"
     fi
 
-    log_success "GNOME installed and configured successfully"
-    log_warn    "A system reboot is required to apply changes"
-    echo ""
-    echo -e "${BOLD}${YELLOW}╔══════════════════════════════════════════════════════╗${RESET}"
-    echo -e "${BOLD}${YELLOW}║           VMware Compatibility Notice                ║${RESET}"
-    echo -e "${BOLD}${YELLOW}╠══════════════════════════════════════════════════════╣${RESET}"
-    echo -e "${BOLD}${YELLOW}║                                                      ║${RESET}"
-    echo -e "${BOLD}${YELLOW}║  Requires: VMware Workstation 17.5 or newer          ║${RESET}"
-    echo -e "${BOLD}${YELLOW}║  VM Menu → Upgrade Virtual Machine (if needed)       ║${RESET}"
-    echo -e "${BOLD}${YELLOW}║                                                      ║${RESET}"
-    echo -e "${BOLD}${YELLOW}║  At login screen: select GNOME or GNOME Classic      ║${RESET}"
-    echo -e "${BOLD}${YELLOW}║                                                      ║${RESET}"
-    echo -e "${BOLD}${YELLOW}╚══════════════════════════════════════════════════════╝${RESET}"
-    echo ""
-
-    # ─── تسجيل الاكتمال ──────────────────────────────────────────────────────
-    mark_step_done "change_to_gnome"
+    echo -e "${GREEN}GNOME installed successfully. Please reboot to apply changes.${RESET}"
 }
 
 
