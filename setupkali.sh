@@ -196,37 +196,80 @@ switch_to_rolling() {
 
 
 enable_root_login() {
-    echo -e "${BLUE}Allowing root login in GDM...${RESET}"
-    echo -e "${BLUE}Updating configuration and cleaning duplicates...${RESET}"
-    sudo apt update -y
-    sudo apt install -y kali-root-login
-    local CONF_FILE="/etc/gdm3/daemon.conf"
+    echo -e "${BLUE}Enabling root login in GDM...${RESET}"
 
-    sudo sed -i '/AllowRoot/d' "$CONF_FILE"
+    local conf_file="/etc/gdm3/daemon.conf"
+    local backup_file="${conf_file}.bak.$(date +%Y%m%d_%H%M%S)"
 
-    sudo sed -i '/\[security\]/a AllowRoot=true' "$CONF_FILE"
-
-    sudo sed -i '/WaylandEnable/d' "$CONF_FILE"
-    sudo sed -i '/\[daemon\]/a WaylandEnable=true' "$CONF_FILE"
-    
-    echo -e "${BLUE}Setting root password...${RESET}"
-    echo "root:ucybers" | sudo chpasswd
-    echo -e "${BLUE}Verifying final configuration...${RESET}"
-    local count_root=$(grep -c "AllowRoot=true" "$CONF_FILE")
-    local count_wayland=$(grep -c "WaylandEnable=true" "$CONF_FILE")
-
-    if [[ "$count_root" -eq 1 && "$count_wayland" -eq 1 ]]; then
-        echo -e "${GREEN}SUCCESS: Exactly one instance of each setting exists.${RESET}"
-    else
-        echo -e "${YELLOW}Cleaning up duplicates again...${RESET}"
-        sudo sed -i '/AllowRoot/d' "$CONF_FILE"
-        sudo sed -i '/WaylandEnable/d' "$CONF_FILE"
-        sudo sed -i '/\[security\]/a AllowRoot=true' "$CONF_FILE"
-        sudo sed -i '/\[daemon\]/a WaylandEnable=true' "$CONF_FILE"
+    if [[ ! -f "$conf_file" ]]; then
+        echo -e "${RED}GDM config file not found: $conf_file${RESET}"
+        echo -e "${YELLOW}Is GDM3 installed? Try: apt-get install -y gdm3${RESET}"
+        return 1
     fi
 
-    echo -e "${GREEN}Root password is: ucybers${RESET}"
-    echo -e "${GREEN}Root login enabled and root password set to 'ucybers'.${RESET}"
+    cp "$conf_file" "$backup_file" || {
+        echo -e "${RED}Failed to backup GDM config — aborting${RESET}"
+        return 1
+    }
+    echo -e "${GREEN}Backup saved to: $backup_file${RESET}"
+
+    echo -e "${BLUE}Installing kali-root-login...${RESET}"
+    apt-get install -y kali-root-login || {
+        echo -e "${RED}Failed to install kali-root-login${RESET}"
+        return 1
+    }
+
+    if grep -q "^\[security\]" "$conf_file"; then
+        sed -i '/^AllowRoot/d' "$conf_file"
+        sed -i '/^\[security\]/a AllowRoot=true' "$conf_file"
+    else
+        printf '\n[security]\nAllowRoot=true\n' >> "$conf_file"
+    fi
+
+    local count_root
+    count_root=$(grep -c "^AllowRoot=true" "$conf_file" || true)
+    if [[ "$count_root" -ne 1 ]]; then
+        echo -e "${RED}Configuration verification failed — restoring backup${RESET}"
+        cp "$backup_file" "$conf_file"
+        return 1
+    fi
+
+    echo -e "${GREEN}GDM configuration updated successfully.${RESET}"
+
+    echo -e "${BLUE}Setting root password...${RESET}"
+    echo -e "${YELLOW}Default password is: ucybers${RESET}"
+    echo -ne "Keep default password 'ucybers'? [Y/n]: "
+    local keep_default=""
+    read -r -n1 keep_default || true
+    echo ""
+
+    if [[ "${keep_default,,}" == "n" ]]; then
+        local root_pass root_pass2
+        while true; do
+            read -rs -p "  Enter new root password: " root_pass
+            echo ""
+            read -rs -p "  Confirm root password: " root_pass2
+            echo ""
+            if [[ "$root_pass" != "$root_pass2" ]]; then
+                echo -e "${RED}  Passwords do not match. Try again.${RESET}"
+                continue
+            fi
+            if [[ -z "$root_pass" ]]; then
+                echo -e "${RED}  Password cannot be empty. Try again.${RESET}"
+                continue
+            fi
+            break
+        done
+        printf '%s:%s\n' "root" "$root_pass" | chpasswd
+        unset root_pass root_pass2
+        echo -e "${GREEN}Root password updated successfully.${RESET}"
+    else
+        printf '%s:%s\n' "root" "ucybers" | chpasswd
+        echo -e "${GREEN}Root password set to: ucybers${RESET}"
+    fi
+
+    echo -e "${GREEN}Root login enabled successfully.${RESET}"
+    echo -e "${YELLOW}A system reboot is required to apply GDM changes.${RESET}"
 }
 
 
