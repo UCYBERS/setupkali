@@ -305,6 +305,7 @@ install_tools_for_root() {
         terminator mousepad firefox-esr
         metasploit-framework burpsuite
         maltego beef-xss zaproxy mdk4
+        nemo
     )
 
     local -a utility_tools=(
@@ -331,13 +332,59 @@ configure_dock_for_root() {
     sudo -u root gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'LEFT'
 }
 
+apply_nemo_fix_for_root() {
+    echo -e "${BLUE}Installing and configuring Nemo file manager...${RESET}"
+
+    apt-get install -y nemo || {
+        echo -e "${RED}Failed to install nemo${RESET}"
+        return 1
+    }
+
+    local nautilus_desktop="/usr/share/applications/org.gnome.Nautilus.desktop"
+    if [[ -f "$nautilus_desktop" ]]; then
+        mv "$nautilus_desktop" "${nautilus_desktop}.bak" || \
+            echo -e "${YELLOW}Warning: Could not disable Nautilus launcher${RESET}"
+        echo -e "${GREEN}Nautilus global launcher disabled.${RESET}"
+    fi
+
+    xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search || \
+        echo -e "${YELLOW}Warning: Could not set Nemo as default via xdg-mime${RESET}"
+
+    local dbus_addr="unix:path=/run/user/0/bus"
+    if [[ -S "/run/user/0/bus" ]]; then
+        DBUS_SESSION_BUS_ADDRESS="$dbus_addr" \
+            gsettings set org.gnome.desktop.background show-desktop-icons false || \
+            echo -e "${YELLOW}Warning: Could not disable Nautilus desktop icons${RESET}"
+        DBUS_SESSION_BUS_ADDRESS="$dbus_addr" \
+            gsettings set org.nemo.desktop show-desktop-icons true || \
+            echo -e "${YELLOW}Warning: Could not enable Nemo desktop icons${RESET}"
+    else
+        echo -e "${YELLOW}No active DBUS session — gsettings will apply on next login${RESET}"
+    fi
+
+    if pgrep -x nautilus &>/dev/null; then
+        pkill -x nautilus || true
+        echo -e "${GREEN}Nautilus stopped.${RESET}"
+    fi
+
+    echo -e "${GREEN}Nemo configured successfully as default file manager for root.${RESET}"
+}
 
 configure_dash_apps() {
     echo -e "${BLUE}Configuring Dash applications for root user...${RESET}"
-    DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/0/bus" \
-        gsettings set org.gnome.shell favorite-apps \
-        "['terminator.desktop', 'org.gnome.Terminal.desktop', 'firefox-esr.desktop', 'org.gnome.Nautilus.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'org.xfce.mousepad.desktop']" || \
-        echo -e "${YELLOW}Warning: Could not configure dash apps${RESET}"
+
+    local dbus_addr="unix:path=/run/user/0/bus"
+
+    if [[ -S "/run/user/0/bus" ]]; then
+        DBUS_SESSION_BUS_ADDRESS="$dbus_addr" \
+            gsettings set org.gnome.shell favorite-apps \
+            "['terminator.desktop', 'org.gnome.Terminal.desktop', 'firefox-esr.desktop', 'nemo.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'org.xfce.mousepad.desktop']" || \
+            echo -e "${YELLOW}Warning: Could not configure dash apps${RESET}"
+    else
+        echo -e "${YELLOW}No active DBUS session — dash apps will apply on next login${RESET}"
+    fi
+
+    echo -e "${GREEN}Dash applications configured.${RESET}"
 }
 
 change_background() {
