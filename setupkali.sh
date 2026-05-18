@@ -90,22 +90,103 @@ EOF
     echo -e "${GREEN}Autostart setup completed to change the icon theme for root.${RESET}"
 }
 
-
 change_to_gnome() {
-    # switch_to_snapshot
-    echo -e "${BLUE}Updating system and installing GNOME...${RESET}"
-    sudo apt update -y
-    sudo apt install -y kali-desktop-gnome
-
-    echo -e "${BLUE}Setting GNOME as default session...${RESET}"
-
-    echo "1" | sudo update-alternatives --config x-session-manager
-    sudo apt purge --autoremove -y --allow-remove-essential kali-desktop-xfce
-    echo -e "${GREEN}GNOME has been set as the default environment and XFCE has been removed.${RESET}"
-    # switch_to_rolling
     
+    if step_is_done "change_to_gnome"; then
+        log_info "GNOME already installed — skipping"
+        log_info "To reinstall: sudo $0 --reset then sudo $0 --gnome"
+        return 0
+    fi
 
+    log_section "Installing GNOME Desktop Environment"
+
+    
+    local available_mb
+    available_mb=$(df /usr --output=avail -m | tail -1)
+    if (( available_mb < 3072 )); then
+        log_error "Insufficient disk space: ${available_mb}MB available, 3072MB required"
+        return 1
+    fi
+
+    log_info "Updating package list..."
+    apt-get update || {
+        log_error "apt update failed — aborting GNOME install"
+        return 1
+    }
+
+    log_info "Installing kali-desktop-gnome..."
+    apt-get install -y kali-desktop-gnome || {
+        log_error "Failed to install kali-desktop-gnome"
+        log_warn  "Run: apt-get install -f to fix broken packages"
+        return 1
+    }
+
+    apt-get install -y gnome-session gdm3 || {
+        log_error "Failed to install gnome-session or gdm3"
+        return 1
+    }
+
+    log_info "Configuring gdm3..."
+    tee /etc/gdm3/daemon.conf > /dev/null << 'EOF'
+[daemon]
+#WaylandEnable=false
+
+[security]
+AllowRoot=true
+
+[xdmcp]
+
+[chooser]
+
+[debug]
+#Enable=true
+EOF
+    log_success "gdm3 configured successfully"
+
+    echo "/usr/sbin/gdm3" > /etc/X11/default-display-manager
+    rm -f /etc/systemd/system/display-manager.service
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure gdm3 2>/dev/null || \
+        log_warn "Could not reconfigure gdm3 automatically"
+    systemctl enable gdm3 || \
+        log_warn "Could not enable gdm3"
+    log_success "gdm3 set as default display manager"
+
+    if ! dpkg -l "kali-desktop-gnome" 2>/dev/null | grep -q "^ii"; then
+        log_error "GNOME installation could not be verified — skipping XFCE removal"
+        return 1
+    fi
+
+    if dpkg -l "kali-desktop-xfce" 2>/dev/null | grep -q "^ii"; then
+        log_info "Removing XFCE..."
+        apt-get remove --autoremove -y \
+            kali-desktop-xfce \
+            "xfce4*" || \
+            log_warn "Could not fully remove XFCE"
+        apt-get autoremove -y
+    else
+        log_info "XFCE not found — skipping removal"
+    fi
+
+    log_success "GNOME installed and configured successfully"
+    log_warn    "A system reboot is required to apply changes"
+    echo ""
+    echo -e "${BOLD}${YELLOW}╔══════════════════════════════════════════════════════╗${RESET}"
+    echo -e "${BOLD}${YELLOW}║           VMware Compatibility Notice                ║${RESET}"
+    echo -e "${BOLD}${YELLOW}╠══════════════════════════════════════════════════════╣${RESET}"
+    echo -e "${BOLD}${YELLOW}║                                                      ║${RESET}"
+    echo -e "${BOLD}${YELLOW}║  Requires: VMware Workstation 17.5 or newer          ║${RESET}"
+    echo -e "${BOLD}${YELLOW}║  VM Menu → Upgrade Virtual Machine (if needed)       ║${RESET}"
+    echo -e "${BOLD}${YELLOW}║                                                      ║${RESET}"
+    echo -e "${BOLD}${YELLOW}║  At login screen: select GNOME or GNOME Classic      ║${RESET}"
+    echo -e "${BOLD}${YELLOW}║                                                      ║${RESET}"
+    echo -e "${BOLD}${YELLOW}╚══════════════════════════════════════════════════════╝${RESET}"
+    echo ""
+
+    # ─── تسجيل الاكتمال ──────────────────────────────────────────────────────
+    mark_step_done "change_to_gnome"
 }
+
+
 switch_to_snapshot() {
   local sources_file="/etc/apt/sources.list"
 
