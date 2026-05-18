@@ -346,24 +346,52 @@ change_background() {
 }
 
 fix_sources() {
-    check_space=$(cat /etc/apt/sources.list | grep -c "# deb-src http://.*/kali kali-rolling.*")
-    check_nospace=$(cat /etc/apt/sources.list | grep -c "#deb-src http://.*/kali kali-rolling.*")
-    get_current_mirror=$(cat /etc/apt/sources.list | grep "deb-src http://.*/kali kali-rolling.*" | cut -d "/" -f3)
-    if [[ $check_space = 0 && $check_nospace = 0 ]]; then
-    	echo -e "\n  $greenminus # deb-src or #deb-sec not found - skipping"
-    elif [ $check_space = 1 ]; then
-      echo -e "\n  $greenplus # deb-src with space found in sources.list uncommenting and enabling deb-src"
-      # relaxed sed
-      sudo sed 's/\# deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
-      echo -e "\n  $greenplus new /etc/apt/sources.list written with deb-src enabled"
-    elif [ $check_nospace = 1 ]; then
-      echo -e "\n  $greenplus #deb-src without space found in sources.list uncommenting and enabling deb-src"
-      # relaxed sed
-      sudo sed 's/\#deb-src http\:\/\/.*\/kali kali-rolling.*/\deb-src http\:\/\/'$get_current_mirror'\/kali kali-rolling main contrib non\-free''/' -i /etc/apt/sources.list
-      echo -e "\n  $greenplus new /etc/apt/sources.list written with deb-src enabled"
-    fi
-    sudo sed -i 's/non-free$/non-free non-free-firmware/' /etc/apt/sources.list
+    local sources_file="/etc/apt/sources.list"
+    local backup_file="${sources_file}.bak.$(date +%Y%m%d_%H%M%S)"
+
+    echo -e "\n  ${BLUE}Fixing APT sources...${RESET}"
+
+    cp "$sources_file" "$backup_file" || {
+        echo -e "\n  ${RED}Failed to backup sources.list — aborting${RESET}"
+        return 1
     }
+    echo -e "\n  ${GREEN}Backup saved to: $backup_file${RESET}"
+
+    local current_mirror
+    current_mirror=$(grep -m1 "^deb http" "$sources_file" | cut -d'/' -f3 || true)
+
+    if [[ -z "$current_mirror" ]]; then
+        echo -e "\n  ${RED}Could not detect current mirror — aborting${RESET}"
+        return 1
+    fi
+
+    echo -e "\n  ${BLUE}Detected mirror: $current_mirror${RESET}"
+
+    local check_space check_nospace
+    check_space=$(grep -c "^# deb-src http.*/kali kali-rolling" "$sources_file" || true)
+    check_nospace=$(grep -c "^#deb-src http.*/kali kali-rolling" "$sources_file" || true)
+
+    if [[ "$check_space" -eq 0 && "$check_nospace" -eq 0 ]]; then
+        echo -e "\n  $greenminus deb-src not found — skipping"
+    elif [[ "$check_space" -ge 1 ]]; then
+        echo -e "\n  $greenplus Enabling deb-src (with space)..."
+        sed -i "s|^# deb-src http.*/kali kali-rolling.*|deb-src http://${current_mirror}/kali kali-rolling main contrib non-free|" \
+            "$sources_file"
+        echo -e "\n  $greenplus deb-src enabled"
+    elif [[ "$check_nospace" -ge 1 ]]; then
+        echo -e "\n  $greenplus Enabling deb-src (without space)..."
+        sed -i "s|^#deb-src http.*/kali kali-rolling.*|deb-src http://${current_mirror}/kali kali-rolling main contrib non-free|" \
+            "$sources_file"
+        echo -e "\n  $greenplus deb-src enabled"
+    fi
+
+    if grep -q "non-free$" "$sources_file"; then
+        sed -i 's/non-free$/non-free non-free-firmware/' "$sources_file"
+        echo -e "\n  $greenplus non-free-firmware added"
+    fi
+
+    echo -e "\n  ${GREEN}APT sources fixed successfully.${RESET}"
+}
 
 apt_update() {
         echo -e "\n  ${GREEN}running: apt update${RESET}"
