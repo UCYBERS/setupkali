@@ -286,41 +286,45 @@ enable_root_login() {
 
 install_tools_for_root() {
     echo -e "${BLUE}Installing tools for root user...${RESET}"
-    sudo apt update -y
-    sudo apt install -y terminator mousepad firefox-esr metasploit-framework burpsuite maltego beef-xss
-    sudo apt install -y ark dolphin gwenview mdk3 kate partitionmanager okular vlc zaproxy
-    apply_nemo_fix_for_root
-    
-}
-apply_nemo_fix_for_root() {
-    echo "Updating system and installing Nemo..."
-    sudo apt update
-    sudo apt install nemo -y
 
-    echo "Applying global fix for the 'Places' menu..."
-    if [ -f /usr/share/applications/org.gnome.Nautilus.desktop ]; then
-        sudo mv /usr/share/applications/org.gnome.Nautilus.desktop /usr/share/applications/org.gnome.Nautilus.desktop.bak
-        echo "Nautilus global launcher disabled."
+    # Check available disk space
+    local available_mb
+    available_mb=$(df /usr --output=avail -m | tail -1)
+    if (( available_mb < 5120 )); then
+        echo -e "${RED}Insufficient disk space: ${available_mb}MB available, 5120MB required${RESET}"
+        return 1
     fi
 
-    echo "Injecting configurations into the ROOT user account..."
-    sudo -H -u root bash -c '
-        # Set Nemo as default directory handler for the root user
-        xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
-        
-        # Configure desktop behavior for root using dbus-launch (needed if root session is not active)
-        # Disable Nautilus icons and enable Nemo icons
-        dbus-launch gsettings set org.gnome.desktop.background show-desktop-icons false
-        dbus-launch gsettings set org.nemo.desktop show-desktop-icons true
-    '
-    nautilus -q
-    
-    echo "--------------------------------------------------------"
-    echo "Success! Nemo is configured for the ROOT user."
-    echo "When you use 'sudo nemo' or log in as root, Nemo will be default."
-    echo "--------------------------------------------------------"
-}
+    echo -e "${BLUE}Updating package list...${RESET}"
+    apt-get update || {
+        echo -e "${RED}apt update failed${RESET}"
+        return 1
+    }
 
+    local -a security_tools=(
+        terminator mousepad firefox-esr
+        metasploit-framework burpsuite
+        maltego beef-xss zaproxy mdk4
+    )
+
+    local -a utility_tools=(
+        ark gwenview
+        kate partitionmanager okular vlc
+    )
+
+    echo -e "${BLUE}Installing security tools...${RESET}"
+    apt-get install -y "${security_tools[@]}" || {
+        echo -e "${RED}One or more security tools failed to install${RESET}"
+        echo -e "${YELLOW}Run: apt-get install -f to fix broken packages${RESET}"
+        return 1
+    }
+
+    echo -e "${BLUE}Installing utility tools...${RESET}"
+    apt-get install -y "${utility_tools[@]}" || \
+        echo -e "${YELLOW}Warning: One or more utility tools failed to install${RESET}"
+
+    echo -e "${GREEN}Tools installed successfully.${RESET}"
+}
 
 configure_dock_for_root() {
     echo -e "${BLUE}Configuring dock position for root user...${RESET}"
