@@ -325,6 +325,7 @@ install_tools_for_root() {
         echo -e "${YELLOW}Warning: One or more utility tools failed to install${RESET}"
 
     echo -e "${GREEN}Tools installed successfully.${RESET}"
+    apply_gnome_settings_on_login
 }
 
 configure_dock_for_root() {
@@ -376,7 +377,6 @@ configure_dash_apps() {
     local dconf_dir="/root/.config/dconf"
     local favorite_apps="['terminator.desktop', 'org.gnome.Terminal.desktop', 'firefox-esr.desktop', 'nemo.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'org.xfce.mousepad.desktop']"
 
-    # Try gsettings first if DBUS session is available
     if [[ -S "/run/user/0/bus" ]]; then
         DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/0/bus" \
             gsettings set org.gnome.shell favorite-apps "$favorite_apps" && {
@@ -385,16 +385,13 @@ configure_dash_apps() {
         }
     fi
 
-    # Fallback — write directly via dconf database
     echo -e "${YELLOW}Writing dash apps directly via dconf...${RESET}"
     mkdir -p "$dconf_dir"
 
-    # Install dconf-cli if missing
     apt-get install -y dconf-cli &>/dev/null || true
 
     dconf write /org/gnome/shell/favorite-apps "$favorite_apps" 2>/dev/null || {
 
-        # Final fallback — write dconf keyfile directly
         mkdir -p /root/.config/dconf
         cat > /root/.config/dconf/user.d/setupkali.conf << EOF
 [org/gnome/shell]
@@ -406,6 +403,25 @@ EOF
 
     echo -e "${GREEN}Dash apps configured via dconf.${RESET}"
 }
+
+apply_gnome_settings_on_login() {
+    echo -e "${BLUE}Setting up GNOME settings autostart...${RESET}"
+
+    mkdir -p /root/.config/autostart
+
+    cat > /root/.config/autostart/setupkali-gnome-settings.desktop << EOF
+[Desktop Entry]
+Type=Application
+Name=SetupKali GNOME Settings
+Exec=/bin/bash -c 'gsettings set org.gnome.shell favorite-apps "[\"terminator.desktop\", \"org.gnome.Terminal.desktop\", \"firefox-esr.desktop\", \"nemo.desktop\", \"kali-metasploit-framework.desktop\", \"kali-burpsuite.desktop\", \"kali-maltego.desktop\", \"kali-beef-xss.desktop\", \"org.xfce.mousepad.desktop\"]"; gsettings set org.gnome.shell.extensions.dash-to-dock dock-position LEFT; gsettings set org.gnome.desktop.background picture-uri "file:///usr/share/backgrounds/kali/kali-tiles-16x9.jpg"; gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing; gsettings set org.gnome.desktop.session idle-delay 0; gsettings set org.gnome.desktop.screensaver lock-enabled false; rm -f /root/.config/autostart/setupkali-gnome-settings.desktop'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+EOF
+
+    echo -e "${GREEN}GNOME settings will be applied on next login automatically.${RESET}"
+}
+
 change_background() {
     local BACKGROUND_IMAGE="/usr/share/backgrounds/kali/kali-tiles-16x9.jpg"
     
@@ -829,6 +845,7 @@ setup_all() {
     install_tools_for_root
     configure_dock_for_root
     configure_dash_apps
+    apply_gnome_settings_on_login
     install_icons
     change_background
     disable_power_checkde
