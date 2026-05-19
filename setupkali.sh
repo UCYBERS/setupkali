@@ -326,6 +326,7 @@ install_tools_for_root() {
 
     echo -e "${GREEN}Tools installed successfully.${RESET}"
     apply_gnome_settings_on_login
+    apply_nemo_fix_for_root
 }
 
 configure_dock_for_root() {
@@ -341,30 +342,32 @@ apply_nemo_fix_for_root() {
         return 1
     }
 
-    xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search || \
-        echo -e "${YELLOW}Warning: Could not set Nemo as default via xdg-mime${RESET}"
-
     if [[ -f "/usr/share/applications/org.gnome.Nautilus.desktop" ]]; then
         sed -i 's|^Exec=nautilus.*|Exec=nemo %U|' \
             /usr/share/applications/org.gnome.Nautilus.desktop || \
             echo -e "${YELLOW}Warning: Could not modify Nautilus desktop file${RESET}"
+        echo -e "${GREEN}Nautilus replaced with Nemo in Places menu.${RESET}"
     fi
 
     update-desktop-database /usr/share/applications/ || true
-    update-desktop-database /root/.local/share/applications/ 2>/dev/null || true
 
-    xdg-mime default nemo.desktop inode/directory || true
+    xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search || true
 
-    echo -e "${GREEN}Places menu fixed — Nemo will open instead of Nautilus.${RESET}"
+    local kali_home="/home/kali"
+    if [[ -d "$kali_home" ]]; then
+        mkdir -p "$kali_home/.config"
+        cp /root/.config/mimeapps.list "$kali_home/.config/mimeapps.list" 2>/dev/null || true
+        chown kali:kali "$kali_home/.config/mimeapps.list" 2>/dev/null || true
+        update-desktop-database "$kali_home/.local/share/applications/" 2>/dev/null || true
+        echo -e "${GREEN}Nemo set as default for kali user.${RESET}"
+    fi
 
     local dbus_addr="unix:path=/run/user/0/bus"
     if [[ -S "/run/user/0/bus" ]]; then
         DBUS_SESSION_BUS_ADDRESS="$dbus_addr" \
-            gsettings set org.gnome.desktop.background show-desktop-icons false || \
-            echo -e "${YELLOW}Warning: Could not disable Nautilus desktop icons${RESET}"
+            gsettings set org.gnome.desktop.background show-desktop-icons false || true
         DBUS_SESSION_BUS_ADDRESS="$dbus_addr" \
-            gsettings set org.nemo.desktop show-desktop-icons true || \
-            echo -e "${YELLOW}Warning: Could not enable Nemo desktop icons${RESET}"
+            gsettings set org.nemo.desktop show-desktop-icons true || true
     else
         echo -e "${YELLOW}No active DBUS session — desktop icons will apply on next login${RESET}"
     fi
@@ -374,7 +377,7 @@ apply_nemo_fix_for_root() {
         echo -e "${GREEN}Nautilus stopped.${RESET}"
     fi
 
-    echo -e "${GREEN}Nemo configured successfully as default file manager for root.${RESET}"
+    echo -e "${GREEN}Nemo configured successfully as default file manager.${RESET}"
 }
 
 configure_dash_apps() {
