@@ -341,15 +341,20 @@ apply_nemo_fix_for_root() {
         return 1
     }
 
-    local nautilus_desktop="/usr/share/applications/org.gnome.Nautilus.desktop"
-    if [[ -f "$nautilus_desktop" ]]; then
-        mv "$nautilus_desktop" "${nautilus_desktop}.bak" || \
-            echo -e "${YELLOW}Warning: Could not disable Nautilus launcher${RESET}"
-        echo -e "${GREEN}Nautilus global launcher disabled.${RESET}"
-    fi
-
     xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search || \
         echo -e "${YELLOW}Warning: Could not set Nemo as default via xdg-mime${RESET}"
+
+    mkdir -p /root/.local/share/applications
+    cat > /root/.local/share/applications/org.gnome.Nautilus.desktop << 'EOF'
+[Desktop Entry]
+Type=Application
+Name=Files
+Exec=nemo %U
+Icon=system-file-manager
+NoDisplay=false
+MimeType=inode/directory;
+EOF
+    echo -e "${GREEN}Places menu fixed — Nemo will open instead of Nautilus.${RESET}"
 
     local dbus_addr="unix:path=/run/user/0/bus"
     if [[ -S "/run/user/0/bus" ]]; then
@@ -360,7 +365,7 @@ apply_nemo_fix_for_root() {
             gsettings set org.nemo.desktop show-desktop-icons true || \
             echo -e "${YELLOW}Warning: Could not enable Nemo desktop icons${RESET}"
     else
-        echo -e "${YELLOW}No active DBUS session — gsettings will apply on next login${RESET}"
+        echo -e "${YELLOW}No active DBUS session — desktop icons will apply on next login${RESET}"
     fi
 
     if pgrep -x nautilus &>/dev/null; then
