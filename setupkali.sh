@@ -373,20 +373,39 @@ apply_nemo_fix_for_root() {
 configure_dash_apps() {
     echo -e "${BLUE}Configuring Dash applications for root user...${RESET}"
 
-    local dbus_addr="unix:path=/run/user/0/bus"
+    local dconf_dir="/root/.config/dconf"
+    local favorite_apps="['terminator.desktop', 'org.gnome.Terminal.desktop', 'firefox-esr.desktop', 'nemo.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'org.xfce.mousepad.desktop']"
 
+    # Try gsettings first if DBUS session is available
     if [[ -S "/run/user/0/bus" ]]; then
-        DBUS_SESSION_BUS_ADDRESS="$dbus_addr" \
-            gsettings set org.gnome.shell favorite-apps \
-            "['terminator.desktop', 'org.gnome.Terminal.desktop', 'firefox-esr.desktop', 'nemo.desktop', 'kali-metasploit-framework.desktop', 'kali-burpsuite.desktop', 'kali-maltego.desktop', 'kali-beef-xss.desktop', 'org.xfce.mousepad.desktop']" || \
-            echo -e "${YELLOW}Warning: Could not configure dash apps${RESET}"
-    else
-        echo -e "${YELLOW}No active DBUS session — dash apps will apply on next login${RESET}"
+        DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/0/bus" \
+            gsettings set org.gnome.shell favorite-apps "$favorite_apps" && {
+            echo -e "${GREEN}Dash apps configured via gsettings.${RESET}"
+            return 0
+        }
     fi
 
-    echo -e "${GREEN}Dash applications configured.${RESET}"
-}
+    # Fallback — write directly via dconf database
+    echo -e "${YELLOW}Writing dash apps directly via dconf...${RESET}"
+    mkdir -p "$dconf_dir"
 
+    # Install dconf-cli if missing
+    apt-get install -y dconf-cli &>/dev/null || true
+
+    dconf write /org/gnome/shell/favorite-apps "$favorite_apps" 2>/dev/null || {
+
+        # Final fallback — write dconf keyfile directly
+        mkdir -p /root/.config/dconf
+        cat > /root/.config/dconf/user.d/setupkali.conf << EOF
+[org/gnome/shell]
+favorite-apps=$favorite_apps
+EOF
+        echo -e "${YELLOW}Dash apps written to dconf keyfile — will apply on next login.${RESET}"
+        return 0
+    }
+
+    echo -e "${GREEN}Dash apps configured via dconf.${RESET}"
+}
 change_background() {
     local BACKGROUND_IMAGE="/usr/share/backgrounds/kali/kali-tiles-16x9.jpg"
     
