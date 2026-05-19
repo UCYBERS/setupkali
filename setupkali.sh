@@ -344,17 +344,17 @@ apply_nemo_fix_for_root() {
     xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search || \
         echo -e "${YELLOW}Warning: Could not set Nemo as default via xdg-mime${RESET}"
 
-    mkdir -p /root/.local/share/applications
-    cat > /root/.local/share/applications/org.gnome.Nautilus.desktop << 'EOF'
-[Desktop Entry]
-Type=Application
-Name=Files
-Exec=nemo %U
-Icon=system-file-manager
-NoDisplay=false
-MimeType=inode/directory;
-EOF
-    update-desktop-database /root/.local/share/applications/ || true
+    if [[ -f "/usr/share/applications/org.gnome.Nautilus.desktop" ]]; then
+        sed -i 's|^Exec=nautilus.*|Exec=nemo %U|' \
+            /usr/share/applications/org.gnome.Nautilus.desktop || \
+            echo -e "${YELLOW}Warning: Could not modify Nautilus desktop file${RESET}"
+    fi
+
+    update-desktop-database /usr/share/applications/ || true
+    update-desktop-database /root/.local/share/applications/ 2>/dev/null || true
+
+    xdg-mime default nemo.desktop inode/directory || true
+
     echo -e "${GREEN}Places menu fixed — Nemo will open instead of Nautilus.${RESET}"
 
     local dbus_addr="unix:path=/run/user/0/bus"
