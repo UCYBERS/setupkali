@@ -354,6 +354,7 @@ Icon=system-file-manager
 NoDisplay=false
 MimeType=inode/directory;
 EOF
+    update-desktop-database /root/.local/share/applications/ || true
     echo -e "${GREEN}Places menu fixed — Nemo will open instead of Nautilus.${RESET}"
 
     local dbus_addr="unix:path=/run/user/0/bus"
