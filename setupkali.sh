@@ -662,9 +662,21 @@ EOF
 }
 
 install_basic_packages() {
-    echo -e "${BLUE}Installing essential packages...${NC}"
-    sudo apt update
-    sudo apt install -y build-essential python3-pip python3-venv
+    echo -e "${BLUE}Installing essential packages...${RESET}"
+
+    local -a basic_packages=(
+        build-essential
+        python3-pip
+        python3-venv
+        python3-setuptools
+    )
+
+    apt-get install -y "${basic_packages[@]}" || {
+        echo -e "${RED}Failed to install essential packages${RESET}"
+        return 1
+    }
+
+    echo -e "${GREEN}Essential packages installed successfully.${RESET}"
 }
 
 install_zenmap() {
