@@ -432,7 +432,7 @@ EOF
 }
 
 change_background() {
-    local BACKGROUND_IMAGE="/usr/share/backgrounds/kali/kali-tiles-16x9.jpg"
+    local BACKGROUND_IMAGE="/usr/share/backgrounds/kali/kali-net-16x9.jpg"
     
     echo -e "\n  ${GREEN}Changing root user's desktop background...${RESET}"
     
