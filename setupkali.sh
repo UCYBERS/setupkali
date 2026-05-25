@@ -836,25 +836,23 @@ python-pip-curl() {
     }
 
 install_hacking_tools() {
-    echo -e "${YELLOW}Starting installation of Hacking tools...${NC}"
+    echo -e "${YELLOW}Starting installation of hacking tools...${RESET}"
 
-    # install_wifi_hotspot
-    # sudo apt install -y htop
-    setup_firefox_custom_homepage
+    apt-get update || {
+        echo -e "${RED}apt update failed${RESET}"
+        return 1
+    }
+
+    apt-get install -y htop python3 python3-pip python3-venv || \
+        echo -e "${YELLOW}Warning: Some packages failed to install${RESET}"
+
     add_firefox_bookmarks
-    # install_basic_packages
+    setup_firefox_custom_homepage
     install_zenmap
-    # install_network_driver
     install_bettercap
     replace_hstshijack
-    apt-get update
-    # apt-get install realtek-rtl88xxau-dkms -y
-    sudo apt install mdk4
-    python-pip-curl
-    sudo apt-get install python3-venv 
-    sudo apt install python3 python3-pip
 
-    echo -e "${GREEN}Installation of Hacking tools complete.${NC}"
+    echo -e "${GREEN}Hacking tools installation complete.${RESET}"
 }
 
 
