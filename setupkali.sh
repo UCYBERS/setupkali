@@ -593,9 +593,50 @@ install_wifi_hotspot() {
 
 
 
-setup_firefox_custom_homepage() {
-    echo -e "${BLUE}Configuring Firefox homepage via policies...${RESET}"
+add_firefox_bookmarks() {
+    echo -e "${BLUE}Configuring Firefox bookmarks...${RESET}"
 
+    local policies_dir="/etc/firefox-esr/policies"
+    local policies_file="$policies_dir/policies.json"
+    local kali_policies="/usr/share/firefox-esr/distribution/policies.json"
+
+    mkdir -p "$policies_dir" || {
+        echo -e "${RED}Failed to create Firefox policies directory${RESET}"
+        return 1
+    }
+
+    # Merge with Kali's system policies to avoid being overridden
+    local target_file="$kali_policies"
+    [[ ! -f "$kali_policies" ]] && target_file="$policies_file"
+
+    python3 -c "
+import json, sys
+try:
+    with open('$target_file', 'r') as f:
+        data = json.load(f)
+except:
+    data = {'policies': {}}
+data.setdefault('policies', {})['Bookmarks'] = [
+    {'Title': 'UCYBERS',                'URL': 'https://ucybers.com',                       'Toolbar': True},
+    {'Title': 'UCYBERS Certifications', 'URL': 'https://certifications.ucybers.com',         'Toolbar': True},
+    {'Title': 'UCYBERS Academy',        'URL': 'https://academy.ucybers.com',                'Toolbar': True},
+    {'Title': 'UCYBERS YouTube',        'URL': 'https://www.youtube.com/@ucybers',           'Toolbar': True},
+    {'Title': 'UCYBERS FB',             'URL': 'https://www.facebook.com/ucybersx',          'Toolbar': True},
+    {'Title': 'UCYBERS Twitter',        'URL': 'https://x.com/ucybersx',                    'Toolbar': True},
+    {'Title': 'UCYBERS Linkedin',       'URL': 'https://www.linkedin.com/company/ucybersx', 'Toolbar': True}
+]
+with open('$target_file', 'w') as f:
+    json.dump(data, f, indent=2)
+" && echo -e "${GREEN}Firefox bookmarks configured successfully.${RESET}" || {
+        echo -e "${RED}Failed to configure bookmarks${RESET}"
+        return 1
+    }
+}
+
+setup_firefox_custom_homepage() {
+    echo -e "${BLUE}Configuring Firefox homepage...${RESET}"
+
+    local kali_policies="/usr/share/firefox-esr/distribution/policies.json"
     local policies_dir="/etc/firefox-esr/policies"
     local policies_file="$policies_dir/policies.json"
 
@@ -604,67 +645,27 @@ setup_firefox_custom_homepage() {
         return 1
     }
 
-    # Merge homepage into existing policies file if it exists
-    if [[ -f "$policies_file" ]]; then
-        python3 -c "
+    local target_file="$kali_policies"
+    [[ ! -f "$kali_policies" ]] && target_file="$policies_file"
+
+    python3 -c "
 import json
-with open('$policies_file', 'r') as f:
-    data = json.load(f)
+try:
+    with open('$target_file', 'r') as f:
+        data = json.load(f)
+except:
+    data = {'policies': {}}
 data.setdefault('policies', {})['Homepage'] = {
     'URL': 'https://ucybers.com',
     'Locked': False,
     'StartPage': 'homepage'
 }
-with open('$policies_file', 'w') as f:
+with open('$target_file', 'w') as f:
     json.dump(data, f, indent=2)
-" && echo -e "${GREEN}Homepage merged into existing policies.${RESET}" || {
-            echo -e "${RED}Failed to merge homepage into policies${RESET}"
-            return 1
-        }
-    else
-        cat > "$policies_file" << 'EOF'
-{
-  "policies": {
-    "Homepage": {
-      "URL": "https://ucybers.com",
-      "Locked": false,
-      "StartPage": "homepage"
-    }
-  }
-}
-EOF
-        echo -e "${GREEN}Firefox homepage configured via policies.${RESET}"
-    fi
-}
-
-add_firefox_bookmarks() {
-    echo -e "${BLUE}Configuring Firefox bookmarks via policies...${RESET}"
-
-    local policies_dir="/etc/firefox-esr/policies"
-    local policies_file="$policies_dir/policies.json"
-
-    mkdir -p "$policies_dir" || {
-        echo -e "${RED}Failed to create Firefox policies directory${RESET}"
+" && echo -e "${GREEN}Firefox homepage configured successfully.${RESET}" || {
+        echo -e "${RED}Failed to configure homepage${RESET}"
         return 1
     }
-
-    cat > "$policies_file" << 'EOF'
-{
-  "policies": {
-    "Bookmarks": [
-      { "Title": "UCYBERS",                "URL": "https://ucybers.com",                       "Toolbar": true },
-      { "Title": "UCYBERS Certifications", "URL": "https://certifications.ucybers.com",         "Toolbar": true },
-      { "Title": "UCYBERS Academy",        "URL": "https://academy.ucybers.com",                "Toolbar": true },
-      { "Title": "UCYBERS YouTube",        "URL": "https://www.youtube.com/@ucybers",           "Toolbar": true },
-      { "Title": "UCYBERS FB",             "URL": "https://www.facebook.com/ucybersx",          "Toolbar": true },
-      { "Title": "UCYBERS X",              "URL": "https://x.com/ucybersx",                    "Toolbar": true },
-      { "Title": "UCYBERS Linkedin",       "URL": "https://www.linkedin.com/company/ucybersx", "Toolbar": true }
-    ]
-  }
-}
-EOF
-
-    echo -e "${GREEN}Firefox bookmarks configured successfully via policies.${RESET}"
 }
 
 install_basic_packages() {
