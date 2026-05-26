@@ -634,36 +634,62 @@ with open('$target_file', 'w') as f:
 }
 
 setup_firefox_custom_homepage() {
-    echo -e "${BLUE}Configuring Firefox homepage...${RESET}"
+    echo -e "${BLUE}Setting up custom Firefox homepage...${RESET}"
 
+    local startpage_url="https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=woz1sg2u"
+    local startpage_dir="/var/startpage"
+    local startpage_file="/tmp/startpage.7z"
+    local homepage_path="file://${startpage_dir}/startpage/ucybers.html"
     local kali_policies="/usr/share/firefox-esr/distribution/policies.json"
-    local policies_dir="/etc/firefox-esr/policies"
-    local policies_file="$policies_dir/policies.json"
 
-    mkdir -p "$policies_dir" || {
-        echo -e "${RED}Failed to create Firefox policies directory${RESET}"
+    # Install 7zip if missing
+    if ! command -v 7z &>/dev/null; then
+        apt-get install -y 7zip || {
+            echo -e "${RED}Failed to install 7zip${RESET}"
+            return 1
+        }
+    fi
+
+    # Download startpage
+    echo -e "${BLUE}Downloading startpage...${RESET}"
+    wget --https-only -O "$startpage_file" "$startpage_url" || {
+        echo -e "${RED}Failed to download startpage${RESET}"
+        rm -f "$startpage_file"
         return 1
     }
 
-    local target_file="$kali_policies"
-    [[ ! -f "$kali_policies" ]] && target_file="$policies_file"
+    # Extract startpage
+    mkdir -p "$startpage_dir"
+    7z x "$startpage_file" -o"${startpage_dir}/" -y || {
+        echo -e "${RED}Failed to extract startpage${RESET}"
+        rm -f "$startpage_file"
+        return 1
+    }
+    rm -f "$startpage_file"
 
+    # Verify startpage exists
+    if [[ ! -f "${startpage_dir}/startpage/ucybers.html" ]]; then
+        echo -e "${RED}ucybers.html not found after extraction${RESET}"
+        return 1
+    fi
+
+    # Set homepage via Firefox policies
     python3 -c "
 import json
 try:
-    with open('$target_file', 'r') as f:
+    with open('$kali_policies', 'r') as f:
         data = json.load(f)
 except:
     data = {'policies': {}}
 data.setdefault('policies', {})['Homepage'] = {
-    'URL': 'https://ucybers.com',
+    'URL': '$homepage_path',
     'Locked': False,
     'StartPage': 'homepage'
 }
-with open('$target_file', 'w') as f:
+with open('$kali_policies', 'w') as f:
     json.dump(data, f, indent=2)
-" && echo -e "${GREEN}Firefox homepage configured successfully.${RESET}" || {
-        echo -e "${RED}Failed to configure homepage${RESET}"
+" && echo -e "${GREEN}Firefox homepage set to local startpage.${RESET}" || {
+        echo -e "${RED}Failed to set homepage in policies${RESET}"
         return 1
     }
 }
