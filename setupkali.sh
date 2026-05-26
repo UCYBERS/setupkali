@@ -552,22 +552,36 @@ fix_nmap() {
 }
 
 apt_upgrade() {
-    echo -e "\n  $greenplus running: apt upgrade \n"
-    sudo -u root bash -c "
-      apt update &&
-      apt -y upgrade -o Dpkg::Progress-Fancy='1' &&
-      apt -y dist-upgrade -o Dpkg::Progress-Fancy='1' &&
-      apt -y autoremove &&
-      apt -y autoclean
-    "
+    echo -e "\n  $greenplus Running full system upgrade...\n"
+
+    apt-get update || {
+        echo -e "\n  ${RED}apt update failed${RESET}"
+        return 1
+    }
+
+    apt-get -y upgrade -o Dpkg::Progress-Fancy="1" || {
+        echo -e "\n  ${RED}apt upgrade failed${RESET}"
+        return 1
+    }
+
+    apt-get -y dist-upgrade -o Dpkg::Progress-Fancy="1" || {
+        echo -e "\n  ${RED}dist-upgrade failed${RESET}"
+        return 1
+    }
+
+    apt-get -y autoremove
+    apt-get -y autoclean
+
     apt_upgrade_complete
-    configure_dash_apps
-    disable_power_gnome
 }
 
 apt_upgrade_complete() {
-    echo -e "\n  $greenplus apt upgrade - complete"
-    configure_dash_apps
+    echo -e "\n  $greenplus apt upgrade complete"
+    configure_dash_apps || \
+        echo -e "\n  ${YELLOW}Warning: Could not configure dash apps${RESET}"
+    disable_power_gnome || \
+        echo -e "\n  ${YELLOW}Warning: Could not configure power settings${RESET}"
+    echo -e "\n  ${GREEN}System upgrade finished successfully.${RESET}"
 }
 
 install_wifi_hotspot() {
