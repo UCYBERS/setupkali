@@ -802,34 +802,39 @@ install_network_driver() {
 }
 
 install_bettercap() {
-    # Update package list
-    echo -e "${YELLOW}Updating package list...${NC}"
-    sudo apt update
+    echo -e "${YELLOW}Installing bettercap...${RESET}"
 
-    # Install bettercap
-    echo -e "${YELLOW}Installing bettercap...${NC}"
-    sudo apt install -y bettercap
+    apt-get install -y bettercap || {
+        echo -e "${RED}Failed to install bettercap${RESET}"
+        return 1
+    }
 
-    # Check if bettercap is installed
-    if command -v bettercap &> /dev/null; then
-        echo -e "${GREEN}bettercap installed successfully!${NC}"
-    else
-        echo -e "${RED}Error occurred while installing bettercap.${NC}"
+    if ! command -v bettercap &>/dev/null; then
+        echo -e "${RED}bettercap installation could not be verified${RESET}"
         return 1
     fi
 
-    git clone https://github.com/bettercap/caplets.git
-    cd caplets
-    sudo make install
+    echo -e "${GREEN}bettercap installed successfully!${RESET}"
 
-    # Remove caplets directory if it exists in the home directory
-    if [ -d "/root/caplets/" ]; then
-        echo -e "${YELLOW}Removing caplets directory from the home directory...${NC}"
-        rm -rf /root/caplets/
-        echo -e "${GREEN}caplets directory removed from the home directory.${NC}"
-    else
-        echo -e "${YELLOW}No caplets directory found in the home directory.${NC}"
-    fi
+    local caplets_tmp
+    caplets_tmp=$(mktemp -d /tmp/caplets_XXXXXX)
+
+    echo -e "${YELLOW}Cloning bettercap caplets...${RESET}"
+    git clone --depth=1 https://github.com/bettercap/caplets.git "$caplets_tmp" || {
+        echo -e "${RED}Failed to clone caplets repository${RESET}"
+        rm -rf "$caplets_tmp"
+        return 1
+    }
+
+    echo -e "${YELLOW}Installing caplets...${RESET}"
+    make -C "$caplets_tmp" install || {
+        echo -e "${RED}Failed to install caplets${RESET}"
+        rm -rf "$caplets_tmp"
+        return 1
+    }
+
+    rm -rf "$caplets_tmp"
+    echo -e "${GREEN}bettercap and caplets installed successfully.${RESET}"
 }
 
 replace_hstshijack() {
