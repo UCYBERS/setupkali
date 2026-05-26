@@ -594,71 +594,77 @@ install_wifi_hotspot() {
 
 
 setup_firefox_custom_homepage() {
-    sudo mkdir -p /var/startpage
-    cd /var/startpage || exit
-    sudo wget -O startpage.7z "https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=woz1sg2u"
-    sudo 7z x startpage.7z -o/var/startpage/
-    sudo rm startpage.7z
+    echo -e "${BLUE}Configuring Firefox homepage via policies...${RESET}"
 
-    FIREFOX_PROFILE_DIR=$(sudo -u root bash -c 'ls -d /root/.mozilla/firefox/*.default-esr 2>/dev/null || true')
+    local policies_dir="/etc/firefox-esr/policies"
+    local policies_file="$policies_dir/policies.json"
 
-    if [ -z "$FIREFOX_PROFILE_DIR" ]; then
-        echo "Firefox profile for root not found. Creating it by running Firefox."
-        sudo -u root bash -c "firefox -headless & sleep 5; pkill firefox"
-        FIREFOX_PROFILE_DIR=$(sudo -u root bash -c 'ls -d /root/.mozilla/firefox/*.default-esr 2>/dev/null')
-    fi
+    mkdir -p "$policies_dir" || {
+        echo -e "${RED}Failed to create Firefox policies directory${RESET}"
+        return 1
+    }
 
-    if [ -n "$FIREFOX_PROFILE_DIR" ]; then
-        sudo -u root bash -c "echo 'user_pref(\"browser.startup.homepage\", \"file:///var/startpage/startpage/ucybers.html\");' >> $FIREFOX_PROFILE_DIR/user.js"
-        echo "Custom homepage set successfully."
+    # Merge homepage into existing policies file if it exists
+    if [[ -f "$policies_file" ]]; then
+        python3 -c "
+import json
+with open('$policies_file', 'r') as f:
+    data = json.load(f)
+data.setdefault('policies', {})['Homepage'] = {
+    'URL': 'https://ucybers.com',
+    'Locked': False,
+    'StartPage': 'homepage'
+}
+with open('$policies_file', 'w') as f:
+    json.dump(data, f, indent=2)
+" && echo -e "${GREEN}Homepage merged into existing policies.${RESET}" || {
+            echo -e "${RED}Failed to merge homepage into policies${RESET}"
+            return 1
+        }
     else
-        echo "Failed to find or create the Firefox profile."
+        cat > "$policies_file" << 'EOF'
+{
+  "policies": {
+    "Homepage": {
+      "URL": "https://ucybers.com",
+      "Locked": false,
+      "StartPage": "homepage"
+    }
+  }
+}
+EOF
+        echo -e "${GREEN}Firefox homepage configured via policies.${RESET}"
     fi
 }
 
 add_firefox_bookmarks() {
-    local DB_PATH="/root/.mozilla/firefox/*.default-esr/places.sqlite"
+    echo -e "${BLUE}Configuring Firefox bookmarks via policies...${RESET}"
 
-    if [ ! -f $DB_PATH ]; then
-        echo "Error: Database file not found at $DB_PATH"
+    local policies_dir="/etc/firefox-esr/policies"
+    local policies_file="$policies_dir/policies.json"
+
+    mkdir -p "$policies_dir" || {
+        echo -e "${RED}Failed to create Firefox policies directory${RESET}"
         return 1
-    fi
+    }
 
-    echo "Checking table structure in $DB_PATH..."
-    sqlite3 $DB_PATH <<EOF
-    PRAGMA table_info(moz_bookmarks);
-    PRAGMA table_info(moz_places);
+    cat > "$policies_file" << 'EOF'
+{
+  "policies": {
+    "Bookmarks": [
+      { "Title": "UCYBERS",                "URL": "https://ucybers.com",                       "Toolbar": true },
+      { "Title": "UCYBERS Certifications", "URL": "https://certifications.ucybers.com",         "Toolbar": true },
+      { "Title": "UCYBERS Academy",        "URL": "https://academy.ucybers.com",                "Toolbar": true },
+      { "Title": "UCYBERS YouTube",        "URL": "https://www.youtube.com/@ucybers",           "Toolbar": true },
+      { "Title": "UCYBERS FB",             "URL": "https://www.facebook.com/ucybersx",          "Toolbar": true },
+      { "Title": "UCYBERS X",              "URL": "https://x.com/ucybersx",                    "Toolbar": true },
+      { "Title": "UCYBERS Linkedin",       "URL": "https://www.linkedin.com/company/ucybersx", "Toolbar": true }
+    ]
+  }
+}
 EOF
 
-    echo "Adding bookmarks to 'Bookmarks Toolbar'..."
-
-    sqlite3 $DB_PATH <<EOF
-    BEGIN;
-
-    -- Insert the URLs into moz_places if they don't already exist
-    INSERT OR IGNORE INTO moz_places (url, title) VALUES 
-    ('https://ucybers.com', 'UCYBERS'),
-    ('https://certifications.ucybers.com', 'UCYBERS Certifications'),
-    ('https://academy.ucybers.com', 'UCYBERS Academy'),
-    ('https://www.youtube.com/@ucybers', 'UCYBERS YouTube'),
-    ('https://www.facebook.com/ucybersx', 'UCYBERS FB'),
-    ('https://x.com/ucybersx', 'UCYBERS Twitter'),
-    ('https://www.linkedin.com/company/ucybersx', 'UCYBERS Linkedin');
-
-    -- Add the bookmarks to the Bookmarks Toolbar
-    INSERT INTO moz_bookmarks (fk, parent, title, type) VALUES
-        ((SELECT id FROM moz_places WHERE url='https://ucybers.com'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS', 1),
-        ((SELECT id FROM moz_places WHERE url='https://certifications.ucybers.com'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Certifications', 1),
-        ((SELECT id FROM moz_places WHERE url='https://academy.ucybers.com'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Academy', 1),
-        ((SELECT id FROM moz_places WHERE url='https://www.youtube.com/@ucybers'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS YouTube', 1),
-        ((SELECT id FROM moz_places WHERE url='https://www.facebook.com/ucybersx'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS FB', 1),
-        ((SELECT id FROM moz_places WHERE url='https://x.com/ucybersx'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Twitter', 1),
-        ((SELECT id FROM moz_places WHERE url='https://www.linkedin.com/company/ucybersx'), (SELECT id FROM moz_bookmarks WHERE title='toolbar'), 'UCYBERS Linkedin', 1);
-
-    COMMIT;
-EOF
-
-    echo "Bookmarks added to the 'Bookmarks Toolbar'."
+    echo -e "${GREEN}Firefox bookmarks configured successfully via policies.${RESET}"
 }
 
 install_basic_packages() {
