@@ -859,23 +859,30 @@ install_hacking_tools() {
 
 
 setup_all() {
+    echo -e "${BLUE}Starting full system setup...${RESET}"
+
+    fix_sources
+    apt_update && apt_update_complete
+
     change_to_gnome
+
     enable_root_login
+
+    install_basic_packages
     install_tools_for_root
+    install_hacking_tools
+    fix_nmap
+    install_wifi_hotspot
+    install_network_driver
+
+    install_icons
+    change_background
     configure_dock_for_root
     configure_dash_apps
     apply_gnome_settings_on_login
-    install_icons
-    change_background
     disable_power_checkde
-    # fix_sources
-    apt_update && apt_update_complete
-    # remove_kali_undercover
-    fix_nmap
-    install_wifi_hotspot
-    sudo apt install -y htop
-    install_basic_packages
-    install_network_driver
+
+    echo -e "${GREEN}Full setup complete. Please reboot to apply all changes.${RESET}"
 }
 
 confirm_menu_choice() {
