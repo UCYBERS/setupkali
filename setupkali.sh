@@ -442,8 +442,17 @@ change_background() {
     
     echo -e "\n  ${GREEN}Background changed to ${BACKGROUND_IMAGE}${RESET}"
 }
+fix_bad_apt_hash() {
+    echo -e "\n  ${BLUE}Fixing APT hash issues...${RESET}"
+    # Remove cached package lists that may have bad hashes
+    rm -rf /var/lib/apt/lists/*
+    apt-get clean
+    apt-get update --fix-missing || true
+    echo -e "\n  ${GREEN}APT cache cleaned.${RESET}"
+}
 
 fix_sources() {
+    fix_bad_apt_hash
     local sources_file="/etc/apt/sources.list"
     local backup_file="${sources_file}.bak.$(date +%Y%m%d_%H%M%S)"
 
