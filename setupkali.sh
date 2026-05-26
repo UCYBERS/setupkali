@@ -540,15 +540,33 @@ remove_kali_undercover() {
 }
 
 fix_nmap() {
-    echo -e "\n  ${BLUE}Removing old clamav-exec.nse script...${RESET}"
-    sudo -u root rm -f /usr/share/nmap/scripts/clamav-exec.nse
-    echo -e "\n  ${RED}Removed /usr/share/nmap/scripts/clamav-exec.nse${RESET}"
+    echo -e "\n  ${BLUE}Fixing nmap scripts...${RESET}"
 
-    echo -e "\n  ${BLUE}Downloading updated clamav-exec.nse and http-shellshock.nse scripts...${RESET}"
-    sudo -u root wget https://raw.githubusercontent.com/nmap/nmap/master/scripts/clamav-exec.nse -O /usr/share/nmap/scripts/clamav-exec.nse
-    sudo -u root wget https://raw.githubusercontent.com/UCYBERS/setupkali/master/fixed-http-shellshock.nse -O /usr/share/nmap/scripts/http-shellshock.nse
+    local clamav_url="https://raw.githubusercontent.com/nmap/nmap/master/scripts/clamav-exec.nse"
+    local shellshock_url="https://raw.githubusercontent.com/UCYBERS/setupkali/master/fixed-http-shellshock.nse"
+    local tmp_clamav="/tmp/clamav-exec.nse"
+    local tmp_shellshock="/tmp/http-shellshock.nse"
 
-    echo -e "\n  ${GREEN}Scripts updated successfully.${RESET}"
+    echo -e "\n  ${BLUE}Downloading clamav-exec.nse...${RESET}"
+    wget --https-only -q "$clamav_url" -O "$tmp_clamav" || {
+        echo -e "\n  ${RED}Failed to download clamav-exec.nse${RESET}"
+        return 1
+    }
+
+    echo -e "\n  ${BLUE}Downloading http-shellshock.nse...${RESET}"
+    wget --https-only -q "$shellshock_url" -O "$tmp_shellshock" || {
+        echo -e "\n  ${RED}Failed to download http-shellshock.nse${RESET}"
+        rm -f "$tmp_clamav"
+        return 1
+    }
+
+    rm -f /usr/share/nmap/scripts/clamav-exec.nse
+    mv "$tmp_clamav"     /usr/share/nmap/scripts/clamav-exec.nse
+    mv "$tmp_shellshock" /usr/share/nmap/scripts/http-shellshock.nse
+    chmod 644 /usr/share/nmap/scripts/clamav-exec.nse
+    chmod 644 /usr/share/nmap/scripts/http-shellshock.nse
+
+    echo -e "\n  ${GREEN}Nmap scripts updated successfully.${RESET}"
 }
 
 apt_upgrade() {
