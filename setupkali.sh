@@ -864,7 +864,10 @@ setup_all() {
     fix_sources
     apt_update && apt_update_complete
 
-    change_to_gnome
+    change_to_gnome || {
+        echo -e "${RED}GNOME installation failed — aborting setup${RESET}"
+        return 1
+    }
 
     enable_root_login
 
