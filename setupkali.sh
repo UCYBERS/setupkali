@@ -847,48 +847,48 @@ install_bettercap() {
 }
 
 replace_hstshijack() {
-    # Set variables
-    URL="https://dl.dropbox.com/scl/fi/qtgpkeinbi6ihngiasx8p/hstshijack.zip?rlkey=4dlfpbuz5kddo8x8guzvvvcrh&st=ot44833o"
-    DEST_DIR="/usr/local/share/bettercap/caplets/hstshijack"
-    TEMP_DIR="/tmp/hstshijack_temp"
+    local url="https://dl.dropbox.com/scl/fi/qtgpkeinbi6ihngiasx8p/hstshijack.zip?rlkey=4dlfpbuz5kddo8x8guzvvvcrh&st=ot44833o"
+    local dest_dir="/usr/local/share/bettercap/caplets/hstshijack"
+    local tmp_zip tmp_dir
 
-    # Download the ZIP file
-    echo -e "${YELLOW}Downloading the ZIP file from Dropbox...${NC}"
-    wget -qO /tmp/hstshijack.zip "$URL"
-    
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Failed to download the file. Please check the URL and try again.${NC}"
-        exit 1
+    tmp_zip=$(mktemp /tmp/hstshijack_XXXXXX.zip)
+    tmp_dir=$(mktemp -d /tmp/hstshijack_dir_XXXXXX)
+
+    echo -e "${YELLOW}Downloading hstshijack...${RESET}"
+    wget --https-only -qO "$tmp_zip" "$url" || {
+        echo -e "${RED}Failed to download hstshijack${RESET}"
+        rm -f "$tmp_zip"
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    echo -e "${YELLOW}Extracting hstshijack...${RESET}"
+    unzip -q "$tmp_zip" -d "$tmp_dir" || {
+        echo -e "${RED}Failed to extract hstshijack.zip${RESET}"
+        rm -f "$tmp_zip"
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    if [[ ! -d "$tmp_dir/hstshijack" ]]; then
+        echo -e "${RED}Expected 'hstshijack' folder not found in archive${RESET}"
+        rm -f "$tmp_zip"
+        rm -rf "$tmp_dir"
+        return 1
     fi
 
-    # Remove existing destination directory
-    echo -e "${YELLOW}Removing existing hstshijack directory...${NC}"
-    sudo rm -rf "$DEST_DIR"
+    echo -e "${YELLOW}Replacing hstshijack directory...${RESET}"
+    rm -rf "$dest_dir"
+    mv "$tmp_dir/hstshijack" "$dest_dir" || {
+        echo -e "${RED}Failed to move hstshijack to destination${RESET}"
+        rm -f "$tmp_zip"
+        rm -rf "$tmp_dir"
+        return 1
+    }
 
-    # Create temporary directory
-    echo -e "${YELLOW}Creating a temporary directory...${NC}"
-    mkdir -p "$TEMP_DIR"
-
-    # Extract the ZIP file to the temporary directory
-    echo -e "${YELLOW}Extracting the ZIP file...${NC}"
-    unzip -q /tmp/hstshijack.zip -d "$TEMP_DIR"
-
-    # Move the extracted folder to the destination
-    echo -e "${YELLOW}Replacing the existing hstshijack directory...${NC}"
-    sudo mv "$TEMP_DIR/hstshijack" "$DEST_DIR"
-
-    # Check if replacement was successful
-    if [ -d "$DEST_DIR" ]; then
-        echo -e "${GREEN}hstshijack directory replaced successfully!${NC}"
-    else
-        echo -e "${RED}Error occurred while replacing the hstshijack directory.${NC}"
-    fi
-
-    # Clean up temporary files
-    echo -e "${YELLOW}Cleaning up temporary files...${NC}"
-    rm -rf /tmp/hstshijack.zip "$TEMP_DIR"
-
-    echo -e "${GREEN}Temporary files cleaned up successfully.${NC}"
+    rm -f "$tmp_zip"
+    rm -rf "$tmp_dir"
+    echo -e "${GREEN}hstshijack replaced successfully.${RESET}"
 }
 
 python-pip-curl() {
