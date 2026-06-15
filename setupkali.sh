@@ -28,11 +28,6 @@ greenminus='\e[1;33m[--]\e[0m'
 NC='\033[0m'
 deep_green='\e[38;5;34m'
 
-finduser="root"
-force=0
-silent=""
-pyver="3.8"
-
 
 if [[ $EUID -ne 0 ]]; then
     echo -e "${RED}Error: This script must be run as root.${RESET}"
