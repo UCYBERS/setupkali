@@ -612,24 +612,25 @@ apt_upgrade_complete() {
 }
 
 install_wifi_hotspot() {
-    echo "Installing dependencies..."
-    sudo apt update
-    sudo apt install -y libgtk-3-dev hostapd libqrencode-dev libpng-dev pkg-config
+    echo -e "${BLUE}Installing linux-wifi-hotspot...${RESET}"
 
-    echo "Cloning and installing linux-wifi-hotspot..."
-    
-    if [ -d "/opt/linux-wifi-hotspot" ]; then
-        echo "linux-wifi-hotspot directory already exists."
-    else
-        sudo -u root git clone https://github.com/lakinduakash/linux-wifi-hotspot /opt/linux-wifi-hotspot
-        sudo -u root bash -c "cd /opt/linux-wifi-hotspot && make && sudo make install"
-        
-        echo "Removing linux-wifi-hotspot directory..."
-        sudo -u root rm -rf /opt/linux-wifi-hotspot
-    fi
-    
-    echo "linux-wifi-hotspot has been successfully installed. You can now run the tool as the kali user."
+    apt-get install -y libgtk-3-dev hostapd libqrencode-dev libpng-dev pkg-config || return 1
 
+    local tmp_dir
+    tmp_dir=$(mktemp -d /tmp/wifi_hotspot_XXXXXX)
+
+    git clone --depth=1 https://github.com/lakinduakash/linux-wifi-hotspot "$tmp_dir" || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    make -C "$tmp_dir" && make -C "$tmp_dir" install || {
+        rm -rf "$tmp_dir"
+        return 1
+    }
+
+    rm -rf "$tmp_dir"
+    echo -e "${GREEN}linux-wifi-hotspot installed successfully.${RESET}"
 }
 
 
