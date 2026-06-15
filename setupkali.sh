@@ -754,37 +754,36 @@ install_basic_packages() {
 }
 
 install_zenmap() {
-    local ZENMAP_RPM="zenmap-7.94-1.noarch.rpm"
-    local ZENMAP_DEB="zenmap_7.94-2_all.deb"
-    local ZENMAP_URL="https://nmap.org/dist/$ZENMAP_RPM"
+    echo -e "${BLUE}Installing Zenmap...${RESET}"
 
-    if [ "$(id -u)" -ne "0" ]; then
-        echo -e "${RED}This script must be run as root.${NC}"
-        exit 1
+    # Try installing from Kali repo first
+    if apt-cache show zenmap-kbx &>/dev/null; then
+        apt-get install -y zenmap-kbx || {
+            echo -e "${RED}Failed to install zenmap-kbx${RESET}"
+            return 1
+        }
+        echo -e "${GREEN}Zenmap installed via apt.${RESET}"
+        return 0
     fi
 
-    echo -e "${BLUE}Updating system...${NC}"
-    sudo apt update
+    # Fallback — Flatpak
+    echo -e "${YELLOW}zenmap-kbx not found in repo — trying Flatpak...${RESET}"
 
-    echo -e "${BLUE}Installing alien...${NC}"
-    sudo apt install -y alien wget
+    if ! command -v flatpak &>/dev/null; then
+        apt-get install -y flatpak || {
+            echo -e "${RED}Failed to install flatpak${RESET}"
+            return 1
+        }
+        flatpak remote-add --if-not-exists flathub \
+            https://flathub.org/repo/flathub.flatpakrepo || true
+    fi
 
-    echo -e "${BLUE}Downloading Zenmap...${NC}"
-    wget $ZENMAP_URL
+    flatpak install -y flathub org.nmap.Zenmap || {
+        echo -e "${RED}Failed to install Zenmap via Flatpak${RESET}"
+        return 1
+    }
 
-    echo -e "${BLUE}Converting RPM package to DEB...${NC}"
-    sudo alien -d $ZENMAP_RPM
-
-    echo -e "${BLUE}Installing Zenmap...${NC}"
-    sudo dpkg -i $ZENMAP_DEB
-
-    echo -e "${BLUE}Fixing missing dependencies...${NC}"
-    sudo apt --fix-broken install -y
-
-    echo -e "${BLUE}Cleaning up temporary files...${NC}"
-    rm $ZENMAP_RPM $ZENMAP_DEB
-
-    echo -e "${GREEN}Zenmap installation complete. You can now run Zenmap using the command: zenmap${NC}"
+    echo -e "${GREEN}Zenmap installed via Flatpak.${RESET}"
 }
 
 install_network_driver() {
