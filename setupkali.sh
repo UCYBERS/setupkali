@@ -34,6 +34,12 @@ silent=""
 pyver="3.8"
 
 
+if [[ $EUID -ne 0 ]]; then
+    echo -e "${RED}Error: This script must be run as root.${RESET}"
+    echo -e "${YELLOW}Usage: sudo $0${RESET}"
+    exit 1
+fi
+
 if ! grep -q "Kali" /etc/os-release; then
     echo -e "${RED}This script is intended to be run on Kali Linux only.${RESET}"
     exit 1
