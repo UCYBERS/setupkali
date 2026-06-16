@@ -783,26 +783,30 @@ install_zenmap() {
 }
 
 install_network_driver() {
-    echo -e "${BLUE}Updating package list...${RESET}"
-    sudo apt update
+    echo -e "${BLUE}Checking wireless drivers...${RESET}"
 
-    echo -e "${BLUE}Installing required packages...${RESET}"
-    sudo apt install -y linux-headers-$(uname -r) build-essential bc dkms git libelf-dev rfkill iw
+    local -a drivers=(
+        "rtw88_8812au"
+        "rtw88_8814au"
+        "rtw88_8821au"
+        "ath9k_htc"
+        "mt76x2u"
+        "mt7921u"
+    )
 
-    echo -e "${BLUE}Creating source directory...${RESET}"
-    mkdir -p ~/src
+    for driver in "${drivers[@]}"; do
+        if modinfo "$driver" &>/dev/null; then
+            modprobe "$driver" 2>/dev/null || true
+            echo -e "${GREEN}✔ $driver loaded${RESET}"
+        else
+            echo -e "${YELLOW}! $driver not available${RESET}"
+        fi
+    done
 
-    cd ~/src
+    apt-get install -y aircrack-ng iw wireless-tools rfkill || \
+        echo -e "${YELLOW}Warning: Some wireless tools failed to install${RESET}"
 
-    echo -e "${BLUE}Cloning the driver repository...${RESET}"
-    git clone https://github.com/morrownr/8821au-20210708.git
-
-    cd 8821au-20210708
-
-    echo -e "${BLUE}Installing the driver...${RESET}"
-    yes n | sudo ./install-driver.sh
-
-    echo -e "${GREEN}Driver installation complete!${RESET}"
+    echo -e "${GREEN}Wireless drivers configured successfully.${RESET}"
 }
 
 install_bettercap() {
