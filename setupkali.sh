@@ -502,9 +502,12 @@ fix_sources() {
 }
 
 apt_update() {
-        echo -e "\n  ${GREEN}running: apt update${RESET}"
-        eval sudo apt -y update -o Dpkg::Progress-Fancy="1"
+    echo -e "\n  ${GREEN}running: apt update${RESET}"
+    apt-get -y update -o Dpkg::Progress-Fancy="1" || {
+        echo -e "\n  ${RED}apt update failed${RESET}"
+        return 1
     }
+}
 
 disable_power_checkde() {
         echo -e "\n  ${GREEN}GNOME is installed on the system${RESET}"
