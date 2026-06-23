@@ -893,28 +893,33 @@ replace_hstshijack() {
     echo -e "${GREEN}hstshijack replaced successfully.${RESET}"
 }
 
-python-pip-curl() {
-  
-    check_pip=$(whereis pip | grep -i -c "/usr/local/bin/pip2.7")
-    if [ $check_pip -ne 1 ]
-     then
-      echo -e "\n  $greenplus installing pip"
-      eval curl https://raw.githubusercontent.com/pypa/get-pip/3843bff3a0a61da5b63ea0b7d34794c5c51a2f11/2.7/get-pip.py -o /tmp/get-pip.py $silent
-      echo -e "\n  $greenplus Symlinking /bin/python2.7 to /bin/python\n"
-      [[ -f /bin/python2.7 ]] && ln -sf /bin/python2.7 /bin/python
-      eval python /tmp/get-pip.py $silent
-      rm -f /tmp/get-pip.py
-      eval pip --no-python-version-warning install setuptools
-      [[ ! -f /usr/bin/pip3 ]] && echo -e "\n  $greenplus installing python3-pip"; apt -y reinstall python3-pip || echo -e "\n  $greenplus python3-pip exists in /usr/bin/pip3"
-      echo -e "\n  $greenplus python-pip installed"
-    else
-      echo -e "\n  $greenminus python-pip already installed"
+install_python2_pip() {
+    echo -e "${BLUE}Installing pip for Python 2...${RESET}"
+
+    if python2 -m pip --version &>/dev/null; then
+        echo -e "${GREEN}pip2 already installed${RESET}"
+        return 0
     fi
 
-    python2 -m pip install setuptools
-    python2 -m pip install cryptography
-    python2 -m pip install python-xlib
+    if ! command -v python2 &>/dev/null; then
+        echo -e "${YELLOW}python2 not installed — skipping${RESET}"
+        return 0
+    fi
+
+    local get_pip="/tmp/get-pip2.py"
+    wget --https-only -qO "$get_pip" "https://bootstrap.pypa.io/pip/2.7/get-pip.py" || {
+        echo -e "${RED}Failed to download get-pip.py${RESET}"
+        return 1
     }
+
+    python2 "$get_pip" || {
+        rm -f "$get_pip"
+        return 1
+    }
+
+    rm -f "$get_pip"
+    echo -e "${GREEN}pip2 installed successfully${RESET}"
+}
 
 install_hacking_tools() {
     echo -e "${YELLOW}Starting installation of hacking tools...${RESET}"
