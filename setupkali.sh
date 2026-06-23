@@ -937,6 +937,7 @@ install_hacking_tools() {
     install_zenmap
     install_bettercap
     replace_hstshijack
+    install_python2_pip
 
     echo -e "${GREEN}Hacking tools installation complete.${RESET}"
 }
