@@ -445,7 +445,6 @@ change_background() {
 }
 fix_bad_apt_hash() {
     echo -e "\n  ${BLUE}Fixing APT hash issues...${RESET}"
-    # Remove cached package lists that may have bad hashes
     rm -rf /var/lib/apt/lists/*
     apt-get clean
     apt-get update --fix-missing || true
@@ -454,51 +453,88 @@ fix_bad_apt_hash() {
 
 fix_sources() {
     fix_bad_apt_hash
-    local sources_file="/etc/apt/sources.list"
-    local backup_file="${sources_file}.bak.$(date +%Y%m%d_%H%M%S)"
+
+    local new_sources="/etc/apt/sources.list.d/kali.sources"
+    local old_sources="/etc/apt/sources.list"
 
     echo -e "\n  ${BLUE}Fixing APT sources...${RESET}"
 
-    cp "$sources_file" "$backup_file" || {
-        echo -e "\n  ${RED}Failed to backup sources.list — aborting${RESET}"
-        return 1
-    }
-    echo -e "\n  ${GREEN}Backup saved to: $backup_file${RESET}"
+    # Kali 2026.2+ uses deb822 format in kali.sources
+    if [[ -f "$new_sources" ]]; then
+        echo -e "\n  ${GREEN}Detected Kali 2026.2+ deb822 format${RESET}"
 
-    local current_mirror
-    current_mirror=$(grep -m1 "^deb http" "$sources_file" | cut -d'/' -f3 || true)
+        local backup_file="${new_sources}.bak.$(date +%Y%m%d_%H%M%S)"
+        cp "$new_sources" "$backup_file" || {
+            echo -e "\n  ${RED}Failed to backup kali.sources — aborting${RESET}"
+            return 1
+        }
+        echo -e "\n  ${GREEN}Backup saved to: $backup_file${RESET}"
 
-    if [[ -z "$current_mirror" ]]; then
-        echo -e "\n  ${RED}Could not detect current mirror — aborting${RESET}"
-        return 1
+        # Add deb-src if missing
+        if ! grep -q "^Types:.*deb-src" "$new_sources"; then
+            sed -i 's/^Types: deb$/Types: deb deb-src/' "$new_sources"
+            echo -e "\n  $greenplus deb-src enabled in kali.sources"
+        else
+            echo -e "\n  $greenminus deb-src already enabled — skipping"
+        fi
+
+        # Ensure non-free-firmware is present
+        if ! grep -q "non-free-firmware" "$new_sources"; then
+            sed -i 's/non-free$/non-free non-free-firmware/' "$new_sources"
+            echo -e "\n  $greenplus non-free-firmware added"
+        fi
+
+        echo -e "\n  ${GREEN}APT sources fixed successfully (deb822 format).${RESET}"
+        return 0
     fi
 
-    echo -e "\n  ${BLUE}Detected mirror: $current_mirror${RESET}"
+    # Fallback — legacy sources.list format (Kali 2026.1 and older)
+    if [[ -f "$old_sources" ]]; then
+        echo -e "\n  ${BLUE}Detected legacy sources.list format${RESET}"
 
-    local check_space check_nospace
-    check_space=$(grep -c "^# deb-src http.*/kali kali-rolling" "$sources_file" || true)
-    check_nospace=$(grep -c "^#deb-src http.*/kali kali-rolling" "$sources_file" || true)
+        local backup_file="${old_sources}.bak.$(date +%Y%m%d_%H%M%S)"
+        cp "$old_sources" "$backup_file" || {
+            echo -e "\n  ${RED}Failed to backup sources.list — aborting${RESET}"
+            return 1
+        }
+        echo -e "\n  ${GREEN}Backup saved to: $backup_file${RESET}"
 
-    if [[ "$check_space" -eq 0 && "$check_nospace" -eq 0 ]]; then
-        echo -e "\n  $greenminus deb-src not found — skipping"
-    elif [[ "$check_space" -ge 1 ]]; then
-        echo -e "\n  $greenplus Enabling deb-src (with space)..."
-        sed -i "s|^# deb-src http.*/kali kali-rolling.*|deb-src http://${current_mirror}/kali kali-rolling main contrib non-free|" \
-            "$sources_file"
-        echo -e "\n  $greenplus deb-src enabled"
-    elif [[ "$check_nospace" -ge 1 ]]; then
-        echo -e "\n  $greenplus Enabling deb-src (without space)..."
-        sed -i "s|^#deb-src http.*/kali kali-rolling.*|deb-src http://${current_mirror}/kali kali-rolling main contrib non-free|" \
-            "$sources_file"
-        echo -e "\n  $greenplus deb-src enabled"
+        local current_mirror
+        current_mirror=$(grep -m1 "^deb http" "$old_sources" | cut -d'/' -f3 || true)
+
+        if [[ -z "$current_mirror" ]]; then
+            echo -e "\n  ${RED}Could not detect current mirror — aborting${RESET}"
+            return 1
+        fi
+
+        echo -e "\n  ${BLUE}Detected mirror: $current_mirror${RESET}"
+
+        local check_space check_nospace
+        check_space=$(grep -c "^# deb-src http.*/kali kali-rolling" "$old_sources" || true)
+        check_nospace=$(grep -c "^#deb-src http.*/kali kali-rolling" "$old_sources" || true)
+
+        if [[ "$check_space" -eq 0 && "$check_nospace" -eq 0 ]]; then
+            echo -e "\n  $greenminus deb-src not found — skipping"
+        elif [[ "$check_space" -ge 1 ]]; then
+            sed -i "s|^# deb-src http.*/kali kali-rolling.*|deb-src http://${current_mirror}/kali kali-rolling main contrib non-free|" \
+                "$old_sources"
+            echo -e "\n  $greenplus deb-src enabled"
+        elif [[ "$check_nospace" -ge 1 ]]; then
+            sed -i "s|^#deb-src http.*/kali kali-rolling.*|deb-src http://${current_mirror}/kali kali-rolling main contrib non-free|" \
+                "$old_sources"
+            echo -e "\n  $greenplus deb-src enabled"
+        fi
+
+        if grep -q "non-free$" "$old_sources"; then
+            sed -i 's/non-free$/non-free non-free-firmware/' "$old_sources"
+            echo -e "\n  $greenplus non-free-firmware added"
+        fi
+
+        echo -e "\n  ${GREEN}APT sources fixed successfully (legacy format).${RESET}"
+        return 0
     fi
 
-    if grep -q "non-free$" "$sources_file"; then
-        sed -i 's/non-free$/non-free non-free-firmware/' "$sources_file"
-        echo -e "\n  $greenplus non-free-firmware added"
-    fi
-
-    echo -e "\n  ${GREEN}APT sources fixed successfully.${RESET}"
+    echo -e "\n  ${RED}No APT sources file found — skipping${RESET}"
 }
 
 apt_update() {
