@@ -57,11 +57,11 @@ sudo ./setupkali.sh
 # 🪶 Revision History
   - ## 📦 Version 1.1.5 (Latest Release)
     ### **"The Wayland-Ready Update"**
-    ***This release focuses on absolute compatibility with **Kali Linux 2026.1** and the transition to the **Wayland** display protocol, ensuring a seamless experience for cybersecurity professionals and students   in the **UCYBERS Academy**.***
+    ***This release focuses on absolute compatibility with **Kali Linux 2026.2** and the transition to the **Wayland** display protocol, ensuring a seamless experience for cybersecurity professionals and students   in the **UCYBERS Academy**.***
 
 
       - ### 🌟 Key Enhancements
-        - **Kali Linux 2026.1 Compatibility**: Fully optimized to support the new **VM Guest Utils for Wayland**, ensuring stable clipboard sharing and window scaling in VMware environments.
+        - **Kali Linux 2026.2 Compatibility**: Fully optimized to support the new **VM Guest Utils for Wayland**, ensuring stable clipboard sharing and window scaling in VMware environments.
         - **Nemo File Manager Integration**: Seamlessly replaces the restricted Nautilus as the default file manager for the **Root** user, bypassing the "Root-Not-Supported" limitations in GNOME.
         - **Idempotent GDM Configuration**: Refactored the `enable_root_login` module to ensure no duplicate entries are created in `/etc/gdm3/daemon.conf`, maintaining a clean system configuration.
         - **Smart Cleanup Strategy**: Implemented "Clean-First" logic that identifies and purges legacy, commented-out, or malformed configuration lines before applying new settings.
