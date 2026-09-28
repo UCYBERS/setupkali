@@ -1129,35 +1129,84 @@ install_hacking_tools() {
 
 
 
+FAILED_STEPS=()
+STEP_MAX_ATTEMPTS=3
+
+repair_apt() {
+    echo -e "${YELLOW}  Repairing APT before retrying...${RESET}"
+    dpkg --configure -a &>/dev/null
+    apt-get -f install -y &>/dev/null
+    apt-get update &>/dev/null
+}
+
+run_step() {
+    local step="$1" attempt=1 answer
+    while true; do
+        "$@" && return 0
+
+        if (( attempt < STEP_MAX_ATTEMPTS )); then
+            echo -e "\n${YELLOW}[RETRY] ${step} failed (attempt ${attempt}/${STEP_MAX_ATTEMPTS}) — retrying in 5 seconds...${RESET}"
+            repair_apt
+            sleep 5
+            attempt=$((attempt + 1))
+            continue
+        fi
+
+        echo -e "\n${RED}[FAILED] ${step} failed ${STEP_MAX_ATTEMPTS} times.${RESET}"
+
+        if [[ ! -t 0 ]]; then
+            FAILED_STEPS+=("$step")
+            return 1
+        fi
+
+        while true; do
+            read -r -p "  Press Enter to retry ${step} again, or type 's' to skip it: " answer || answer="s"
+            case "${answer,,}" in
+                "") attempt=1; continue 2 ;;
+                s)  FAILED_STEPS+=("$step")
+                    echo -e "${YELLOW}  Skipped: ${step}${RESET}"
+                    return 1 ;;
+                *)  echo -e "${RED}  Press Enter to retry, or type 's' to skip.${RESET}" ;;
+            esac
+        done
+    done
+}
+
 setup_all() {
     echo -e "${BLUE}Starting full system setup...${RESET}"
 
-    fix_sources
-    apt_update && apt_update_complete
+    run_step fix_sources
+    run_step apt_update && apt_update_complete
 
-    change_to_gnome || {
+    run_step change_to_gnome || {
         echo -e "${RED}GNOME installation failed — aborting setup${RESET}"
         return 1
     }
 
-    enable_root_login
+    run_step enable_root_login
 
-    install_basic_packages
-    install_tools_for_root
-    install_hacking_tools
-    fix_nmap
-    install_wifi_hotspot
-    install_network_driver
+    run_step install_basic_packages
+    run_step install_tools_for_root
+    run_step install_hacking_tools
+    run_step fix_nmap
+    run_step install_wifi_hotspot
+    run_step install_network_driver
 
-    install_icons
-    change_background
-    configure_dock_for_root
-    configure_dash_apps
-    apply_gnome_settings_on_login
-    disable_power_checkde
+    run_step install_icons
+    run_step change_background
+    run_step configure_dock_for_root
+    run_step configure_dash_apps
+    run_step apply_gnome_settings_on_login
+    run_step disable_power_checkde
 
+    if (( ${#FAILED_STEPS[@]} > 0 )); then
+        echo -e "${YELLOW}Full setup finished with errors — see the summary below.${RESET}"
+        return 1
+    fi
     echo -e "${GREEN}Full setup complete. Please reboot to apply all changes.${RESET}"
 }
+
+
 
 confirm_menu_choice() {
     valid_options=("1" "2" "3" "4" "5" "6" "0")
@@ -1219,15 +1268,14 @@ show_menu() {
         read -n1 -p " Press key for menu selection or press 0 to exit: " menuinput
         echo
         
-        # Confirm the selection
         confirm_menu_choice $menuinput
         if [ $? -eq 0 ]; then
             case $menuinput in
-                1) change_to_gnome; break ;;
-                2) enable_root_login; break ;;
-                3) install_tools_for_root; break ;;
-                4) install_hacking_tools; break ;;
-                5) apt_upgrade; break ;;
+                1) run_step change_to_gnome; break ;;
+                2) run_step enable_root_login; break ;;
+                3) run_step install_tools_for_root; break ;;
+                4) run_step install_hacking_tools; break ;;
+                5) run_step apt_upgrade; break ;;
                 6) setup_all; break ;;
                 0) 
                     clear
@@ -1237,11 +1285,9 @@ show_menu() {
                     exit 0
                     ;;
                 *)
-                    # Should not reach here because confirm_menu_choice handles invalid input
                     ;;
             esac
         fi
-        # If not confirmed, the loop repeats to show the menu again
     done
 }
 
@@ -1279,33 +1325,33 @@ check_arg() {
     else
         case "$1" in
             --gnome|-g)
-                change_to_gnome ;;
+                run_step change_to_gnome ;;
             --root|-r)
-                enable_root_login ;;
+                run_step enable_root_login ;;
             --tools|-t)
-                install_tools_for_root ;;
+                run_step install_tools_for_root ;;
             --hacking|-H)
-                install_hacking_tools ;;
+                run_step install_hacking_tools ;;
             --upgrade|-u)
-                apt_update
-                apt_upgrade ;;
+                run_step apt_update
+                run_step apt_upgrade ;;
             --all|-a|-A)
                 setup_all ;;
             --fix-sources|-f)
-                fix_sources ;;
+                run_step fix_sources ;;
             --nmap|-n)
-                fix_nmap ;;
+                run_step fix_nmap ;;
             --style|-s)
-                configure_dock_for_root
-                configure_dash_apps
-                install_icons ;;
+                run_step configure_dock_for_root
+                run_step configure_dash_apps
+                run_step install_icons ;;
             --wifi|-w)
-                install_wifi_hotspot ;;
+                run_step install_wifi_hotspot ;;
             --firefox|-F)
-            	add_firefox_bookmarks
-                setup_firefox_custom_homepage ;;
+                run_step add_firefox_bookmarks
+                run_step setup_firefox_custom_homepage ;;
             --enable-root|-R)
-                enable_root_login ;;
+                run_step enable_root_login ;;
             *)
                 setupkali_help
                 exit 1 ;;
@@ -1317,18 +1363,30 @@ check_arg() {
 
 check_arg "$1"
 
-
 clear
-echo -e "$asciiart"
-echo -e "\n${RED}Happy Hacking!${RESET}"
-echo -e "${GREEN}Setup completed! Please type 'reboot' to apply the changes and restart the system.${RESET}"
+echo -e "${BOLD}${deep_green}$asciiart${RESET}"
+exit_code=0
+if (( ${#FAILED_STEPS[@]} > 0 )); then
+    exit_code=1
+    echo -e "\n${RED}[!!] Finished with ${#FAILED_STEPS[@]} failed step(s):${RESET}"
+    for step in "${FAILED_STEPS[@]}"; do
+        echo -e "${RED}     - ${step}${RESET}"
+    done
+    echo -e "${YELLOW}Run the tool again to retry the failed step(s).${RESET}"
+else
+    echo -e "\n${RED}Happy Hacking!${RESET}"
+    echo -e "${GREEN}Setup completed successfully!${RESET}"
+fi
 
-
-read -p "Type 'reboot' to restart: " user_input
-
+echo -e "${GREEN}Please type 'reboot' to apply the changes and restart the system.${RESET}"
+read -r -p "Type 'reboot' to restart: " user_input
 
 if [ "$user_input" == "reboot" ]; then
     sudo reboot
 else
     echo -e "\n  ${RED}You must type 'reboot' to restart the system.${RESET}"
 fi
+
+exit "$exit_code"
+
+exit "$exit_code"
