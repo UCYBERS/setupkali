@@ -902,6 +902,9 @@ install_network_driver() {
 install_bettercap() {
     echo -e "${YELLOW}Installing bettercap...${RESET}"
 
+    local caplets_repo="https://github.com/bettercap/caplets.git"
+    local caplets_commit="eb626871ad99ea8c4f9771f216caa2290e06a058"
+
     apt-get install -y bettercap || {
         echo -e "${RED}Failed to install bettercap${RESET}"
         return 1
@@ -914,15 +917,27 @@ install_bettercap() {
 
     echo -e "${GREEN}bettercap installed successfully!${RESET}"
 
-    local caplets_tmp
+    local caplets_tmp head_commit
     caplets_tmp=$(mktemp -d /tmp/caplets_XXXXXX)
 
-    echo -e "${YELLOW}Cloning bettercap caplets...${RESET}"
-    git clone --depth=1 https://github.com/bettercap/caplets.git "$caplets_tmp" || {
-        echo -e "${RED}Failed to clone caplets repository${RESET}"
+    echo -e "${YELLOW}Fetching bettercap caplets (commit ${caplets_commit:0:7})...${RESET}"
+    if ! git -C "$caplets_tmp" init -q ||
+       ! git -C "$caplets_tmp" fetch -q --depth=1 "$caplets_repo" "$caplets_commit" ||
+       ! git -C "$caplets_tmp" -c advice.detachedHead=false checkout -q FETCH_HEAD; then
+        echo -e "${RED}Failed to fetch pinned caplets commit${RESET}"
         rm -rf "$caplets_tmp"
         return 1
-    }
+    fi
+
+    head_commit=$(git -C "$caplets_tmp" rev-parse HEAD)
+    if [[ "$head_commit" != "$caplets_commit" ]]; then
+        echo -e "${RED}[!!] Commit mismatch for caplets${RESET}"
+        echo -e "${RED}     expected: $caplets_commit${RESET}"
+        echo -e "${RED}     actual:   $head_commit${RESET}"
+        rm -rf "$caplets_tmp"
+        return 1
+    fi
+    echo -e "${GREEN}[OK] Commit verified: caplets ${caplets_commit:0:7}${RESET}"
 
     echo -e "${YELLOW}Installing caplets...${RESET}"
     make -C "$caplets_tmp" install || {
