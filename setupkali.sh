@@ -265,33 +265,79 @@ enable_root_login() {
 
     echo -e "${GREEN}GDM configuration updated successfully.${RESET}"
 
+    # SSH: root may log in with a key only, never with a password
+    local ssh_conf="/etc/ssh/sshd_config.d/01-setupkali-root.conf"
+    mkdir -p /etc/ssh/sshd_config.d
+    cat > "$ssh_conf" <<'SSHEOF'
+# Added by setupkali: the root password (e.g. 'ucybers') is never accepted over SSH
+PermitRootLogin prohibit-password
+SSHEOF
+    chmod 644 "$ssh_conf"
+    if command -v sshd &>/dev/null && ! sshd -t 2>/dev/null; then
+        echo -e "${RED}SSH config test failed — removing $ssh_conf${RESET}"
+        rm -f "$ssh_conf"
+    else
+        systemctl is-active --quiet ssh && systemctl reload ssh
+        echo -e "${GREEN}[OK] SSH root login with password is disabled${RESET}"
+    fi
+
     echo -e "${BLUE}Setting root password...${RESET}"
+
+    local virt
+    virt=$(systemd-detect-virt --vm 2>/dev/null) || virt="none"
+
     echo -e "${YELLOW}Default password is: ucybers${RESET}"
-    
     echo -e "${RED}[!] SECURITY NOTICE:${RESET}"
     echo -e "${YELLOW}    The 'ucybers' password is intended ONLY for an isolated local${RESET}"
     echo -e "${YELLOW}    training VM (VMware/VirtualBox using NAT or Host-Only networking).${RESET}"
     echo -e "${YELLOW}    Do NOT use this setup on a machine on a public network, on a VPS,${RESET}"
-    echo -e "${YELLOW}    or in bridged mode with SSH enabled. On those, choose a unique${RESET}"
-    echo -e "${YELLOW}    password below.${RESET}"
+    echo -e "${YELLOW}    or in bridged mode. On those, choose a unique password below.${RESET}"
 
-    local keep_default=""
-    while true; do
-        echo -ne "Keep default password 'ucybers'? [Y/n]: "
-        read -r keep_default || true
-        case "${keep_default,,}" in
-            y|"") break ;;
-            n)    break ;;
-            *)    echo -e "${RED}  Invalid input. Please enter Y or N.${RESET}" ;;
-        esac
-    done
+    # Desktop hypervisors used for training labs (cloud/VPS types like kvm, xen, amazon are excluded)
+    local desktop_vm="no"
+    case "$virt" in
+        vmware|oracle|microsoft|parallels) desktop_vm="yes" ;;
+    esac
 
-    if [[ "${keep_default,,}" == "n" ]]; then
+    local use_default=""
+    if [[ "$desktop_vm" == "yes" && -t 0 ]]; then
+        # Desktop virtual machine with a terminal: Enter keeps the default
+        echo -e "${GREEN}Virtual machine detected: ${virt}${RESET}"
+        while true; do
+            echo -ne "Keep default password 'ucybers'? [Y/n]: "
+            read -r use_default || { echo; echo -e "${RED}Input closed — root password NOT changed.${RESET}"; return 1; }
+            case "${use_default,,}" in
+                y|"") use_default="yes"; break ;;
+                n)    use_default="no";  break ;;
+                *)    echo -e "${RED}  Invalid input. Please enter Y or N.${RESET}" ;;
+            esac
+        done
+    else
+        # Physical machine, server/cloud VM, or no terminal: the default must be typed in full
+        if [[ ! -t 0 ]]; then
+            echo -e "${RED}[!] No interactive terminal — 'ucybers' must be given in full.${RESET}"
+        elif [[ "$virt" == "none" ]]; then
+            echo -e "${RED}[!] This is a PHYSICAL machine, not a virtual machine.${RESET}"
+        else
+            echo -e "${RED}[!] Server/cloud virtual machine detected (${virt}), not a desktop VM.${RESET}"
+        fi
+        while true; do
+            echo -ne "Type 'ucybers' to use the default password, or 'n' to choose your own: "
+            read -r use_default || { echo; echo -e "${RED}Input closed — root password NOT changed.${RESET}"; return 1; }
+            case "$use_default" in
+                ucybers) use_default="yes"; break ;;
+                n|N)     use_default="no";  break ;;
+                *)       echo -e "${RED}  Please type 'ucybers' exactly, or 'n'.${RESET}" ;;
+            esac
+        done
+    fi
+
+    if [[ "$use_default" == "no" ]]; then
         local root_pass root_pass2
         while true; do
-            read -rs -p "  Enter new root password: " root_pass
+            read -rs -p "  Enter new root password: " root_pass || { echo; return 1; }
             echo ""
-            read -rs -p "  Confirm root password: " root_pass2
+            read -rs -p "  Confirm root password: " root_pass2 || { echo; return 1; }
             echo ""
             if [[ "$root_pass" != "$root_pass2" ]]; then
                 echo -e "${RED}  Passwords do not match. Try again.${RESET}"
@@ -314,7 +360,6 @@ enable_root_login() {
     echo -e "${GREEN}Root login enabled successfully.${RESET}"
     echo -e "${YELLOW}A system reboot is required to apply GDM changes.${RESET}"
 }
-
 install_tools_for_root() {
     echo -e "${BLUE}Installing tools for root user...${RESET}"
 
