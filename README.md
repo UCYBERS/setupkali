@@ -33,6 +33,15 @@
 - **Username**: root
 - **Password**: ucybers
 
+> ⚠️ **Security notice - read before using outside a lab.**
+> The `ucybers` password is intended **only** for an isolated local training VM
+> (VMware/VirtualBox using **NAT** or **Host-Only** networking). **Do not** use this
+> setup on a machine on a public network, on a VPS, or in **bridged** mode with SSH
+> enabled.
+>
+> On those setups, set a **unique password** when prompted. SSH is left **disabled by
+> default** by this script - keep it that way unless you understand the exposure.
+
 # Github index updated added +x permission:
   - Script is now be executable upon clone (perms: 755 rwxr-xr-x added to github)
   - There is no need to chmod +x setupkali.sh upon git clone
