@@ -55,7 +55,7 @@ echo
 
 install_icons() {
     echo -e "${BLUE}Downloading and installing icons...${RESET}"
-    ICONS_URL="https://dl.dropbox.com/scl/fi/d8o2oor98iiq54y3uf006/Vibrancy-Kali.tar.gz?rlkey=nj8w51w5oljddqsjs0e5wmffm&st=tx97epgh"
+    ICONS_URL="https://github.com/UCYBERS/setupkali/releases/download/1.1.5/Vibrancy-Kali.tar.gz"
     ICONS_FILE="/tmp/Vibrancy-Kali.tar.gz"
     
    
@@ -725,7 +725,7 @@ with open('$target_file', 'w') as f:
 setup_firefox_custom_homepage() {
     echo -e "${BLUE}Setting up custom Firefox homepage...${RESET}"
 
-    local startpage_url="https://dl.dropbox.com/scl/fi/flp1oet82gkssjbgggk0n/startpage.7z?rlkey=t0x63e4yhnub1gnf160tp0b7b&st=woz1sg2u"
+    local startpage_url="https://github.com/UCYBERS/setupkali/releases/download/1.1.5/startpage.7z"
     local startpage_dir="/var/startpage"
     local startpage_file="/tmp/startpage.7z"
     local homepage_path="file://${startpage_dir}/startpage/ucybers.html"
@@ -892,7 +892,7 @@ install_bettercap() {
 }
 
 replace_hstshijack() {
-    local url="https://dl.dropbox.com/scl/fi/qtgpkeinbi6ihngiasx8p/hstshijack.zip?rlkey=4dlfpbuz5kddo8x8guzvvvcrh&st=ot44833o"
+    local url="https://github.com/UCYBERS/setupkali/releases/download/1.1.5/hstshijack.zip"
     local dest_dir="/usr/local/share/bettercap/caplets/hstshijack"
     local tmp_zip tmp_dir
 
