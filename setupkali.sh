@@ -621,29 +621,54 @@ remove_kali_undercover() {
 fix_nmap() {
     echo -e "\n  ${BLUE}Fixing nmap scripts...${RESET}"
 
-    local clamav_url="https://raw.githubusercontent.com/nmap/nmap/master/scripts/clamav-exec.nse"
-    local shellshock_url="https://raw.githubusercontent.com/UCYBERS/setupkali/master/fixed-http-shellshock.nse"
-    local tmp_clamav="/tmp/clamav-exec.nse"
-    local tmp_shellshock="/tmp/http-shellshock.nse"
+    local nmap_commit="1bb2586a85ae41dc6824a8405e44d17309e9288c"
+    local clamav_sha256="34c7b72531cc6aa6b073c2a23c17903a2ff6b1e96d9419cc6536bdf91da020c9"
+    local clamav_url="https://raw.githubusercontent.com/nmap/nmap/${nmap_commit}/scripts/clamav-exec.nse"
 
-    echo -e "\n  ${BLUE}Downloading clamav-exec.nse...${RESET}"
-    wget --https-only -q "$clamav_url" -O "$tmp_clamav" || {
-        echo -e "\n  ${RED}Failed to download clamav-exec.nse${RESET}"
+    local shellshock_sha256="db5f4d608c1e2ec103526cb5b20f3ad464ebef1a529a626caedbfce707f6075e"
+    local script_dir local_shellshock actual
+    script_dir="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+    local_shellshock="${script_dir}/fixed-http-shellshock.nse"
+
+    local nse_dir="/usr/share/nmap/scripts"
+    local tmp_dir
+
+    if [[ ! -d "$nse_dir" ]]; then
+        echo -e "\n  ${RED}nmap scripts directory not found — is nmap installed?${RESET}"
+        return 1
+    fi
+
+    if [[ ! -f "$local_shellshock" ]]; then
+        echo -e "\n  ${RED}Missing $local_shellshock — run the script from the setupkali folder${RESET}"
+        return 1
+    fi
+
+    actual=$(sha256sum "$local_shellshock" | awk '{print $1}')
+    if [[ "$actual" != "$shellshock_sha256" ]]; then
+        echo -e "${RED}[!!] SHA-256 mismatch for fixed-http-shellshock.nse${RESET}"
+        echo -e "${RED}     expected: $shellshock_sha256${RESET}"
+        echo -e "${RED}     actual:   $actual${RESET}"
+        return 1
+    fi
+    echo -e "${GREEN}[OK] SHA-256 verified: fixed-http-shellshock.nse${RESET}"
+
+    tmp_dir=$(mktemp -d /tmp/nmap_fix_XXXXXX)
+
+    echo -e "\n  ${BLUE}Downloading clamav-exec.nse (nmap v7.991)...${RESET}"
+    download_verified "$clamav_url" "$tmp_dir/clamav-exec.nse" "$clamav_sha256" || {
+        rm -rf "$tmp_dir"
         return 1
     }
 
-    echo -e "\n  ${BLUE}Downloading http-shellshock.nse...${RESET}"
-    wget --https-only -q "$shellshock_url" -O "$tmp_shellshock" || {
-        echo -e "\n  ${RED}Failed to download http-shellshock.nse${RESET}"
-        rm -f "$tmp_clamav"
+    if ! install -m 0644 -o root -g root "$tmp_dir/clamav-exec.nse" "$nse_dir/clamav-exec.nse" ||
+       ! install -m 0644 -o root -g root "$local_shellshock" "$nse_dir/http-shellshock.nse"; then
+        echo -e "\n  ${RED}Failed to install nmap scripts${RESET}"
+        rm -rf "$tmp_dir"
         return 1
-    }
+    fi
 
-    rm -f /usr/share/nmap/scripts/clamav-exec.nse
-    mv "$tmp_clamav"     /usr/share/nmap/scripts/clamav-exec.nse
-    mv "$tmp_shellshock" /usr/share/nmap/scripts/http-shellshock.nse
-    chmod 644 /usr/share/nmap/scripts/clamav-exec.nse
-    chmod 644 /usr/share/nmap/scripts/http-shellshock.nse
+    rm -rf "$tmp_dir"
+    nmap --script-updatedb &>/dev/null || true
 
     echo -e "\n  ${GREEN}Nmap scripts updated successfully.${RESET}"
 }
