@@ -807,44 +807,57 @@ install_wifi_hotspot() {
 
 
 
+firefox_set_policy() {
+    python3 - "$1" "$2" <<'PYEOF'
+import json, os, sys, tempfile
+
+name, value = sys.argv[1], json.loads(sys.argv[2])
+etc_file  = "/etc/firefox/policies/policies.json"
+kali_file = "/usr/share/firefox-esr/distribution/policies.json"
+
+# Start from our file if it exists, otherwise from Kali's policies
+source = etc_file if os.path.exists(etc_file) else kali_file
+if os.path.exists(source):
+    try:
+        with open(source) as f:
+            data = json.load(f)
+    except (OSError, ValueError) as e:
+        sys.exit(f"Cannot read {source}: {e} — nothing changed")
+else:
+    data = {}
+
+if not isinstance(data.get("policies", {}), dict):
+    sys.exit(f"Unexpected format in {source} — nothing changed")
+
+data.setdefault("policies", {})[name] = value
+
+# Write to a temp file first, then replace in one step
+os.makedirs(os.path.dirname(etc_file), exist_ok=True)
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(etc_file), suffix=".tmp")
+with os.fdopen(fd, "w") as f:
+    json.dump(data, f, indent=2)
+os.chmod(tmp, 0o644)
+os.replace(tmp, etc_file)
+PYEOF
+}
+
 add_firefox_bookmarks() {
     echo -e "${BLUE}Configuring Firefox bookmarks...${RESET}"
 
-    local policies_dir="/etc/firefox-esr/policies"
-    local policies_file="$policies_dir/policies.json"
-    local kali_policies="/usr/share/firefox-esr/distribution/policies.json"
-
-    mkdir -p "$policies_dir" || {
-        echo -e "${RED}Failed to create Firefox policies directory${RESET}"
-        return 1
-    }
-
-    # Merge with Kali's system policies to avoid being overridden
-    local target_file="$kali_policies"
-    [[ ! -f "$kali_policies" ]] && target_file="$policies_file"
-
-    python3 -c "
-import json, sys
-try:
-    with open('$target_file', 'r') as f:
-        data = json.load(f)
-except:
-    data = {'policies': {}}
-data.setdefault('policies', {})['Bookmarks'] = [
-    {'Title': 'UCYBERS',                'URL': 'https://ucybers.com',                       'Toolbar': True},
-    {'Title': 'UCYBERS Certifications', 'URL': 'https://certifications.ucybers.com',         'Toolbar': True},
-    {'Title': 'UCYBERS Academy',        'URL': 'https://academy.ucybers.com',                'Toolbar': True},
-    {'Title': 'UCYBERS YouTube',        'URL': 'https://www.youtube.com/@ucybers',           'Toolbar': True},
-    {'Title': 'UCYBERS FB',             'URL': 'https://www.facebook.com/ucybersx',          'Toolbar': True},
-    {'Title': 'UCYBERS Twitter',        'URL': 'https://x.com/ucybersx',                    'Toolbar': True},
-    {'Title': 'UCYBERS Linkedin',       'URL': 'https://www.linkedin.com/company/ucybersx', 'Toolbar': True}
-]
-with open('$target_file', 'w') as f:
-    json.dump(data, f, indent=2)
-" && echo -e "${GREEN}Firefox bookmarks configured successfully.${RESET}" || {
+    firefox_set_policy "Bookmarks" '[
+        {"Title": "UCYBERS",                "URL": "https://ucybers.com",                       "Toolbar": true},
+        {"Title": "UCYBERS Certifications", "URL": "https://certifications.ucybers.com",         "Toolbar": true},
+        {"Title": "UCYBERS Academy",        "URL": "https://academy.ucybers.com",                "Toolbar": true},
+        {"Title": "UCYBERS YouTube",        "URL": "https://www.youtube.com/@ucybers",           "Toolbar": true},
+        {"Title": "UCYBERS FB",             "URL": "https://www.facebook.com/ucybersx",          "Toolbar": true},
+        {"Title": "UCYBERS Twitter",        "URL": "https://x.com/ucybersx",                     "Toolbar": true},
+        {"Title": "UCYBERS Linkedin",       "URL": "https://www.linkedin.com/company/ucybersx", "Toolbar": true}
+    ]' || {
         echo -e "${RED}Failed to configure bookmarks${RESET}"
         return 1
     }
+
+    echo -e "${GREEN}Firefox bookmarks configured successfully.${RESET}"
 }
 
 setup_firefox_custom_homepage() {
@@ -854,9 +867,7 @@ setup_firefox_custom_homepage() {
     local startpage_dir="/var/startpage"
     local startpage_file="/tmp/startpage.7z"
     local homepage_path="file://${startpage_dir}/startpage/ucybers.html"
-    local kali_policies="/usr/share/firefox-esr/distribution/policies.json"
 
-    # Install 7zip if missing
     if ! command -v 7z &>/dev/null; then
         apt-get install -y 7zip || {
             echo -e "${RED}Failed to install 7zip${RESET}"
@@ -864,11 +875,9 @@ setup_firefox_custom_homepage() {
         }
     fi
 
-    # Download startpage
     echo -e "${BLUE}Downloading startpage...${RESET}"
     download_verified "$startpage_url" "$startpage_file" "${ASSET_SHA256[startpage.7z]}" || return 1
 
-    # Extract startpage
     mkdir -p "$startpage_dir"
     7z x "$startpage_file" -o"${startpage_dir}/" -y || {
         echo -e "${RED}Failed to extract startpage${RESET}"
@@ -877,32 +886,23 @@ setup_firefox_custom_homepage() {
     }
     rm -f "$startpage_file"
 
-    # Verify startpage exists
     if [[ ! -f "${startpage_dir}/startpage/ucybers.html" ]]; then
         echo -e "${RED}ucybers.html not found after extraction${RESET}"
         return 1
     fi
 
-    # Set homepage via Firefox policies
-    python3 -c "
-import json
-try:
-    with open('$kali_policies', 'r') as f:
-        data = json.load(f)
-except:
-    data = {'policies': {}}
-data.setdefault('policies', {})['Homepage'] = {
-    'URL': '$homepage_path',
-    'Locked': False,
-    'StartPage': 'homepage'
-}
-with open('$kali_policies', 'w') as f:
-    json.dump(data, f, indent=2)
-" && echo -e "${GREEN}Firefox homepage set to local startpage.${RESET}" || {
+    firefox_set_policy "Homepage" "{
+        \"URL\": \"${homepage_path}\",
+        \"Locked\": false,
+        \"StartPage\": \"homepage\"
+    }" || {
         echo -e "${RED}Failed to set homepage in policies${RESET}"
         return 1
     }
+
+    echo -e "${GREEN}Firefox homepage set to local startpage.${RESET}"
 }
+
 
 install_basic_packages() {
     echo -e "${BLUE}Installing essential packages...${RESET}"
