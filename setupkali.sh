@@ -981,28 +981,35 @@ replace_hstshijack() {
 install_python2_pip() {
     echo -e "${BLUE}Installing pip for Python 2...${RESET}"
 
-    if python2 -m pip --version &>/dev/null; then
-        echo -e "${GREEN}pip2 already installed${RESET}"
-        return 0
-    fi
+    local getpip_commit="831b5dd0bec03caf24aa6d736a28dc2ba80f91cc"
+    local getpip_sha256="40ee07eac6674b8d60fce2bbabc148cf0e2f1408c167683f110fd608b8d6f416"
+    local getpip_url="https://raw.githubusercontent.com/pypa/get-pip/${getpip_commit}/public/2.7/get-pip.py"
+    local tmp_dir
 
     if ! command -v python2 &>/dev/null; then
         echo -e "${YELLOW}python2 not installed — skipping${RESET}"
         return 0
     fi
 
-    local get_pip="/tmp/get-pip2.py"
-    wget --https-only -qO "$get_pip" "https://bootstrap.pypa.io/pip/2.7/get-pip.py" || {
-        echo -e "${RED}Failed to download get-pip.py${RESET}"
+    if python2 -m pip --version &>/dev/null; then
+        echo -e "${GREEN}pip2 already installed${RESET}"
+        return 0
+    fi
+
+    tmp_dir=$(mktemp -d /tmp/get_pip2_XXXXXX)
+
+    download_verified "$getpip_url" "$tmp_dir/get-pip.py" "$getpip_sha256" || {
+        rm -rf "$tmp_dir"
         return 1
     }
 
-    python2 "$get_pip" || {
-        rm -f "$get_pip"
+    python2 "$tmp_dir/get-pip.py" || {
+        echo -e "${RED}get-pip.py failed${RESET}"
+        rm -rf "$tmp_dir"
         return 1
     }
 
-    rm -f "$get_pip"
+    rm -rf "$tmp_dir"
     echo -e "${GREEN}pip2 installed successfully${RESET}"
 }
 
