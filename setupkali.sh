@@ -709,17 +709,49 @@ apt_upgrade_complete() {
 install_wifi_hotspot() {
     echo -e "${BLUE}Installing linux-wifi-hotspot...${RESET}"
 
-    apt-get install -y libgtk-3-dev hostapd libqrencode-dev libpng-dev pkg-config || return 1
+    local hotspot_repo="https://github.com/lakinduakash/linux-wifi-hotspot"
+    local hotspot_commit="63c2168626a0b13015913d52d5dbd5e1d91a7fb6"
 
-    local tmp_dir
+    apt-get install -y build-essential libgtk-3-dev hostapd libqrencode-dev libpng-dev pkg-config || return 1
+
+    local build_user="nobody"
+    if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != "root" ]] && id "$SUDO_USER" &>/dev/null; then
+        build_user="$SUDO_USER"
+    fi
+
+    local tmp_dir head_commit
     tmp_dir=$(mktemp -d /tmp/wifi_hotspot_XXXXXX)
 
-    git clone --depth=1 https://github.com/lakinduakash/linux-wifi-hotspot "$tmp_dir" || {
+    echo -e "${BLUE}Fetching linux-wifi-hotspot v5.0.0 (commit ${hotspot_commit:0:7})...${RESET}"
+    if ! git -C "$tmp_dir" init -q ||
+       ! git -C "$tmp_dir" fetch -q --depth=1 "$hotspot_repo" "$hotspot_commit" ||
+       ! git -C "$tmp_dir" -c advice.detachedHead=false checkout -q FETCH_HEAD; then
+        echo -e "${RED}Failed to fetch pinned linux-wifi-hotspot commit${RESET}"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    head_commit=$(git -C "$tmp_dir" rev-parse HEAD)
+    if [[ "$head_commit" != "$hotspot_commit" ]]; then
+        echo -e "${RED}[!!] Commit mismatch for linux-wifi-hotspot${RESET}"
+        echo -e "${RED}     expected: $hotspot_commit${RESET}"
+        echo -e "${RED}     actual:   $head_commit${RESET}"
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+    echo -e "${GREEN}[OK] Commit verified: linux-wifi-hotspot ${hotspot_commit:0:7}${RESET}"
+
+    chown -R "$build_user": "$tmp_dir"
+
+    echo -e "${BLUE}Building as user: ${build_user}${RESET}"
+    runuser -u "$build_user" -- env HOME="$tmp_dir" make -C "$tmp_dir" || {
+        echo -e "${RED}linux-wifi-hotspot build failed${RESET}"
         rm -rf "$tmp_dir"
         return 1
     }
 
-    make -C "$tmp_dir" && make -C "$tmp_dir" install || {
+    make -C "$tmp_dir" install || {
+        echo -e "${RED}linux-wifi-hotspot install failed${RESET}"
         rm -rf "$tmp_dir"
         return 1
     }
