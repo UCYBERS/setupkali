@@ -244,6 +244,13 @@ enable_root_login() {
 
     echo -e "${BLUE}Setting root password...${RESET}"
     echo -e "${YELLOW}Default password is: ucybers${RESET}"
+    
+    echo -e "${RED}[!] SECURITY NOTICE:${RESET}"
+    echo -e "${YELLOW}    The 'ucybers' password is intended ONLY for an isolated local${RESET}"
+    echo -e "${YELLOW}    training VM (VMware/VirtualBox using NAT or Host-Only networking).${RESET}"
+    echo -e "${YELLOW}    Do NOT use this setup on a machine on a public network, on a VPS,${RESET}"
+    echo -e "${YELLOW}    or in bridged mode with SSH enabled. On those, choose a unique${RESET}"
+    echo -e "${YELLOW}    password below.${RESET}"
 
     local keep_default=""
     while true; do
