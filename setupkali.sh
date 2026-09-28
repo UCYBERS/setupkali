@@ -40,6 +40,33 @@ if ! grep -q "Kali" /etc/os-release; then
     exit 1
 fi
 
+declare -rA ASSET_SHA256=(
+    [Vibrancy-Kali.tar.gz]="55ea8978064e6953d65dc4a6fee5e7702def47fe572dbf9c6be8ed11c64143d7"
+    [startpage.7z]="79febacd9a32081aae1a8a63856fb12e4b82a3bb7eb35ed3bf90d1e507efbfa6"
+    [hstshijack.zip]="22ce5359e72fff65215cf36ad0dda4e25365bc898d9d04ce85703f257f73dae5"
+)
+
+download_verified() {
+    local url="$1" dest="$2" expected="$3" actual
+
+    curl --proto '=https' --tlsv1.2 -fsSL --retry 3 -o "$dest" "$url" || {
+        echo -e "${RED}Download failed: $url${RESET}"
+        rm -f "$dest"
+        return 1
+    }
+
+    actual=$(sha256sum "$dest" | awk '{print $1}')
+    if [[ "$actual" != "$expected" ]]; then
+        echo -e "${RED}[!!] SHA-256 mismatch for $(basename "$dest") — file deleted${RESET}"
+        echo -e "${RED}     expected: $expected${RESET}"
+        echo -e "${RED}     actual:   $actual${RESET}"
+        rm -f "$dest"
+        return 1
+    fi
+
+    echo -e "${GREEN}[OK] SHA-256 verified: $(basename "$dest")${RESET}"
+}
+
 
 asciiart=$(base64 -d <<< "H4sICP9gsmYAA2xvZ28udHh0AH1OMQ4CMQzb+wqPTJcPoA6c+ACIAclSJcTNIBaE1McTJ1cECxnq
 xLFTAz/VGvCHmTTpKVqoEgzoalfSm+7MmJBTb60XWDjNpGbcZ+wZSkppMMrF1edPiT3IdH94IL6u
@@ -57,18 +84,14 @@ install_icons() {
     echo -e "${BLUE}Downloading and installing icons...${RESET}"
     ICONS_URL="https://github.com/UCYBERS/setupkali/releases/download/1.1.5/Vibrancy-Kali.tar.gz"
     ICONS_FILE="/tmp/Vibrancy-Kali.tar.gz"
-    
-   
-    wget -O "$ICONS_FILE" "$ICONS_URL"
-    
-    
+
+    download_verified "$ICONS_URL" "$ICONS_FILE" "${ASSET_SHA256[Vibrancy-Kali.tar.gz]}" || return 1
+
     sudo tar -xzf "$ICONS_FILE" -C /usr/share/icons/
-    
-   
-   sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
-    
+
+    sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
+
     echo -e "${GREEN}Icons installed and set successfully.${RESET}"
-    # enable_icon_theme_autostart_root
 }
 
 enable_icon_theme_autostart_root() {
@@ -741,11 +764,7 @@ setup_firefox_custom_homepage() {
 
     # Download startpage
     echo -e "${BLUE}Downloading startpage...${RESET}"
-    wget --https-only -O "$startpage_file" "$startpage_url" || {
-        echo -e "${RED}Failed to download startpage${RESET}"
-        rm -f "$startpage_file"
-        return 1
-    }
+    download_verified "$startpage_url" "$startpage_file" "${ASSET_SHA256[startpage.7z]}" || return 1
 
     # Extract startpage
     mkdir -p "$startpage_dir"
@@ -900,9 +919,7 @@ replace_hstshijack() {
     tmp_dir=$(mktemp -d /tmp/hstshijack_dir_XXXXXX)
 
     echo -e "${YELLOW}Downloading hstshijack...${RESET}"
-    wget --https-only -qO "$tmp_zip" "$url" || {
-        echo -e "${RED}Failed to download hstshijack${RESET}"
-        rm -f "$tmp_zip"
+    download_verified "$url" "$tmp_zip" "${ASSET_SHA256[hstshijack.zip]}" || {
         rm -rf "$tmp_dir"
         return 1
     }
