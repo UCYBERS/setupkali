@@ -17,6 +17,7 @@
 - A final summary lists failed steps and the script exits with a proper exit code.
 - `fix_sources` keeps its backups in `/var/backups/setupkali/`, so stray `.bak` files no longer
   stay in `sources.list.d/`.
+- `fix_bad_apt_hash` no longer wipes the APT lists on every run: it runs `apt-get update` first and clears the lists only when that fails (the `lock` file and `partial` directory are kept).
 
 ### Desktop
 - Firefox policies are written to `/etc/firefox/policies/` (Kali's own policies are kept).
