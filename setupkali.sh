@@ -42,7 +42,7 @@ fi
 
 declare -rA ASSET_SHA256=(
     [Vibrancy-Kali.tar.gz]="55ea8978064e6953d65dc4a6fee5e7702def47fe572dbf9c6be8ed11c64143d7"
-    [startpage.7z]="79febacd9a32081aae1a8a63856fb12e4b82a3bb7eb35ed3bf90d1e507efbfa6"
+    [startpage.7z]="1fc5193a07e9cb296ad561c00caa814cce7f432b91773c821ec08e3232b8dc11"
     [hstshijack.zip]="22ce5359e72fff65215cf36ad0dda4e25365bc898d9d04ce85703f257f73dae5"
 )
 
@@ -898,7 +898,7 @@ add_firefox_bookmarks() {
 setup_firefox_custom_homepage() {
     echo -e "${BLUE}Setting up custom Firefox homepage...${RESET}"
 
-    local startpage_url="https://github.com/UCYBERS/setupkali/releases/download/1.1.5/startpage.7z"
+    local startpage_url="https://github.com/UCYBERS/setupkali/releases/download/1.1.6/startpage.7z"
     local startpage_dir="/var/startpage"
     local startpage_file="/tmp/startpage.7z"
     local homepage_path="file://${startpage_dir}/startpage/ucybers.html"
