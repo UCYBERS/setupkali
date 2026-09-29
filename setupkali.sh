@@ -9,7 +9,7 @@
 # Standard Disclaimer: Author assumes no liability for any damage
 
 # Most functions are invoked indirectly through run_step
-# shellcheck disable=SC2329
+# shellcheck disable=SC2317,SC2329
 
 VERSION="2.0.0"
 
