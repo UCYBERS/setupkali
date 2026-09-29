@@ -1,6 +1,7 @@
 # setupkali.sh
 ![SetupKali](https://github.com/user-attachments/assets/4159ae20-d7a0-45aa-80f1-b8534f60686a)
 <p align="center">
+  <img src="https://img.shields.io/badge/version-2.0.0-b5003c">
   <img src="https://img.shields.io/github/last-commit/ucybers/setupkali">
   <img src="https://img.shields.io/github/repo-size/ucybers/setupkali">
   <a href="https://discord.gg/FXgT8fdGyY">
@@ -14,237 +15,129 @@
             alt="Twitter"></a>
 </p>
 
-
-
 # Fixes and Enhancements for Kali Linux
 
-
-   
-
+Setup script for a fresh, up-to-date **Kali Linux** install (GNOME desktop, root login, tools, icons and
+UCYBERS start page). Current version: **2.0.0** (`sudo ./setupkali.sh --version`).
 
 - **Author**: UCYBERS
 - **GitHub Repository**: [setupkali](https://github.com/UCYBERS/setupkali)
-- **Usage**: `sudo ./setupkali.sh` (defaults to the menu system)
-- **Command Line Arguments**: Valid arguments can be used; only one argument is supported
+- **Usage**: `sudo ./setupkali.sh` (opens the menu) or `sudo ./setupkali.sh --all`
+- **Arguments**: only one argument is accepted per run
+- **Changes**: see [CHANGELOG.md](CHANGELOG.md)
 
-
-# 👤🔑 Enabled root login.
-
-- **Username**: root
-- **Password**: ucybers
-
-> ⚠️ **Security notice - read before using outside a lab.**
-> The `ucybers` password is intended **only** for an isolated local training VM
-> (VMware/VirtualBox using **NAT** or **Host-Only** networking). **Do not** use this
-> setup on a machine on a public network, on a VPS, or in **bridged** mode with SSH
-> enabled.
->
-> On those setups, set a **unique password** when prompted. SSH is left **disabled by
-> default** by this script - keep it that way unless you understand the exposure.
-
-# Github index updated added +x permission:
-  - Script is now be executable upon clone (perms: 755 rwxr-xr-x added to github)
-  - There is no need to chmod +x setupkali.sh upon git clone
+> The script is meant for current Kali installs. It refuses to run on anything else and it must be run as root.
 
 # 🛠️ Installation
 ```console
-# Remove existing setupkali folder
+# Remove an existing copy (if any)
 rm -rf setupkali/
 
-# Clone setupkali repository & enter the folder
-sudo git clone https://github.com/UCYBERS/setupkali
+# Clone the repository (no sudo needed) and enter the folder
+git clone https://github.com/UCYBERS/setupkali
 cd setupkali
 
-# (The script must be run with root privileges)
+# Run it with root privileges
 sudo ./setupkali.sh
 ```
+The file is already executable, so `chmod +x` is not needed.
 
-# ✨ Fixes and Features for Kali Linux Setup
-- Author assumes zero liability for any data loss or misuse of setupkali
-- Menu breakdown added below revision history
+To keep a log of a full run:
+```console
+script -q -c "sudo ./setupkali.sh --all" ~/run.log
+```
+
+# 👤🔑 Root login
+
+- **Username**: root
+- **Default password**: `ucybers`
+
+> ⚠️ **Security notice - read before using outside a lab.**
+> The `ucybers` password is intended **only** for an isolated local training VM
+> (VMware/VirtualBox using **NAT** or **Host-Only** networking). **Do not** use it on a machine on a
+> public network, on a VPS, or in **bridged** mode.
+
+How the password is set:
+
+- On a **desktop virtual machine** (VMware, VirtualBox, Hyper-V, Parallels) pressing Enter keeps `ucybers`;
+  answering `n` lets you choose your own password.
+- On a **physical machine or a server/cloud VM**, or when there is no terminal, you must type `ucybers`
+  in full to accept it (or `n` to choose your own). Wrong input asks again.
+- **SSH password login for root is disabled** (`PermitRootLogin prohibit-password`, set in
+  `/etc/ssh/sshd_config.d/01-setupkali-root.conf`), so the default password works for the GNOME login only.
+
+# ⌨️ Command Line Arguments
+
+| Argument         | Shortcut(s) | Description                                              |
+| ---------------- | ----------- | -------------------------------------------------------- |
+| `--gnome`        | `-g`        | Install GNOME and make it the default desktop             |
+| `--root`         | `-r`        | Enable root login and set the root password               |
+| `--enable-root`  | `-R`        | Enable root login only                                    |
+| `--tools`        | `-t`        | Install tools for the root user                           |
+| `--hacking`      | `-H`        | Install additional hacking tools                          |
+| `--upgrade`      | `-u`        | Update and upgrade the system                             |
+| `--all`          | `-a`, `-A`  | Run the full setup (all steps)                            |
+| `--fix-sources`  | `-f`        | Fix and update the APT sources                            |
+| `--nmap`         | `-n`        | Fix nmap scripts                                          |
+| `--style`        | `-s`        | Configure dock, dash and icons                            |
+| `--wifi`         | `-w`        | Install linux-wifi-hotspot                                |
+| `--firefox`      | `-F`        | Firefox bookmarks and UCYBERS homepage                    |
+| `--version`      | `-v`        | Show the version                                          |
+| `--help`         | `-h`, `-?`  | Show the help message (an unknown option exits with 1)    |
+
+```console
+sudo ./setupkali.sh --all
+sudo ./setupkali.sh -g
+sudo ./setupkali.sh --fix-sources
+sudo ./setupkali.sh --help
+```
+
+# ☰ Menu
+
+| Key | Option | What it does |
+| --- | ------ | ------------ |
+| 1 | Change to GNOME Desktop | Installs `kali-desktop-gnome` and GDM3, makes GDM the default display manager, removes XFCE if present, and sets qterminal as the default terminal for menu launchers (fixes tools such as Metasploit) |
+| 2 | Enable Root Login | Installs `kali-root-login`, allows root in GDM (with a backup of the config), disables SSH password login for root and sets the root password (see above) |
+| 3 | Install Tools for Root | terminator, mousepad, firefox-esr, metasploit-framework, burpsuite, maltego, beef-xss, zaproxy, mdk4, nemo, plus ark, gwenview, kate, partitionmanager, okular, vlc. Also applies the GNOME defaults and makes **Nemo** the default file manager |
+| 4 | Install Pen Tools | htop, Firefox bookmarks and UCYBERS homepage, zenmap, bettercap with caplets, the patched `hstshijack` caplet, Python 2 pip |
+| 5 | Upgrade System | update, upgrade, dist-upgrade, autoremove, autoclean |
+| 6 | Setup All | Everything below, in order |
+| 0 | Exit | Leaves the script |
+
+**Setup All** runs: fix APT sources, update, GNOME, root login, basic build packages, tools for root,
+hacking tools, nmap fix, WiFi hotspot, wireless drivers/tools, icons, desktop background, dock, dash apps,
+GNOME defaults and power settings.
+
+## Notable behaviour
+
+- **Downloads are verified.** Release assets are checked against a pinned SHA-256, and git sources are
+  pinned to fixed commits (get-pip, bettercap caplets, linux-wifi-hotspot v5.0.0, clamav-exec).
+  A mismatch stops that step.
+- **Steps retry and repair.** A failed step is retried up to 3 times, repairing APT in between. At the end a
+  summary lists failed steps and the exit code is non-zero if any step failed.
+- **APT sources.** `fix_sources` enables `deb-src` and `non-free-firmware`, and keeps backups in
+  `/var/backups/setupkali/`. It only clears the APT lists when `apt update` fails.
+- **Firefox.** Bookmarks and homepage are set through enterprise policies in `/etc/firefox/policies/`
+  (Kali's own policies are preserved). Check them at `about:policies`.
+- **Desktop.** Icons (Vibrancy-Kali), dock on the left and the Kali background are applied system-wide through
+  dconf defaults. Nemo replaces Files through an override launcher in `/usr/local/share/applications`;
+  no package file is edited.
+- **Wireless.** Known wireless kernel modules are loaded when available, and `aircrack-ng`, `iw`,
+  `wireless-tools` and `rfkill` are installed.
 
 # 🪶 Revision History
-  - ## 📦 Version 1.1.5 (Latest Release)
-    ### **"The Wayland-Ready Update"**
-    ***This release focuses on absolute compatibility with **Kali Linux 2026.2** and the transition to the **Wayland** display protocol, ensuring a seamless experience for cybersecurity professionals and students   in the **UCYBERS Academy**.***
+The full history is in [CHANGELOG.md](CHANGELOG.md).
 
+- **2.0.0** - supply-chain pinning, retry/repair and failure summary, safer root and SSH handling,
+  system-wide desktop defaults, new UCYBERS start page, code cleanup, `--version`.
+- **1.1.5** - Kali 2026.2 compatibility, Nemo as the file manager for root, idempotent GDM configuration.
+- **1.1.4** - short and long arguments, improved help and menu confirmation.
+- **1.1.0** - `fix_sources`, autoremove, custom Firefox homepage.
+- **1.0.0** - initial release.
 
-      - ### 🌟 Key Enhancements
-        - **Kali Linux 2026.2 Compatibility**: Fully optimized to support the new **VM Guest Utils for Wayland**, ensuring stable clipboard sharing and window scaling in VMware environments.
-        - **Nemo File Manager Integration**: Seamlessly replaces the restricted Nautilus as the default file manager for the **Root** user, bypassing the "Root-Not-Supported" limitations in GNOME.
-        - **Idempotent GDM Configuration**: Refactored the `enable_root_login` module to ensure no duplicate entries are created in `/etc/gdm3/daemon.conf`, maintaining a clean system configuration.
-        - **Smart Cleanup Strategy**: Implemented "Clean-First" logic that identifies and purges legacy, commented-out, or malformed configuration lines before applying new settings.
-        - **Wayland Optimization**: Explicitly forces `WaylandEnable=true` to leverage modern display performance and enhanced security in virtualized environments.
-        - **Enhanced Verification Phase**: Added a post-configuration audit layer using `grep -c` to verify that all system flags are correctly set, ensuring exactly one source of truth for GDM settings.
-  
-
-      -  ### 🛠️ New Tools Support
-         his update ensures full compatibility and provides deployment logic for the latest tools introduced in the Kali repositories:
-         - **evil-winrm-py**: Python-based tool for remote Windows command execution.
-         - **hexstrike-ai**: MCP server for autonomous AI-driven security tools.
-         - **bpf-linker**: Simple BPF static linker for kernel-level monitoring.
-    
-- ## Version 1.1.4
-
-  - **Improved Command Line Argument Handling:**
-    - Added short and long argument options for ease of use (e.g., `-g`/`--gnome`, `-a`/`--all`, `-h`/`--help`).
-    - Simplified argument parsing for faster script execution.
-
-  - **Enhanced Help Message:**
-    - Detailed, clear help output listing all supported CLI arguments with shortcuts.
-    - Helps users quickly understand available options.
-
-  - **Menu Confirmation (`confirm_menu_choice`):**
-    - Validates user input on menu selection.
-    - Provides colored feedback for selection confirmation or cancellation.
-    - Allows exiting cleanly on option `0` with farewell message and ASCII art.
-    - Reprompts user on invalid input to improve UX.
-
-
-
-   - ## Command Line Arguments
-
-     - | Argument       | Shortcut(s) | Description                                            |
-       | -------------- | ----------- | ---------------------------------------------------- |
-       | `--gnome`      | `-g`        | Install and switch to GNOME desktop environment       |
-       | `--root`       | `-r`        | Enable root login and prompt for password             |
-       | `--tools`      | `-t`        | Install hacking tools for root user                    |
-       | `--hacking`    | `-H`        | Install additional hacking tools                       |
-       | `--upgrade`    | `-u`        | Update and upgrade the system                          |
-       | `--all`        | `-a`, `-A`  | Run full system setup (all steps)                      |
-       | `--fixsources` | `-f`        | Fix and update APT sources list                         |
-       | `--nmap`       | `-n`        | Fix nmap configuration/issues                          |
-       | `--style`      | `-s`        | Configure dock, dash, and icons for root user          |
-       | `--wifi`       | `-w`        | Install linux-wifi-hotspot tool                         |
-       | `--firefox`    | `-F`        | Set custom Firefox homepage for root                   |
-       | `--help`       | `-h`, `-?`  | Show help message                                      |
-
-
-
-    - ## Usage Examples
-
-       -  ```console
-           sudo ./setupkali.sh --all
-           sudo ./setupkali.sh -g
-           sudo ./setupkali.sh --fixsources
-           sudo ./setupkali.sh -w
-           sudo ./setupkali.sh --help
-          ```
-
-
-- ## Revision 1.1.0 - Feature Enhancements and Improvements
-
-    - ### New Functions Added:
-      - Introduced the `fix_hushlogin` function to manage `.hushlogin` for root user sessions.
-      - Added the `fix_sources` function to update and validate APT sources, including enabling `deb-src` and ensuring `non-free-firmware` inclusion.
-      - Implemented the `apt_autoremove` function for system cleanup post-upgrade.
-
-    - ### Customization Updates:
-      - Added support for setting a custom Firefox homepage for the root user.
-      - Improved menu layout and descriptions for better usability.
-
-    - ### Wi-Fi Hotspot Installation:
-      - Streamlined the installation process for `linux-wifi-hotspot`, ensuring proper package verification and minimal dependencies.
-
-    - ### Kernel Update Integration:
-      - Included commands for installing kernel headers alongside kernel updates.
-
-    - ### Power Management Tweaks:
-      - Added `disable_power_gnome` function to optimize GNOME power settings for better performance.
-
-    - ### General Enhancements:
-      - Optimized the script to ensure functions run under the correct user contexts (e.g., root or kali user as needed).
-      - Various bug fixes and performance improvements.
-     
-- ## Revision 1.0.0 - Initial Release
-    - Added features for Kali Linux setup
-    - Included options for package installation and configuration
-
-
-# ☰ Menu Breakdown of setupkali
-
-- **Menu Option 1** - Change to GNOME Desktop
-  - Installs the GNOME Desktop Environment and sets it as the default session.
-  - Removes XFCE and performs **Wayland Optimization** to leverage modern display performance and security.
-
-- **Menu Option 2** - Enable Root Login
-  - Installs root login and sets the password
-  - Sets the root password to 'ucybers'
-  - **Critical Fix**: Automatically applies the **Nemo/Nautilus patch** to ensure the File Manager works perfectly under Root in GNOME/Wayland environments.
-
-- **Menu Option 3** - Install Tools for Root
-  - Installs a comprehensive list of tools and utilities including:
-    - Terminator
-    - Leafpad
-    - Mousepad
-    - Firefox ESR
-    - Metasploit Framework
-    - Burpsuite
-    - Maltego
-    - Beef-xss
-    - Additional tools like ark, dolphin, gwenview, mdk3, kate, partitionmanager, okular, unix-privesc-check, vlc, zaproxy
-
-- **Menu Option 4** - Install Pen Tools
-  - Improved wireless compatibility
-      - Atheros AR9271 drivers.
-      - Correct RTL8812AU drivers.
-      - Realtek RT5370 drivers.
-      - Improved Monitor mode, packet injection and AP mode support.
-
-  - Bug fixes:
-      - Fixed `netdiscover` range issue.
-      - Fixed `zenmap` discovery bugs.
-      - Fixed `wash` and `reaver` issues with RTL8812AU chipset.
-      - Fixed bettercap `hstshijack` caplet issues.
-      - Added modified `hstshijack` caplet that works properly with HSTS websites.
-      - Patched XZ Utils package.
-   
-  - Additional software:
-      - Install WiFi Hotspot
-      - Install system monitoring tool
-      - Setup Firefox Custom Homepage
-      - Add Firefox Bookmarks
-      - Install Zenmap
-      - Install Network Driver
-      - Install MDK4
-      - Install Python2 Pip
-
-
-- **Menu Option 5** - Upgrade System
-  - System Upgrade
-    - Update package list
-    - Upgrade installed packages
-    - Perform a full distribution upgrade
-    - Clean up unnecessary packages
-    - Clean up package cache
-  
-
-- **Menu Option 6** - Setup All
-  - Executes a series of setup tasks including:
-    - Changing to GNOME
-    - Enabling root login + File Manager fixes
-    - Installing tools for root
-    - Installing and configuring icons
-    - Changing the root user's desktop background
-    - Fixing APT sources and updating system
-    - Installing and configuring WiFi hotspot utilities
-    - Configuring GNOME dock and Dash applications
-    - Running Python package installations
-    - Updating and upgrading system packages
-    - Fixing broken packages
-    - Fix Nmap
-    - Remove Kali Undercover
-    - Improved performance
-    - Darker theme
-    - Darker icons
-
-
-- **Menu Option 0** - Exit
-  - Exits the script
-
-
-
+# ⚖️ Disclaimer
+The author assumes no liability for any data loss or misuse of setupkali. Use it on systems you own.
 
 # TODO
-- Improve error handling
-- Add more customization options
+- ShellCheck workflow in CI
+- Warn when the system clock is wrong (APT signatures fail with "Not live until")
