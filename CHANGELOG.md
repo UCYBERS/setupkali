@@ -34,3 +34,4 @@
 - Fixed: an unknown option now prints the help and exits with 1 (it used to exit 0).
 - Menu validation uses `case`, `read -r` everywhere, and the unreachable menu branches are gone.
 - ShellCheck passes with no warnings.
+- Added a ShellCheck workflow (GitHub Actions) that runs on every change to `.sh` files.
