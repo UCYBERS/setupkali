@@ -3,29 +3,31 @@
 # setupkali.sh  Author: DARK (UCYBERS)
 # git clone https://github.com/UCYBERS/setupkali
 # Usage: sudo ./setupkali.sh  (defaults to the menu system)
-# command line arguments are valid, only catching 1 argument
+# Only one command line argument is accepted (see --help)
 #
-# Full Revision history can be found in changelog.txt
+# Full revision history: CHANGELOG.md
 # Standard Disclaimer: Author assumes no liability for any damage
 
-# revision var
-revision="1.1.4"
+# Most functions are invoked indirectly through run_step
+# shellcheck disable=SC2329
+
+VERSION="2.0.0"
+
+# Answer --version before the root / Kali checks so anyone can run it
+if [[ "${1:-}" == "--version" || "${1:-}" == "-v" ]]; then
+    echo "setupkali ${VERSION}"
+    exit 0
+fi
 
 
 RED='\033[31m'
-redminus='\e[1;31m[--]\e[0m'
-redexclaim='\e[1;31m[!!]\e[0m'
 GREEN='\e[1;32m'
 YELLOW='\033[33m'
 BLUE='\033[34m'
-MAGENTA='\033[35m'
-CYAN='\033[36m'
-WHITE='\033[37m'
 BOLD='\033[1m'
 RESET='\033[0m' 
 greenplus='\e[1;33m[++]\e[0m'
 greenminus='\e[1;33m[--]\e[0m'
-NC='\033[0m'
 deep_green='\e[38;5;34m'
 
 
@@ -92,26 +94,6 @@ install_icons() {
     sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
 
     echo -e "${GREEN}Icons installed and set successfully.${RESET}"
-}
-
-enable_icon_theme_autostart_root() {
-    echo -e "${BLUE}Setting up autostart to change icon theme to Vibrancy-Kali for root...${RESET}"
-    
-    
-    sudo mkdir -p /root/.config/autostart
-
-    
-    sudo tee /root/.config/autostart/change_icon_theme.desktop > /dev/null <<EOF
-[Desktop Entry]
-Type=Application
-Exec=gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name=Change Icon Theme
-EOF
-
-    echo -e "${GREEN}Autostart setup completed to change the icon theme for root.${RESET}"
 }
 
 configure_gnome_terminal() {
@@ -219,46 +201,12 @@ EOF
     echo -e "${GREEN}GNOME installed successfully. Please reboot to apply changes.${RESET}"
 }
 
-
-switch_to_snapshot() {
-  local sources_file="/etc/apt/sources.list"
-
-  # Backup the original file
-  cp "$sources_file" "${sources_file}.bak"
-
-  # Comment out kali-rolling if it exists
-  sed -i 's|^deb http://http.kali.org/kali kali-rolling|# deb http://http.kali.org/kali kali-rolling|' "$sources_file"
-
-  # Add kali-last-snapshot if not already present
-  if ! grep -q "^deb http://http.kali.org/kali kali-last-snapshot" "$sources_file"; then
-    echo "deb http://http.kali.org/kali kali-last-snapshot main contrib non-free non-free-firmware" >> "$sources_file"
-  fi
-
-  echo "[✔] Switched to kali-last-snapshot"
-}
-
-switch_to_rolling() {
-  local sources_file="/etc/apt/sources.list"
-
-  # Backup the original file
-  cp "$sources_file" "${sources_file}.bak"
-
-  # Remove kali-last-snapshot line
-  sed -i '/^deb http:\/\/http.kali.org\/kali kali-last-snapshot/d' "$sources_file"
-
-  # Uncomment kali-rolling line if it was commented
-  sed -i 's|^# deb http://http.kali.org/kali kali-rolling|deb http://http.kali.org/kali kali-rolling|' "$sources_file"
-
-  echo "[✔] Switched to kali-rolling"
-}
-
-
-
 enable_root_login() {
     echo -e "${BLUE}Enabling root login in GDM...${RESET}"
 
     local conf_file="/etc/gdm3/daemon.conf"
-    local backup_file="${conf_file}.bak.$(date +%Y%m%d_%H%M%S)"
+    local backup_file
+    backup_file="${conf_file}.bak.$(date +%Y%m%d_%H%M%S)"
 
     if [[ ! -f "$conf_file" ]]; then
         echo -e "${RED}GDM config file not found: $conf_file${RESET}"
@@ -749,13 +697,6 @@ disable_power_gnome() {
 apt_update_complete() {
         echo -e "\n  ${GREEN}apt update - complete${RESET}"
     }
-
-
-remove_kali_undercover() {
-        echo -e "\n  ${BLUE}Removing kali-undercover package${RESET}"
-        sudo apt -y remove kali-undercover
-        echo -e "\n  ${GREEN}kali-undercover package removed${RESET}"
-}
 
 fix_nmap() {
     echo -e "\n  ${BLUE}Fixing nmap scripts...${RESET}"
@@ -1303,12 +1244,13 @@ setup_all() {
 
 
 confirm_menu_choice() {
-    valid_options=("1" "2" "3" "4" "5" "6" "0")
-
-    if [[ ! " ${valid_options[@]} " =~ " ${menuinput} " ]]; then
-        echo -e "\n${RED}  Invalid option: '${menuinput}'. Please try again.${RESET}"
-        return 1
-    fi
+    case "$menuinput" in
+        0|1|2|3|4|5|6) ;;
+        *)
+            echo -e "\n${RED}  Invalid option: '${menuinput}'. Please try again.${RESET}"
+            return 1
+            ;;
+    esac
 
     if [ "$menuinput" == "0" ]; then
         clear
@@ -1320,7 +1262,7 @@ confirm_menu_choice() {
 
     echo -e ""
     echo -ne " Menu selection is ${deep_green}${menuinput}${RESET} Press ${GREEN}Y${RESET} to confirm or ${RED}N${RESET} to cancel: "
-    read -n1 selectinput
+    read -r -n1 selectinput
 
 
     case "$selectinput" in
@@ -1346,7 +1288,7 @@ show_menu() {
     while true; do
         clear
         echo -e "${BOLD}${deep_green}$asciiart"
-        echo -e "\n    ${YELLOW}Select an option from the menu:${RESET}\n"  
+        echo -e "\n    ${YELLOW}Select an option from the menu (v${VERSION}):${RESET}\n"  
         echo -e " ${deep_green}Key  Menu Option:              Description:${RESET}"
         echo -e " ${deep_green}---  ------------              ------------${RESET}"
         echo -e " ${BLUE}1 - Change to GNOME Desktop   (Installs GNOME and sets it as default)${RESET}"
@@ -1359,11 +1301,10 @@ show_menu() {
         echo -e " ${deep_green}Please use sudo ./setupkali.sh --help for additional installations/fixes${RESET}\n"
         
         
-        read -n1 -p " Press key for menu selection or press 0 to exit: " menuinput
+        read -r -n1 -p " Press key for menu selection or press 0 to exit: " menuinput
         echo
         
-        confirm_menu_choice $menuinput
-        if [ $? -eq 0 ]; then
+        if confirm_menu_choice "$menuinput"; then
             case $menuinput in
                 1) run_step change_to_gnome; break ;;
                 2) run_step enable_root_login; break ;;
@@ -1371,15 +1312,6 @@ show_menu() {
                 4) run_step install_hacking_tools; break ;;
                 5) run_step apt_upgrade; break ;;
                 6) setup_all; break ;;
-                0) 
-                    clear
-                    echo -e "$asciiart"
-                    echo -e "\n${RED}Happy Hacking!${RESET}"
-                    echo -e "${GREEN}Setup completed! ${RESET}\n"
-                    exit 0
-                    ;;
-                *)
-                    ;;
             esac
         fi
     done
@@ -1401,6 +1333,7 @@ setupkali_help() {
     "  -w, --wifi            - Install linux-wifi-hotspot tool"
     "  -F, --firefox         - Set custom Firefox homepage"
     "  -R, --enable-root     - Enable root login only"
+    "  -v, --version         - Show the version"
     "  -h, -?, --help        - Show this help message"
     )
 
@@ -1408,7 +1341,7 @@ setupkali_help() {
         echo -e "$option"
     done
     echo
-    exit 0
+    exit "${1:-0}"
 }
 
 check_arg() {
@@ -1447,8 +1380,7 @@ check_arg() {
             --enable-root|-R)
                 run_step enable_root_login ;;
             *)
-                setupkali_help
-                exit 1 ;;
+                setupkali_help 1 ;;
         esac
     fi
 }
