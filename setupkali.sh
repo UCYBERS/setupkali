@@ -561,6 +561,28 @@ fix_bad_apt_hash() {
     echo -e "\n  ${GREEN}APT cache cleaned.${RESET}"
 }
 
+backup_apt_file() {
+    local src="$1"
+    local backup_dir="/var/backups/setupkali" dest
+    dest="${backup_dir}/$(basename "$src").bak.$(date +%Y%m%d_%H%M%S)"
+
+    mkdir -p "$backup_dir" || return 1
+    cp -p "$src" "$dest" || return 1
+    echo "$dest"
+}
+
+move_stray_apt_backups() {
+    local stray
+    for stray in /etc/apt/sources.list.d/*.bak*; do
+        [[ -e "$stray" ]] || continue
+        mkdir -p /var/backups/setupkali || return 1
+        mv -- "$stray" /var/backups/setupkali/ && \
+            echo -e "  ${YELLOW}Moved old backup out of sources.list.d: $(basename "$stray")${RESET}"
+    done
+    return 0
+}
+
+
 fix_sources() {
     fix_bad_apt_hash
 
@@ -569,15 +591,15 @@ fix_sources() {
 
     echo -e "\n  ${BLUE}Fixing APT sources...${RESET}"
 
-    # Kali 2026.2+ uses deb822 format in kali.sources
     if [[ -f "$new_sources" ]]; then
         echo -e "\n  ${GREEN}Detected Kali 2026.2+ deb822 format${RESET}"
 
-        local backup_file="${new_sources}.bak.$(date +%Y%m%d_%H%M%S)"
-        cp "$new_sources" "$backup_file" || {
+        local backup_file
+        backup_file=$(backup_apt_file "$new_sources") || {
             echo -e "\n  ${RED}Failed to backup kali.sources — aborting${RESET}"
             return 1
         }
+        move_stray_apt_backups
         echo -e "\n  ${GREEN}Backup saved to: $backup_file${RESET}"
 
         # Add deb-src if missing
@@ -602,11 +624,12 @@ fix_sources() {
     if [[ -f "$old_sources" ]]; then
         echo -e "\n  ${BLUE}Detected legacy sources.list format${RESET}"
 
-        local backup_file="${old_sources}.bak.$(date +%Y%m%d_%H%M%S)"
-        cp "$old_sources" "$backup_file" || {
+        local backup_file
+        backup_file=$(backup_apt_file "$old_sources") || {
             echo -e "\n  ${RED}Failed to backup sources.list — aborting${RESET}"
             return 1
         }
+        move_stray_apt_backups
         echo -e "\n  ${GREEN}Backup saved to: $backup_file${RESET}"
 
         local current_mirror
