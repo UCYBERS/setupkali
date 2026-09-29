@@ -114,6 +114,38 @@ EOF
     echo -e "${GREEN}Autostart setup completed to change the icon theme for root.${RESET}"
 }
 
+configure_gnome_terminal() {
+    
+    echo -e "${BLUE}Setting qterminal as the terminal for menu launchers...${RESET}"
+
+    apt-get install -y qterminal dconf-cli || return 1
+
+    local profile="/etc/dconf/profile/user"
+    local keyfile="/etc/dconf/db/local.d/00-setupkali-terminal"
+
+    mkdir -p /etc/dconf/profile /etc/dconf/db/local.d || return 1
+
+    if [[ ! -f "$profile" ]]; then
+        printf 'user-db:user\nsystem-db:local\n' > "$profile"
+    elif ! grep -qx 'system-db:local' "$profile"; then
+        echo 'system-db:local' >> "$profile"
+    fi
+
+    cat > "$keyfile" <<'DCONFEOF'
+[org/gnome/desktop/applications/terminal]
+exec='qterminal'
+exec-arg='-e'
+DCONFEOF
+
+    dconf update || {
+        echo -e "${RED}dconf update failed${RESET}"
+        return 1
+    }
+
+    echo -e "${GREEN}[OK] Menu launchers will open in qterminal${RESET}"
+}
+
+
 change_to_gnome() {
     echo -e "${BLUE}Installing GNOME Desktop Environment...${RESET}"
 
@@ -180,6 +212,9 @@ EOF
     else
         echo -e "${YELLOW}XFCE not found — skipping removal${RESET}"
     fi
+
+    configure_gnome_terminal || \
+        echo -e "${YELLOW}Warning: menu launchers may not open in a terminal${RESET}"
 
     echo -e "${GREEN}GNOME installed successfully. Please reboot to apply changes.${RESET}"
 }
