@@ -538,8 +538,15 @@ change_background() {
     echo -e "\n  ${GREEN}Background changed to ${BACKGROUND_IMAGE}${RESET}"
 }
 fix_bad_apt_hash() {
-    echo -e "\n  ${BLUE}Fixing APT hash issues...${RESET}"
-    rm -rf /var/lib/apt/lists/*
+    echo -e "\n  ${BLUE}Checking APT package lists...${RESET}"
+
+    if apt-get update; then
+        echo -e "\n  ${GREEN}APT lists are healthy - nothing to clean.${RESET}"
+        return 0
+    fi
+
+    echo -e "\n  ${YELLOW}apt update failed - clearing the package lists and retrying...${RESET}"
+    find /var/lib/apt/lists -mindepth 1 -maxdepth 1 ! -name lock ! -name partial -exec rm -rf {} +
     apt-get clean
     apt-get update --fix-missing || true
     echo -e "\n  ${GREEN}APT cache cleaned.${RESET}"
