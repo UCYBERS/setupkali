@@ -138,6 +138,3 @@ The full history is in [CHANGELOG.md](CHANGELOG.md).
 # ⚖️ Disclaimer
 The author assumes no liability for any data loss or misuse of setupkali. Use it on systems you own.
 
-# TODO
-- ShellCheck workflow in CI
-- Warn when the system clock is wrong (APT signatures fail with "Not live until")
