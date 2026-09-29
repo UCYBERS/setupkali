@@ -453,25 +453,50 @@ apply_nemo_fix_for_root() {
         return 1
     }
 
-    if [[ -f "/usr/share/applications/org.gnome.Nautilus.desktop" ]]; then
-        sed -i 's|^Exec=nautilus.*|Exec=nemo %U|' \
-            /usr/share/applications/org.gnome.Nautilus.desktop || \
-            echo -e "${YELLOW}Warning: Could not modify Nautilus desktop file${RESET}"
-        echo -e "${GREEN}Nautilus replaced with Nemo in Places menu.${RESET}"
-    fi
+    
+    local apps_dir="/usr/local/share/applications"
+    mkdir -p "$apps_dir" || return 1
 
-    update-desktop-database /usr/share/applications/ || true
+    cat > "$apps_dir/org.gnome.Nautilus.desktop" <<'DESKEOF'
+[Desktop Entry]
+Name=Files
+Comment=Access and organize files
+Exec=nemo %U
+Icon=system-file-manager
+Type=Application
+DBusActivatable=false
+MimeType=inode/directory;application/x-gnome-saved-search;
+Categories=GNOME;GTK;Core;
+DESKEOF
+    chmod 644 "$apps_dir/org.gnome.Nautilus.desktop"
+    update-desktop-database "$apps_dir" || true
+    echo -e "${GREEN}Files launcher now opens Nemo.${RESET}"
 
-    xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search || true
+    local mime_file
+    for mime_file in /etc/xdg/gnome-mimeapps.list /etc/xdg/mimeapps.list; do
+        [[ -f "$mime_file" ]] && backup_apt_file "$mime_file" > /dev/null
+        python3 - "$mime_file" <<'PYEOF' || echo -e "${YELLOW}Warning: could not update $mime_file${RESET}"
+import configparser, os, sys, tempfile
 
-    local kali_home="/home/kali"
-    if [[ -d "$kali_home" ]]; then
-        mkdir -p "$kali_home/.config"
-        cp /root/.config/mimeapps.list "$kali_home/.config/mimeapps.list" 2>/dev/null || true
-        chown kali:kali "$kali_home/.config/mimeapps.list" 2>/dev/null || true
-        update-desktop-database "$kali_home/.local/share/applications/" 2>/dev/null || true
-        echo -e "${GREEN}Nemo set as default for kali user.${RESET}"
-    fi
+path = sys.argv[1]
+cp = configparser.RawConfigParser(strict=False, delimiters=("=",), interpolation=None)
+cp.optionxform = str                      # keep the case of mime types
+if os.path.exists(path):
+    cp.read(path, encoding="utf-8")
+if not cp.has_section("Default Applications"):
+    cp.add_section("Default Applications")
+for mime in ("inode/directory", "application/x-gnome-saved-search"):
+    cp.set("Default Applications", mime, "nemo.desktop")
+
+os.makedirs(os.path.dirname(path), exist_ok=True)
+fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), suffix=".tmp")
+with os.fdopen(fd, "w", encoding="utf-8") as f:
+    cp.write(f, space_around_delimiters=False)
+os.chmod(tmp, 0o644)
+os.replace(tmp, path)
+PYEOF
+    done
+    echo -e "${GREEN}Nemo set as the default file manager for all users.${RESET}"
 
     local dbus_addr="unix:path=/run/user/0/bus"
     if [[ -S "/run/user/0/bus" ]]; then
