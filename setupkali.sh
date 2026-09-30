@@ -11,7 +11,7 @@
 # Most functions are invoked indirectly through run_step
 # shellcheck disable=SC2317,SC2329
 
-VERSION="2.0.1"
+VERSION="2.0.2"
 
 # Answer --version before the root / Kali checks so anyone can run it
 if [[ "${1:-}" == "--version" || "${1:-}" == "-v" ]]; then
@@ -37,10 +37,14 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-if ! grep -q "Kali" /etc/os-release; then
+if ! grep -Eq '^ID="?kali"?$' /etc/os-release; then
     echo -e "${RED}This script is intended to be run on Kali Linux only.${RESET}"
     exit 1
 fi
+
+export DEBIAN_FRONTEND=noninteractive
+
+INTEGRITY_FAILURE=0
 
 declare -rA ASSET_SHA256=(
     [Vibrancy-Kali.tar.gz]="55ea8978064e6953d65dc4a6fee5e7702def47fe572dbf9c6be8ed11c64143d7"
@@ -59,6 +63,7 @@ download_verified() {
 
     actual=$(sha256sum "$dest" | awk '{print $1}')
     if [[ "$actual" != "$expected" ]]; then
+        INTEGRITY_FAILURE=1
         echo -e "${RED}[!!] SHA-256 mismatch for $(basename "$dest") — file deleted${RESET}"
         echo -e "${RED}     expected: $expected${RESET}"
         echo -e "${RED}     actual:   $actual${RESET}"
@@ -84,12 +89,21 @@ echo
 
 install_icons() {
     echo -e "${BLUE}Downloading and installing icons...${RESET}"
-    ICONS_URL="https://github.com/UCYBERS/setupkali/releases/download/1.1.5/Vibrancy-Kali.tar.gz"
-    ICONS_FILE="/tmp/Vibrancy-Kali.tar.gz"
+    local icons_url="https://github.com/UCYBERS/setupkali/releases/download/1.1.5/Vibrancy-Kali.tar.gz"
+    local icons_file
+    icons_file=$(mktemp /tmp/Vibrancy-Kali_XXXXXX.tar.gz) || return 1
 
-    download_verified "$ICONS_URL" "$ICONS_FILE" "${ASSET_SHA256[Vibrancy-Kali.tar.gz]}" || return 1
+    download_verified "$icons_url" "$icons_file" "${ASSET_SHA256[Vibrancy-Kali.tar.gz]}" || {
+        rm -f "$icons_file"
+        return 1
+    }
 
-    sudo tar -xzf "$ICONS_FILE" -C /usr/share/icons/
+    tar -xzf "$icons_file" -C /usr/share/icons/ --no-same-owner || {
+        echo -e "${RED}Failed to extract icons${RESET}"
+        rm -f "$icons_file"
+        return 1
+    }
+    rm -f "$icons_file"
 
     sudo -u root gsettings set org.gnome.desktop.interface icon-theme 'Vibrancy-Kali'
 
@@ -157,6 +171,7 @@ change_to_gnome() {
     }
 
     echo -e "${BLUE}Configuring gdm3...${RESET}"
+    [[ -f /etc/gdm3/daemon.conf ]] && backup_apt_file /etc/gdm3/daemon.conf > /dev/null
     tee /etc/gdm3/daemon.conf > /dev/null << 'EOF'
 [daemon]
 #WaylandEnable=false
@@ -758,6 +773,7 @@ fix_nmap() {
 
     actual=$(sha256sum "$local_shellshock" | awk '{print $1}')
     if [[ "$actual" != "$shellshock_sha256" ]]; then
+        INTEGRITY_FAILURE=1
         echo -e "${RED}[!!] SHA-256 mismatch for fixed-http-shellshock.nse${RESET}"
         echo -e "${RED}     expected: $shellshock_sha256${RESET}"
         echo -e "${RED}     actual:   $actual${RESET}"
@@ -794,12 +810,12 @@ apt_upgrade() {
         return 1
     }
 
-    apt-get -y upgrade -o Dpkg::Progress-Fancy="1" || {
+    apt-get -y upgrade -o Dpkg::Progress-Fancy="1" -o Dpkg::Options::="--force-confold" || {
         echo -e "\n  ${RED}apt upgrade failed${RESET}"
         return 1
     }
 
-    apt-get -y dist-upgrade -o Dpkg::Progress-Fancy="1" || {
+    apt-get -y dist-upgrade -o Dpkg::Progress-Fancy="1" -o Dpkg::Options::="--force-confold" || {
         echo -e "\n  ${RED}dist-upgrade failed${RESET}"
         return 1
     }
@@ -812,10 +828,6 @@ apt_upgrade() {
 
 apt_upgrade_complete() {
     echo -e "\n  $greenplus apt upgrade complete"
-    configure_dash_apps || \
-        echo -e "\n  ${YELLOW}Warning: Could not configure dash apps${RESET}"
-    disable_power_gnome || \
-        echo -e "\n  ${YELLOW}Warning: Could not configure power settings${RESET}"
     echo -e "\n  ${GREEN}System upgrade finished successfully.${RESET}"
 }
 
@@ -846,6 +858,7 @@ install_wifi_hotspot() {
 
     head_commit=$(git -C "$tmp_dir" rev-parse HEAD)
     if [[ "$head_commit" != "$hotspot_commit" ]]; then
+        INTEGRITY_FAILURE=1
         echo -e "${RED}[!!] Commit mismatch for linux-wifi-hotspot${RESET}"
         echo -e "${RED}     expected: $hotspot_commit${RESET}"
         echo -e "${RED}     actual:   $head_commit${RESET}"
@@ -862,6 +875,8 @@ install_wifi_hotspot() {
         rm -rf "$tmp_dir"
         return 1
     }
+
+    chown -R root:root "$tmp_dir"
 
     make -C "$tmp_dir" install || {
         echo -e "${RED}linux-wifi-hotspot install failed${RESET}"
@@ -933,18 +948,23 @@ setup_firefox_custom_homepage() {
 
     local startpage_url="https://github.com/UCYBERS/setupkali/releases/download/1.1.6/startpage.7z"
     local startpage_dir="/var/startpage"
-    local startpage_file="/tmp/startpage.7z"
+    local startpage_file
+    startpage_file=$(mktemp /tmp/startpage_XXXXXX.7z) || return 1
     local homepage_path="file://${startpage_dir}/startpage/ucybers.html"
 
     if ! command -v 7z &>/dev/null; then
         apt-get install -y 7zip || {
             echo -e "${RED}Failed to install 7zip${RESET}"
+            rm -f "$startpage_file"
             return 1
         }
     fi
 
     echo -e "${BLUE}Downloading startpage...${RESET}"
-    download_verified "$startpage_url" "$startpage_file" "${ASSET_SHA256[startpage.7z]}" || return 1
+    download_verified "$startpage_url" "$startpage_file" "${ASSET_SHA256[startpage.7z]}" || {
+        rm -f "$startpage_file"
+        return 1
+    }
 
     mkdir -p "$startpage_dir"
     7z x "$startpage_file" -o"${startpage_dir}/" -y || {
@@ -1076,6 +1096,7 @@ install_bettercap() {
 
     head_commit=$(git -C "$caplets_tmp" rev-parse HEAD)
     if [[ "$head_commit" != "$caplets_commit" ]]; then
+        INTEGRITY_FAILURE=1
         echo -e "${RED}[!!] Commit mismatch for caplets${RESET}"
         echo -e "${RED}     expected: $caplets_commit${RESET}"
         echo -e "${RED}     actual:   $head_commit${RESET}"
@@ -1125,19 +1146,29 @@ replace_hstshijack() {
     fi
 
     echo -e "${YELLOW}Replacing hstshijack directory...${RESET}"
-    rm -rf "$dest_dir"
+    local old_dir=""
+    if [[ -d "$dest_dir" ]]; then
+        old_dir="${dest_dir}.old.$$"
+        mv "$dest_dir" "$old_dir" || {
+            echo -e "${RED}Could not move the existing hstshijack aside${RESET}"
+            rm -f "$tmp_zip"
+            rm -rf "$tmp_dir"
+            return 1
+        }
+    fi
     mv "$tmp_dir/hstshijack" "$dest_dir" || {
         echo -e "${RED}Failed to move hstshijack to destination${RESET}"
+        [[ -n "$old_dir" ]] && mv "$old_dir" "$dest_dir"
         rm -f "$tmp_zip"
         rm -rf "$tmp_dir"
         return 1
     }
+    [[ -n "$old_dir" ]] && rm -rf "$old_dir"
 
     rm -f "$tmp_zip"
     rm -rf "$tmp_dir"
     echo -e "${GREEN}hstshijack replaced successfully.${RESET}"
 }
-
 install_python2_pip() {
     echo -e "${BLUE}Installing pip for Python 2...${RESET}"
 
@@ -1210,7 +1241,14 @@ repair_apt() {
 run_step() {
     local step="$1" attempt=1 answer
     while true; do
+        INTEGRITY_FAILURE=0
         "$@" && return 0
+
+        if (( INTEGRITY_FAILURE )); then
+            echo -e "\n${RED}[FAILED] ${step}: integrity check failed - not retrying.${RESET}"
+            FAILED_STEPS+=("$step")
+            return 1
+        fi
 
         if (( attempt < STEP_MAX_ATTEMPTS )); then
             echo -e "\n${YELLOW}[RETRY] ${step} failed (attempt ${attempt}/${STEP_MAX_ATTEMPTS}) — retrying in 5 seconds...${RESET}"
@@ -1419,6 +1457,19 @@ check_arg() {
 }
 
 
+
+acquire_lock() {
+    exec 9> /var/lock/setupkali.lock
+    if ! flock -n 9; then
+        echo -e "${RED}Another setupkali is already running.${RESET}"
+        exit 1
+    fi
+}
+
+case "${1:-}" in
+    -h|--help|"-?") ;;
+    *) acquire_lock ;;
+esac
 
 check_arg "$1"
 
