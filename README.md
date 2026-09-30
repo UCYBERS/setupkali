@@ -18,7 +18,7 @@
 # Fixes and Enhancements for Kali Linux
 
 Setup script for a fresh, up-to-date **Kali Linux** install (GNOME desktop, root login, tools, icons and
-UCYBERS start page). Current version: **2.0.0** (`sudo ./setupkali.sh --version`).
+UCYBERS start page). Current version: **2.0.1** (`sudo ./setupkali.sh --version`).
 
 - **Author**: UCYBERS
 - **GitHub Repository**: [setupkali](https://github.com/UCYBERS/setupkali)
