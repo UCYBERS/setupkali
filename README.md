@@ -1,7 +1,7 @@
 # setupkali.sh
 ![SetupKali](https://github.com/user-attachments/assets/4159ae20-d7a0-45aa-80f1-b8534f60686a)
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.0-b5003c">
+  <img src="https://img.shields.io/badge/version-2.0.1-b5003c">
   <img src="https://img.shields.io/github/last-commit/ucybers/setupkali">
   <img src="https://img.shields.io/github/repo-size/ucybers/setupkali">
   <a href="https://discord.gg/FXgT8fdGyY">
