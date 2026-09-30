@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.1
+
+### Security
+- The public default root password `ucybers` is offered only on desktop virtual machines; on physical machines, server/cloud VMs and non-interactive runs a random or user-chosen password is used.
+- Sleep and screen lock are disabled only on desktop virtual machines; other machines keep their settings.
+- `--gnome` no longer enables graphical root login; `AllowRoot` is written only when root login is requested (`--root`, `--all`, menu option 2).
+
 ## 2.0.0
 
 ### Security
@@ -11,9 +18,6 @@
   (`/etc/ssh/sshd_config.d/01-setupkali-root.conf`, `PermitRootLogin prohibit-password`).
 - The default root password `ucybers` is kept, but only set after the user types `ucybers` to confirm.
   Desktop virtual machines (VMware, VirtualBox, Hyper-V, Parallels) are handled separately.
-- The public default root password `ucybers` is offered only on desktop virtual machines; on physical machines, server/cloud VMs and non-interactive runs a random or user-chosen password is used.
-- Sleep and screen lock are disabled only on desktop virtual machines; other machines keep their settings.
-- `--gnome` no longer enables graphical root login; `AllowRoot` is written only when root login is requested (`--root`, `--all`, menu option 2).
 
 ### Reliability
 - `run_step` retries failed steps and repairs APT between attempts.
