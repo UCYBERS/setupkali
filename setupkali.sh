@@ -11,7 +11,7 @@
 # Most functions are invoked indirectly through run_step
 # shellcheck disable=SC2317,SC2329
 
-VERSION="2.0.0"
+VERSION="2.0.1"
 
 # Answer --version before the root / Kali checks so anyone can run it
 if [[ "${1:-}" == "--version" || "${1:-}" == "-v" ]]; then
