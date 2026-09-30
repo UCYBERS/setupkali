@@ -130,6 +130,7 @@ GNOME defaults and power settings.
 # 🪶 Revision History
 The full history is in [CHANGELOG.md](CHANGELOG.md).
 
+- **2.0.1** - the default root password, sleep/screen lock and graphical root login are limited to where they are needed (desktop VMs, explicit root login).
 - **2.0.0** - supply-chain pinning, retry/repair and failure summary, safer root and SSH handling,
   system-wide desktop defaults, new UCYBERS start page, code cleanup, `--version`.
 - **1.1.5** - Kali 2026.2 compatibility, Nemo as the file manager for root, idempotent GDM configuration.
