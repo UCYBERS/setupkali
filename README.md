@@ -61,8 +61,9 @@ How the password is set:
 
 - On a **desktop virtual machine** (VMware, VirtualBox, Hyper-V, Parallels) pressing Enter keeps `ucybers`;
   answering `n` lets you choose your own password.
-- On a **physical machine or a server/cloud VM**, or when there is no terminal, you must type `ucybers`
-  in full to accept it (or `n` to choose your own). Wrong input asks again.
+- On a **physical machine or a server/cloud VM**, the default password is **not offered**: you can
+  generate a random root password (shown once) or type your own. Without a terminal a random
+  password is generated and saved to `/root/setupkali-root-password.txt` (mode 600).
 - **SSH password login for root is disabled** (`PermitRootLogin prohibit-password`, set in
   `/etc/ssh/sshd_config.d/01-setupkali-root.conf`), so the default password works for the GNOME login only.
 
@@ -124,6 +125,7 @@ GNOME defaults and power settings.
   no package file is edited.
 - **Wireless.** Known wireless kernel modules are loaded when available, and `aircrack-ng`, `iw`,
   `wireless-tools` and `rfkill` are installed.
+- **Screen lock and sleep.** They are disabled for all users only on desktop virtual machines (VMware, VirtualBox, Hyper-V, Parallels); on any other machine these settings are left unchanged.
 
 # 🪶 Revision History
 The full history is in [CHANGELOG.md](CHANGELOG.md).
