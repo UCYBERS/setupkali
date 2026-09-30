@@ -162,7 +162,6 @@ change_to_gnome() {
 #WaylandEnable=false
 
 [security]
-AllowRoot=true
 
 [xdmcp]
 
@@ -476,8 +475,17 @@ PYEOF
     echo -e "${GREEN}Nemo configured successfully as default file manager.${RESET}"
 }
 
+is_desktop_vm() {
+    local virt
+    virt=$(systemd-detect-virt --vm 2>/dev/null) || return 1
+    case "$virt" in
+        vmware|oracle|microsoft|parallels) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
 configure_gnome_defaults() {
-    echo -e "${BLUE}Setting GNOME defaults (dash, dock, background, icons, power)...${RESET}"
+    echo -e "${BLUE}Setting GNOME defaults (dash, dock, background, icons)...${RESET}"
 
     apt-get install -y dconf-cli || return 1
 
@@ -505,6 +513,10 @@ icon-theme='Vibrancy-Kali'
 [org/gnome/desktop/background]
 picture-uri='file:///usr/share/backgrounds/kali/kali-tiles-16x9.jpg'
 picture-uri-dark='file:///usr/share/backgrounds/kali/kali-tiles-16x9.jpg'
+DCONFEOF
+
+    if is_desktop_vm; then
+        cat >> "$keyfile" <<'DCONFEOF'
 
 [org/gnome/settings-daemon/plugins/power]
 sleep-inactive-ac-type='nothing'
@@ -519,6 +531,10 @@ idle-delay=uint32 0
 [org/gnome/desktop/screensaver]
 lock-enabled=false
 DCONFEOF
+        echo -e "${YELLOW}Desktop VM: sleep and screen lock are disabled for all users.${RESET}"
+    else
+        echo -e "${GREEN}Screen lock and power settings left unchanged (not a desktop VM).${RESET}"
+    fi
 
     dconf update || {
         echo -e "${RED}dconf update failed${RESET}"
@@ -688,27 +704,25 @@ disable_power_checkde() {
 
 
 disable_power_gnome() {
+    if ! is_desktop_vm; then
+        echo -e "\n  ${GREEN}Not a desktop VM - power and screen lock settings left unchanged${RESET}"
+        return 0
+    fi
     echo -e "\n  ${GREEN}GNOME detected - Disabling Power Savings${RESET}"
-    # ac power
     sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing
     echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type nothing${RESET}"
     sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0
     echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-ac-timeout 0${RESET}"
-    # battery power
     sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing
     echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-battery-type nothing${RESET}"
     sudo -u root gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 0
     echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power sleep-inactive-battery-timeout 0${RESET}"
-    # power button
     sudo -u root gsettings set org.gnome.settings-daemon.plugins.power power-button-action nothing
     echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power power-button-action nothing${RESET}"
-    # idle brightness
     sudo -u root gsettings set org.gnome.settings-daemon.plugins.power idle-brightness 0
     echo -e "  ${GREEN}org.gnome.settings-daemon.plugins.power idle-brightness 0${RESET}"
-    # screensaver activation
     sudo -u root gsettings set org.gnome.desktop.session idle-delay 0
     echo -e "  ${GREEN}org.gnome.desktop.session idle-delay 0${RESET}"
-    # screensaver lock
     sudo -u root gsettings set org.gnome.desktop.screensaver lock-enabled false
     echo -e "  ${GREEN}org.gnome.desktop.screensaver lock-enabled false${RESET}\n"
 }
