@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.2
+
+### Security
+- Temporary files use random names (`mktemp`); icons are extracted with `--no-same-owner`.
+- wifi-hotspot is handed back to root before `make install`.
+- A failed integrity check (SHA-256 or pinned commit) is never retried.
+- The OS check requires `ID=kali` in `/etc/os-release`.
+- The GitHub Actions workflow pins `actions/checkout` to a commit.
+
+### Reliability
+- Package prompts never block a run (`DEBIAN_FRONTEND=noninteractive`, `--force-confold` on upgrade).
+- Only one copy of the tool can run at a time.
+- `/etc/gdm3/daemon.conf` is backed up before it is rewritten; the old `hstshijack` directory is kept until the new one is in place.
+- The system upgrade no longer re-applies desktop settings.
 ## 2.0.1
 
 ### Security
