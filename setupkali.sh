@@ -11,7 +11,7 @@
 # Most functions are invoked indirectly through run_step
 # shellcheck disable=SC2317,SC2329
 
-VERSION="2.0.2"
+VERSION="2.0.3"
 
 # Answer --version before the root / Kali checks so anyone can run it
 if [[ "${1:-}" == "--version" || "${1:-}" == "-v" ]]; then
@@ -1215,12 +1215,17 @@ install_hacking_tools() {
     apt-get install -y htop python3 python3-pip python3-venv || \
         echo -e "${YELLOW}Warning: Some packages failed to install${RESET}"
 
-    add_firefox_bookmarks
-    setup_firefox_custom_homepage
-    install_zenmap
-    install_bettercap
-    replace_hstshijack
-    install_python2_pip
+    local part
+    local -a failed_parts=()
+    for part in add_firefox_bookmarks setup_firefox_custom_homepage install_zenmap \
+                install_bettercap replace_hstshijack install_python2_pip; do
+        "$part" || failed_parts+=("$part")
+    done
+
+    if (( ${#failed_parts[@]} > 0 )); then
+        echo -e "${RED}Hacking tools finished with failures: ${failed_parts[*]}${RESET}"
+        return 1
+    fi
 
     echo -e "${GREEN}Hacking tools installation complete.${RESET}"
 }
