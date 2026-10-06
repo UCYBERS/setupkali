@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.3
+
+### Reliability
+- `install_hacking_tools` now runs every part and fails if any part failed, instead of reporting the result of the last one only.
+
+### Quality
+- Smoke tests (`tests/smoke.sh`) run in CI: version consistency, exit codes, pinned hashes.
+- Added `SECURITY.md`.
+
 ## 2.0.2
 
 ### Security
