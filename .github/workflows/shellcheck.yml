@@ -3,9 +3,9 @@ name: ShellCheck
 on:
   push:
     branches: [master]
-    paths: ['**.sh', '.github/workflows/shellcheck.yml']
+    paths: ['**.sh', '**.md', 'tests/**', '.github/workflows/shellcheck.yml']
   pull_request:
-    paths: ['**.sh', '.github/workflows/shellcheck.yml']
+    paths: ['**.sh', '**.md', 'tests/**', '.github/workflows/shellcheck.yml']
 
 permissions:
   contents: read
@@ -21,3 +21,6 @@ jobs:
 
       - name: ShellCheck
         run: shellcheck --severity=style setupkali.sh
+
+      - name: Smoke tests
+        run: sudo bash tests/smoke.sh
