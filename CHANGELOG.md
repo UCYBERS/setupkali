@@ -4,6 +4,7 @@
 
 ### Reliability
 - `install_hacking_tools` now runs every part and fails if any part failed, instead of reporting the result of the last one only.
+- The failed parts of `install_hacking_tools` are listed in the final summary, and `SETUPKALI_NO_CLEAR=1` keeps the run output on screen.
 
 ### Quality
 - Smoke tests (`tests/smoke.sh`) run in CI: version consistency, exit codes, pinned hashes.
