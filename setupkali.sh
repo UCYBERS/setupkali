@@ -1222,6 +1222,8 @@ install_hacking_tools() {
         "$part" || failed_parts+=("$part")
     done
 
+    HACKING_FAILED_PARTS="${failed_parts[*]}"
+
     if (( ${#failed_parts[@]} > 0 )); then
         echo -e "${RED}Hacking tools finished with failures: ${failed_parts[*]}${RESET}"
         return 1
@@ -1478,7 +1480,7 @@ esac
 
 check_arg "$1"
 
-clear
+[[ -n "${SETUPKALI_NO_CLEAR:-}" ]] || clear
 echo -e "${BOLD}${deep_green}$asciiart${RESET}"
 exit_code=0
 if (( ${#FAILED_STEPS[@]} > 0 )); then
@@ -1486,6 +1488,9 @@ if (( ${#FAILED_STEPS[@]} > 0 )); then
     echo -e "\n${RED}[!!] Finished with ${#FAILED_STEPS[@]} failed step(s):${RESET}"
     for step in "${FAILED_STEPS[@]}"; do
         echo -e "${RED}     - ${step}${RESET}"
+        if [[ "$step" == "install_hacking_tools" && -n "${HACKING_FAILED_PARTS:-}" ]]; then
+            echo -e "${RED}         failed parts: ${HACKING_FAILED_PARTS}${RESET}"
+        fi
     done
     echo -e "${YELLOW}Run the tool again to retry the failed step(s).${RESET}"
 else
