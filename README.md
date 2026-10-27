@@ -28,6 +28,23 @@ UCYBERS start page). Current version: **2.0.3** (`sudo ./setupkali.sh --version`
 
 > The script is meant for current Kali installs. It refuses to run on anything else and it must be run as root.
 
+## 🐉 Kali Linux Compatibility
+
+**Latest verified release:** Kali Linux 2026.3
+
+SetupKali supports Kali Linux Rolling and has
+been manually tested on Kali Linux 2026.3.
+
+Compatibility includes:
+- GNOME desktop configuration
+- Root login configuration
+- APT repository management (deb822)
+- Security tools installation
+- Desktop customization
+
+Hardware-dependent functionality requires
+separate validation on the target hardware.
+
 # 🛠️ Installation
 ```console
 # Remove an existing copy (if any)
