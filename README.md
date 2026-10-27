@@ -1,7 +1,7 @@
 # setupkali.sh
 ![SetupKali](https://github.com/user-attachments/assets/4159ae20-d7a0-45aa-80f1-b8534f60686a)
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.3-b5003c">
+  <img src="https://img.shields.io/badge/version-2.0.4-b5003c">
   <img src="https://img.shields.io/github/last-commit/ucybers/setupkali">
   <img src="https://img.shields.io/github/repo-size/ucybers/setupkali">
   <a href="https://discord.gg/FXgT8fdGyY">
@@ -18,7 +18,7 @@
 # Fixes and Enhancements for Kali Linux
 
 Setup script for a fresh, up-to-date **Kali Linux** install (GNOME desktop, root login, tools, icons and
-UCYBERS start page). Current version: **2.0.3** (`sudo ./setupkali.sh --version`).
+UCYBERS start page). Current version: **2.0.4** (`sudo ./setupkali.sh --version`).
 
 - **Author**: UCYBERS
 - **GitHub Repository**: [setupkali](https://github.com/UCYBERS/setupkali)
