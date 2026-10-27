@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.4
+
+### Compatibility
+- Verified compatibility with Kali Linux 2026.3.
+- Preserved compatibility with Kali Rolling.
+- Added Kali version identification.
+- Updated compatibility documentation.
+
+### Stability
+- No changes to existing installation logic.
+- Preserved current security and integrity checks.
+
 ## 2.0.3
 
 ### Reliability
